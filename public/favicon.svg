@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0f172a"/>
+  <rect x="0" y="0" width="512" height="512" rx="96" fill="url(#g)"/>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#1e3a5f"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#e11d48" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M120 260 L256 148 L392 260"/>
+    <path d="M150 232 V 380 H 362 V 232"/>
+  </g>
+  <rect x="232" y="300" width="48" height="80" fill="#e11d48"/>
+  <text x="256" y="440" font-family="Arial, sans-serif" font-size="54" font-weight="700" fill="#f8fafc" text-anchor="middle">MRG</text>
+</svg>
