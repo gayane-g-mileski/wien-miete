@@ -1,6 +1,13 @@
-import type { BaubewilligungGebaeude, Foerderung, Kategorie, Lagequalitaet, Objektart, Zustand } from './types'
+import type {
+  BaubewilligungGebaeude,
+  Heizung,
+  Kategorie,
+  Objektart,
+  Stockwerk,
+  ZustandHaus,
+} from './types'
 
-export const OBJEKTART_GRUPPEN: { label: string; optionen: { value: Objektart; label: string; hinweis?: string }[] }[] = [
+export const OBJEKTART_GRUPPEN: { label: string; optionen: { value: Objektart; label: string }[] }[] = [
   {
     label: 'Standard',
     optionen: [
@@ -42,13 +49,6 @@ export const BAUBEWILLIGUNG_LABEL: Record<BaubewilligungGebaeude, string> = {
   nach_1953: 'nach dem 30.6.1953 (Neubau)',
 }
 
-export const FOERDERUNG_LABEL: Record<Foerderung, string> = {
-  keine: 'Keine öffentliche Förderung (frei finanziert)',
-  gefoerdert_offen: 'Öffentlich gefördert – Darlehen noch offen / in Tilgung',
-  gefoerdert_getilgt: 'Öffentlich gefördert – Darlehen bereits getilgt/rückgezahlt',
-  wgg: 'Gemeinnützige Bauvereinigung (WGG-Miete)',
-}
-
 export const KATEGORIE_LABEL: Record<Kategorie, string> = {
   A: 'Kategorie A (voll ausgestattet, Zimmer ≥ 30 m²)',
   B: 'Kategorie B (Bad/WC, Zimmer ≥ 30 m²)',
@@ -57,21 +57,25 @@ export const KATEGORIE_LABEL: Record<Kategorie, string> = {
   D_unbrauchbar: 'Kategorie D – unbrauchbar',
 }
 
-export const LAGE_LABEL: Record<Lagequalitaet, string> = {
-  unterdurchschnittlich: 'unterdurchschnittlich',
+export const ZUSTAND_HAUS_LABEL: Record<ZustandHaus, string> = {
+  sehr_gut: 'sehr gut / saniert (Zuschlag)',
   durchschnittlich: 'durchschnittlich',
-  ueberdurchschnittlich: 'überdurchschnittlich (Lagezuschlag möglich)',
-  sehr_gut: 'sehr gut / Bestlage (Lagezuschlag möglich)',
+  schlecht: 'sanierungsbedürftig (Abschlag)',
 }
 
-export const ZUSTAND_LABEL: Record<Zustand, string> = {
-  gut: 'gut erhalten / saniert',
-  durchschnittlich: 'durchschnittlich',
-  sanierungsbeduerftig: 'sanierungsbedürftig',
+export const HEIZUNG_LABEL: Record<Heizung, string> = {
+  zentral_etage: 'Zentral- oder Etagenheizung (Zuschlag)',
+  keine: 'keine Zentral-/Etagenheizung',
+}
+
+export const STOCKWERK_LABEL: Record<Stockwerk, string> = {
+  erdgeschoss: 'Erdgeschoss / Hochparterre (Abschlag)',
+  normal: 'Normalgeschoss',
+  hoch_ohne_lift: 'hohes Stockwerk ohne Lift (Abschlag)',
 }
 
 export function zeigeBaujahr(objektart: Objektart): boolean {
-  return !['einfamilienhaus', 'zweifamilienhaus', 'dienstwohnung', 'karitatives_wohnen', 'heim_beherbergung', 'ferienwohnung', 'pacht', 'nebenflaeche_separat', 'geschaeftsraum_kurzzeit', 'wirtschaftspark'].includes(objektart)
+  return ['wohnung', 'geschaeftsraum', 'dg_ausbau', 'zubau'].includes(objektart)
 }
 
 export function zeigeFoerderung(objektart: Objektart): boolean {
@@ -80,4 +84,8 @@ export function zeigeFoerderung(objektart: Objektart): boolean {
 
 export function zeigeKategorie(objektart: Objektart): boolean {
   return ['wohnung', 'dg_ausbau', 'zubau', 'zweitwohnung_befristet'].includes(objektart)
+}
+
+export function zeigeAusstattung(objektart: Objektart): boolean {
+  return ['wohnung', 'geschaeftsraum', 'dg_ausbau', 'zubau'].includes(objektart)
 }

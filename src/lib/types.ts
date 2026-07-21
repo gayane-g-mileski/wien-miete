@@ -1,6 +1,5 @@
-// Domain types for the Wiener Mietzins-Check.
-// Terminology follows the Mietrechtsgesetz (MRG) as summarized in the
-// reference material (Voll-/Teilausnahme/Vollanwendung, Tabelle 1, Förderungen).
+// Domain types für den Wiener Mietzins-Check.
+// Terminologie folgt dem Mietrechtsgesetz (MRG) und dem Richtwertgesetz.
 
 export type Objektart =
   | 'wohnung'
@@ -21,29 +20,55 @@ export type Objektart =
 
 export type BaubewilligungGebaeude = 'vor_1945' | '1945_1953' | 'nach_1953'
 
-export type Foerderung = 'keine' | 'gefoerdert_offen' | 'gefoerdert_getilgt' | 'wgg'
-
 export type Kategorie = 'A' | 'B' | 'C' | 'D_brauchbar' | 'D_unbrauchbar'
 
-export type Lagequalitaet = 'unterdurchschnittlich' | 'durchschnittlich' | 'ueberdurchschnittlich' | 'sehr_gut'
+export type ZustandHaus = 'sehr_gut' | 'durchschnittlich' | 'schlecht'
+export type Heizung = 'zentral_etage' | 'keine'
+export type Stockwerk = 'erdgeschoss' | 'normal' | 'hoch_ohne_lift'
 
-export type Zustand = 'gut' | 'durchschnittlich' | 'sanierungsbeduerftig'
+// Förderungsprogramme laut Unterlage "Förderungen".
+export type FoerderungProgramm =
+  | 'keine'
+  | 'wwg1948'
+  | 'wfg1954'
+  | 'gr_beschluss'
+  | 'wfg1968'
+  | 'wfg1984'
+  | 'wwfsg1989'
+  | 'wgg'
+
+export type Tilgungsstatus = 'offen' | 'getilgt_wgg' | 'rbg1971' | 'rbg1987'
 
 export interface MietobjektInput {
   objektart: Objektart
   baubewilligungGebaeude: BaubewilligungGebaeude
-  dgAusbauNachStichtag: boolean // Baubewilligung/Mietvertrag nach 31.12.2001 (Objektart dg_ausbau)
-  zubauNachStichtag: boolean // Baubewilligung nach 30.9.2006 (Objektart zubau)
-  foerderung: Foerderung
-  kategorie: Kategorie
+  dgAusbauNachStichtag: boolean
+  zubauNachStichtag: boolean
+  anschrift: string // optional; leer = ohne Lageberücksichtigung
   flaeche: number // m²
-  bezirk: number // 1-23
-  lagequalitaet: Lagequalitaet
-  zustand: Zustand
-  balkonTerrasse: boolean
-  lift: boolean
+  bezirk: number // 1-23 (für Marktpreis)
+  eigentumswohnung: boolean
   befristet: boolean
-  marktmieteM2Override: number | null // manueller Override, sonst Bezirks-Schätzung
+
+  // Förderung
+  foerderungProgramm: FoerderungProgramm
+  tilgungsstatus: Tilgungsstatus
+
+  // Ausstattung & Zustand (Zu-/Abschläge)
+  kategorie: Kategorie
+  zustandHaus: ZustandHaus
+  heizung: Heizung
+  stockwerk: Stockwerk
+  lift: boolean
+  balkonTerrasse: boolean
+  garten: boolean
+  ruhelage: boolean
+  ausblick: boolean
+  hochwertigeAusstattung: boolean
+  keller: boolean
+  garage: boolean
+  gemeinschaft: boolean
+  strassenlaerm: boolean
 }
 
 export type MietzinsArt =
@@ -56,11 +81,17 @@ export type MietzinsArt =
 
 export type MrgAnwendung = 'voll' | 'teil' | 'ausnahme'
 
+export interface Preisbestandteil {
+  label: string
+  wert: number // €/m²
+}
+
 export interface Preisspanne {
   proM2Min: number
   proM2Max: number
   monatlichMin: number
   monatlichMax: number
+  bestandteile?: Preisbestandteil[]
 }
 
 export interface MrgErgebnis {
@@ -74,4 +105,5 @@ export interface MrgErgebnis {
   rechtsgrundlagen: string[]
   begruendung: string[]
   hinweise: string[]
+  lageHinweis: string | null
 }

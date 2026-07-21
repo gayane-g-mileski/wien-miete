@@ -1,32 +1,35 @@
-import type { ChangeEvent } from 'react'
 import type { MietobjektInput } from '../lib/types'
 import {
   BAUBEWILLIGUNG_LABEL,
-  FOERDERUNG_LABEL,
+  HEIZUNG_LABEL,
   KATEGORIE_LABEL,
-  LAGE_LABEL,
   OBJEKTART_GRUPPEN,
-  ZUSTAND_LABEL,
+  STOCKWERK_LABEL,
+  ZUSTAND_HAUS_LABEL,
+  zeigeAusstattung,
   zeigeBaujahr,
   zeigeFoerderung,
   zeigeKategorie,
 } from '../lib/labels'
-import { BEZIRKE, getBezirk } from '../lib/pricingData'
+import { FOERDERUNG_PROGRAMM_LABEL, TILGUNGSSTATUS_LABEL, statusRelevant } from '../lib/foerderung'
+import { BEZIRKE, bezirkAusAnschrift, getBezirk } from '../lib/pricingData'
 
 interface Props {
   value: MietobjektInput
   onChange: (next: MietobjektInput) => void
 }
 
-const fieldLabel = 'block text-sm font-medium text-slate-200 mb-1.5'
+const fieldLabel = 'block text-sm font-medium text-ink mb-1.5'
 const controlBase =
-  'w-full rounded-lg border border-slate-600 bg-slate-800/70 px-3 py-2 text-sm text-slate-50 shadow-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500'
-const hint = 'mt-1 text-xs text-slate-400'
+  'w-full rounded-lg border border-sand-line bg-cream-50 px-3 py-2 text-sm text-ink shadow-sm focus:border-sage focus:outline-none focus:ring-2 focus:ring-sage/40'
+const hint = 'mt-1 text-xs text-ink-faint'
+const checkbox = 'h-4 w-4 rounded border-sand-line bg-cream-50 text-sage focus:ring-sage/40'
+const checkLabel = 'flex items-center gap-2 text-sm text-ink'
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, children, className = '' }: { title: string; children: React.ReactNode; className?: string }) {
   return (
-    <fieldset className="space-y-4 rounded-xl border border-slate-700/70 bg-slate-800/40 p-4 sm:p-5">
-      <legend className="px-1 text-sm font-semibold uppercase tracking-wide text-red-400">{title}</legend>
+    <fieldset className={`space-y-4 rounded-xl border border-sand-line bg-cream-100 p-4 sm:p-5 ${className}`}>
+      <legend className="px-2 text-xs font-semibold uppercase tracking-wider text-wine">{title}</legend>
       {children}
     </fieldset>
   )
@@ -35,17 +38,12 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export function Formular({ value, onChange }: Props) {
   const set = <K extends keyof MietobjektInput>(key: K, v: MietobjektInput[K]) => onChange({ ...value, [key]: v })
 
-  const onBezirkChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const nr = Number(e.target.value)
-    const b = getBezirk(nr)
-    onChange({ ...value, bezirk: nr, lagequalitaet: b.typischeLage })
-  }
-
-  const bezirk = getBezirk(value.bezirk)
+  const bezirkAusAdresse = bezirkAusAnschrift(value.anschrift)
+  const bezirk = getBezirk(bezirkAusAdresse ?? value.bezirk)
 
   return (
     <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-      <Section title="Objekt">
+      <Section title="Angaben zum Mietobjekt">
         <div>
           <label className={fieldLabel} htmlFor="objektart">
             Art des Mietgegenstands
@@ -89,10 +87,10 @@ export function Formular({ value, onChange }: Props) {
         )}
 
         {value.objektart === 'dg_ausbau' && (
-          <label className="flex items-center gap-2 text-sm text-slate-200">
+          <label className={checkLabel}>
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-slate-500 bg-slate-800 text-red-500 focus:ring-red-500"
+              className={checkbox}
               checked={value.dgAusbauNachStichtag}
               onChange={(e) => set('dgAusbauNachStichtag', e.target.checked)}
             />
@@ -101,10 +99,10 @@ export function Formular({ value, onChange }: Props) {
         )}
 
         {value.objektart === 'zubau' && (
-          <label className="flex items-center gap-2 text-sm text-slate-200">
+          <label className={checkLabel}>
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-slate-500 bg-slate-800 text-red-500 focus:ring-red-500"
+              className={checkbox}
               checked={value.zubauNachStichtag}
               onChange={(e) => set('zubauNachStichtag', e.target.checked)}
             />
@@ -113,179 +111,237 @@ export function Formular({ value, onChange }: Props) {
         )}
 
         <div>
-          <label className={fieldLabel} htmlFor="flaeche">
-            Nutzfläche (m²)
+          <label className={fieldLabel} htmlFor="anschrift">
+            Anschrift <span className="font-normal text-ink-faint">(optional)</span>
           </label>
           <input
-            id="flaeche"
-            type="number"
-            min={1}
-            step={1}
+            id="anschrift"
+            type="text"
             className={controlBase}
-            value={value.flaeche}
-            onChange={(e) => set('flaeche', Math.max(0, Number(e.target.value)))}
+            placeholder="z.B. Lindengasse 12, 1070 Wien"
+            value={value.anschrift}
+            onChange={(e) => set('anschrift', e.target.value)}
           />
+          <p className={hint}>
+            {bezirkAusAdresse
+              ? `Erkannt: ${bezirkAusAdresse}. Bezirk (${bezirk.name}) – Lagezuschlag wird geschätzt.`
+              : 'Für die Lagezuschlag-Schätzung. Ohne Anschrift wird die Lage nicht berücksichtigt.'}
+          </p>
         </div>
 
-        <div>
-          <label className={fieldLabel} htmlFor="bezirk">
-            Wiener Gemeindebezirk
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={fieldLabel} htmlFor="flaeche">
+              Nutzfläche (m²)
+            </label>
+            <input
+              id="flaeche"
+              type="number"
+              min={1}
+              step={1}
+              className={controlBase}
+              value={value.flaeche}
+              onChange={(e) => set('flaeche', Math.max(0, Number(e.target.value)))}
+            />
+          </div>
+          <div>
+            <label className={fieldLabel} htmlFor="bezirk">
+              Bezirk (Marktpreis)
+            </label>
+            <select
+              id="bezirk"
+              className={controlBase}
+              value={value.bezirk}
+              onChange={(e) => set('bezirk', Number(e.target.value))}
+              disabled={bezirkAusAdresse != null}
+            >
+              {BEZIRKE.map((b) => (
+                <option key={b.nr} value={b.nr}>
+                  {b.nr}. {b.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          <label className={checkLabel}>
+            <input
+              type="checkbox"
+              className={checkbox}
+              checked={value.eigentumswohnung}
+              onChange={(e) => set('eigentumswohnung', e.target.checked)}
+            />
+            Eigentumswohnung
           </label>
-          <select id="bezirk" className={controlBase} value={value.bezirk} onChange={onBezirkChange}>
-            {BEZIRKE.map((b) => (
-              <option key={b.nr} value={b.nr}>
-                {b.nr}. {b.name}
-              </option>
-            ))}
-          </select>
-          <p className={hint}>
-            Richtwert-Näherung Marktmiete: {bezirk.marktmieteMin}–{bezirk.marktmieteMax} €/m²
-          </p>
+          <label className={checkLabel}>
+            <input
+              type="checkbox"
+              className={checkbox}
+              checked={value.befristet}
+              onChange={(e) => set('befristet', e.target.checked)}
+            />
+            befristeter Mietvertrag
+          </label>
         </div>
       </Section>
 
       <Section title="Förderung">
         {zeigeFoerderung(value.objektart) ? (
-          <div>
-            <label className={fieldLabel} htmlFor="foerderung">
-              Öffentliche Wohnbauförderung
-            </label>
-            <select
-              id="foerderung"
-              className={controlBase}
-              value={value.foerderung}
-              onChange={(e) => set('foerderung', e.target.value as MietobjektInput['foerderung'])}
-            >
-              {(Object.keys(FOERDERUNG_LABEL) as (keyof typeof FOERDERUNG_LABEL)[]).map((k) => (
-                <option key={k} value={k}>
-                  {FOERDERUNG_LABEL[k]}
-                </option>
-              ))}
-            </select>
-            <p className={hint}>Betrifft z.B. WWG 1948, WFG 1954/1968/1984, WWFSG 1989 oder gemeinnützige Bauvereinigungen (WGG).</p>
-          </div>
+          <>
+            <div>
+              <label className={fieldLabel} htmlFor="foerderung">
+                Öffentliche Wohnbauförderung
+              </label>
+              <select
+                id="foerderung"
+                className={controlBase}
+                value={value.foerderungProgramm}
+                onChange={(e) => set('foerderungProgramm', e.target.value as MietobjektInput['foerderungProgramm'])}
+              >
+                {(Object.keys(FOERDERUNG_PROGRAMM_LABEL) as (keyof typeof FOERDERUNG_PROGRAMM_LABEL)[]).map((k) => (
+                  <option key={k} value={k}>
+                    {FOERDERUNG_PROGRAMM_LABEL[k]}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {statusRelevant(value.foerderungProgramm) && (
+              <div>
+                <label className={fieldLabel} htmlFor="tilgung">
+                  Tilgungsstatus des Förderungsdarlehens
+                </label>
+                <select
+                  id="tilgung"
+                  className={controlBase}
+                  value={value.tilgungsstatus}
+                  onChange={(e) => set('tilgungsstatus', e.target.value as MietobjektInput['tilgungsstatus'])}
+                >
+                  {(Object.keys(TILGUNGSSTATUS_LABEL) as (keyof typeof TILGUNGSSTATUS_LABEL)[]).map((k) => (
+                    <option key={k} value={k}>
+                      {TILGUNGSSTATUS_LABEL[k]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <p className={hint}>
+              Datensätze laut Unterlage „Förderungen" (WWG 1948, WFG 1954/1968/1984, WWFSG 1989, gemeinnützige
+              Bauvereinigung).
+            </p>
+          </>
         ) : (
-          <p className="text-sm text-slate-400">Bei dieser Objektart ist die Förderung für die Einstufung ohne Bedeutung.</p>
+          <p className="text-sm text-ink-soft">Bei dieser Objektart ist die Förderung für die Einstufung ohne Bedeutung.</p>
         )}
-
-        <div>
-          <label className={fieldLabel} htmlFor="befristet">
-            Mietvertrag
-          </label>
-          <div className="flex items-center gap-2">
-            <input
-              id="befristet"
-              type="checkbox"
-              className="h-4 w-4 rounded border-slate-500 bg-slate-800 text-red-500 focus:ring-red-500"
-              checked={value.befristet}
-              onChange={(e) => set('befristet', e.target.checked)}
-            />
-            <label htmlFor="befristet" className="text-sm text-slate-200">
-              befristet (schriftlich)
-            </label>
-          </div>
-          <p className={hint}>In Vollanwendung führt ein schriftlich befristeter Vertrag zu einem 25 % Befristungsabschlag.</p>
-        </div>
       </Section>
 
-      <Section title="Ausstattung & Zustand">
-        {zeigeKategorie(value.objektart) && (
+      {zeigeAusstattung(value.objektart) && (
+        <Section title="Ausstattung, Zustand & Zu-/Abschläge" className="md:col-span-2">
+          {zeigeKategorie(value.objektart) && (
+            <div>
+              <label className={fieldLabel} htmlFor="kategorie">
+                Ausstattungskategorie
+              </label>
+              <select
+                id="kategorie"
+                className={controlBase}
+                value={value.kategorie}
+                onChange={(e) => set('kategorie', e.target.value as MietobjektInput['kategorie'])}
+              >
+                {(Object.keys(KATEGORIE_LABEL) as (keyof typeof KATEGORIE_LABEL)[]).map((k) => (
+                  <option key={k} value={k}>
+                    {KATEGORIE_LABEL[k]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className={fieldLabel} htmlFor="zustand">
+                Erhaltungszustand des Hauses
+              </label>
+              <select
+                id="zustand"
+                className={controlBase}
+                value={value.zustandHaus}
+                onChange={(e) => set('zustandHaus', e.target.value as MietobjektInput['zustandHaus'])}
+              >
+                {(Object.keys(ZUSTAND_HAUS_LABEL) as (keyof typeof ZUSTAND_HAUS_LABEL)[]).map((k) => (
+                  <option key={k} value={k}>
+                    {ZUSTAND_HAUS_LABEL[k]}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={fieldLabel} htmlFor="stockwerk">
+                Geschoss
+              </label>
+              <select
+                id="stockwerk"
+                className={controlBase}
+                value={value.stockwerk}
+                onChange={(e) => set('stockwerk', e.target.value as MietobjektInput['stockwerk'])}
+              >
+                {(Object.keys(STOCKWERK_LABEL) as (keyof typeof STOCKWERK_LABEL)[]).map((k) => (
+                  <option key={k} value={k}>
+                    {STOCKWERK_LABEL[k]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           <div>
-            <label className={fieldLabel} htmlFor="kategorie">
-              Ausstattungskategorie
+            <label className={fieldLabel} htmlFor="heizung">
+              Heizung
             </label>
             <select
-              id="kategorie"
+              id="heizung"
               className={controlBase}
-              value={value.kategorie}
-              onChange={(e) => set('kategorie', e.target.value as MietobjektInput['kategorie'])}
+              value={value.heizung}
+              onChange={(e) => set('heizung', e.target.value as MietobjektInput['heizung'])}
             >
-              {(Object.keys(KATEGORIE_LABEL) as (keyof typeof KATEGORIE_LABEL)[]).map((k) => (
+              {(Object.keys(HEIZUNG_LABEL) as (keyof typeof HEIZUNG_LABEL)[]).map((k) => (
                 <option key={k} value={k}>
-                  {KATEGORIE_LABEL[k]}
+                  {HEIZUNG_LABEL[k]}
                 </option>
               ))}
             </select>
           </div>
-        )}
 
-        <div>
-          <label className={fieldLabel} htmlFor="zustand">
-            Erhaltungszustand
-          </label>
-          <select
-            id="zustand"
-            className={controlBase}
-            value={value.zustand}
-            onChange={(e) => set('zustand', e.target.value as MietobjektInput['zustand'])}
-          >
-            {(Object.keys(ZUSTAND_LABEL) as (keyof typeof ZUSTAND_LABEL)[]).map((k) => (
-              <option key={k} value={k}>
-                {ZUSTAND_LABEL[k]}
-              </option>
+          <div className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
+            {(
+              [
+                ['lift', 'Lift im Haus'],
+                ['balkonTerrasse', 'Balkon/Terrasse/Loggia'],
+                ['garten', 'Eigengarten'],
+                ['ruhelage', 'Besonders ruhige Lage'],
+                ['ausblick', 'Guter Ausblick'],
+                ['hochwertigeAusstattung', 'Hochwertige Ausstattung'],
+                ['keller', 'Keller/Kellerabteil'],
+                ['garage', 'Garage/Stellplatz'],
+                ['gemeinschaft', 'Gemeinschaftseinrichtungen'],
+                ['strassenlaerm', 'Straßenlärm/laute Lage (Abschlag)'],
+              ] as const
+            ).map(([key, label]) => (
+              <label key={key} className={checkLabel}>
+                <input
+                  type="checkbox"
+                  className={checkbox}
+                  checked={value[key] as boolean}
+                  onChange={(e) => set(key, e.target.checked)}
+                />
+                {label}
+              </label>
             ))}
-          </select>
-        </div>
-
-        <div className="flex flex-wrap gap-x-6 gap-y-2">
-          <label className="flex items-center gap-2 text-sm text-slate-200">
-            <input
-              type="checkbox"
-              className="h-4 w-4 rounded border-slate-500 bg-slate-800 text-red-500 focus:ring-red-500"
-              checked={value.balkonTerrasse}
-              onChange={(e) => set('balkonTerrasse', e.target.checked)}
-            />
-            Balkon/Terrasse/Loggia
-          </label>
-          <label className="flex items-center gap-2 text-sm text-slate-200">
-            <input
-              type="checkbox"
-              className="h-4 w-4 rounded border-slate-500 bg-slate-800 text-red-500 focus:ring-red-500"
-              checked={value.lift}
-              onChange={(e) => set('lift', e.target.checked)}
-            />
-            Lift im Haus
-          </label>
-        </div>
-      </Section>
-
-      <Section title="Lage">
-        <div>
-          <label className={fieldLabel} htmlFor="lage">
-            Lagequalität
-          </label>
-          <select
-            id="lage"
-            className={controlBase}
-            value={value.lagequalitaet}
-            onChange={(e) => set('lagequalitaet', e.target.value as MietobjektInput['lagequalitaet'])}
-          >
-            {(Object.keys(LAGE_LABEL) as (keyof typeof LAGE_LABEL)[]).map((k) => (
-              <option key={k} value={k}>
-                {LAGE_LABEL[k]}
-              </option>
-            ))}
-          </select>
-          <p className={hint}>Voreinstellung nach Bezirk; laut Wiener Lagezuschlagskarte auf Zählgebiets-Ebene genauer zu prüfen.</p>
-        </div>
-
-        <div>
-          <label className={fieldLabel} htmlFor="marktmiete">
-            Vergleichs-/Marktmiete manuell (€/m², optional)
-          </label>
-          <input
-            id="marktmiete"
-            type="number"
-            min={0}
-            step={0.1}
-            placeholder={`${bezirk.marktmieteMin}–${bezirk.marktmieteMax}`}
-            className={controlBase}
-            value={value.marktmieteM2Override ?? ''}
-            onChange={(e) => set('marktmieteM2Override', e.target.value === '' ? null : Number(e.target.value))}
-          />
-          <p className={hint}>Überschreibt die hinterlegte Bezirks-Schätzung, z.B. nach Recherche vergleichbarer Inserate.</p>
-        </div>
-      </Section>
+          </div>
+        </Section>
+      )}
     </div>
   )
 }

@@ -1,13 +1,35 @@
 @import 'tailwindcss';
 
-:root {
-  color-scheme: light dark;
+/*
+ * Light-only warme Palette (colorhunt 607456 / EEE0CC / BA6A4C / 7B2525).
+ * Als Tailwind-v4-@theme-Tokens definiert, damit Utilities wie bg-cream,
+ * text-wine, border-sand automatisch generiert werden.
+ */
+@theme {
+  --color-cream: #eee0cc;
+  --color-cream-50: #f8f2e7;
+  --color-cream-100: #f3ebdb;
+  --color-cream-200: #e7d8bd;
+  --color-sand: #ddc9a6;
+  --color-sand-line: #d8c6a4;
+
+  --color-sage: #607456;
+  --color-sage-600: #55684c;
+  --color-sage-700: #47573f;
+
+  --color-terracotta: #ba6a4c;
+  --color-terracotta-600: #a85c40;
+
+  --color-wine: #7b2525;
+  --color-wine-600: #6a1f1f;
+
+  --color-ink: #2f2a24;
+  --color-ink-soft: #6f6553;
+  --color-ink-faint: #8a8069;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+:root {
+  color-scheme: light;
 }
 
 html,
@@ -18,7 +40,10 @@ body,
 
 body {
   margin: 0;
+  background-color: var(--color-cream);
+  color: var(--color-ink);
   font-family:
+    ui-sans-serif,
     system-ui,
     -apple-system,
     'Segoe UI',
@@ -28,7 +53,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom number input without spinners, for a cleaner form look */
 input[type='number']::-webkit-inner-spin-button,
 input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
