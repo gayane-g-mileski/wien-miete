@@ -8,13 +8,15 @@ import type {
   Preisspanne,
 } from './types'
 import {
-  ABSCHLAG,
   ANGEMESSEN_ABSCHLAG_VON_FREI,
   BEFRISTUNGSABSCHLAG,
+  HEIZUNG_ZUSCHLAG,
   KATEGORIE_FAKTOR,
   KAT_D_HMZ,
+  MERKMAL_KATALOG,
   RICHTWERT_WIEN,
-  ZUSCHLAG,
+  STOCKWERK_ABSCHLAG,
+  ZUSTAND_ABSCHLAG,
   bezirkAusAnschrift,
   getBezirk,
 } from './pricingData'
@@ -44,6 +46,11 @@ function round2(n: number): number {
   return Math.round(n * 100) / 100
 }
 
+function katKurz(k: Kategorie): string {
+  if (k === 'D_brauchbar' || k === 'D_unbrauchbar') return 'D'
+  return k
+}
+
 /** Lagezuschlag in €/m² aus der Anschrift; 0 ohne (verwertbare) Anschrift. */
 function lagezuschlagAusAnschrift(input: MietobjektInput): { wert: number; bezirk: number | null } {
   const nr = bezirkAusAnschrift(input.anschrift)
@@ -52,7 +59,6 @@ function lagezuschlagAusAnschrift(input: MietobjektInput): { wert: number; bezir
 }
 
 function marktband(input: MietobjektInput): { min: number; max: number } {
-  // Bezirk bevorzugt aus Anschrift, sonst aus Auswahl.
   const nr = bezirkAusAnschrift(input.anschrift) ?? input.bezirk
   const b = getBezirk(nr)
   return { min: b.marktmieteMin, max: b.marktmieteMax }
@@ -61,24 +67,14 @@ function marktband(input: MietobjektInput): { min: number; max: number } {
 /** Summe der Ausstattungs-/Zustands-Zu- und -Abschläge in €/m² (ohne Lage). */
 function ausstattungsBestandteile(input: MietobjektInput): Preisbestandteil[] {
   const teile: Preisbestandteil[] = []
-  const add = (label: string, wert: number) => {
-    if (wert !== 0) teile.push({ label, wert: round2(wert) })
+  for (const def of MERKMAL_KATALOG) {
+    if (input.merkmale[def.key]) teile.push({ label: def.label, wert: def.wert })
   }
-  if (input.lift) add('Lift', ZUSCHLAG.lift)
-  if (input.balkonTerrasse) add('Balkon/Terrasse/Loggia', ZUSCHLAG.balkonTerrasse)
-  if (input.garten) add('Eigengarten', ZUSCHLAG.garten)
-  if (input.ruhelage) add('Besonders ruhige Lage', ZUSCHLAG.ruhelage)
-  if (input.ausblick) add('Guter Ausblick', ZUSCHLAG.ausblick)
-  if (input.hochwertigeAusstattung) add('Hochwertige Ausstattung', ZUSCHLAG.hochwertigeAusstattung)
-  if (input.heizung === 'zentral_etage') add('Zentral-/Etagenheizung', ZUSCHLAG.heizungZentral)
-  if (input.keller) add('Keller/Kellerabteil', ZUSCHLAG.keller)
-  if (input.garage) add('Garage/Stellplatz', ZUSCHLAG.garage)
-  if (input.gemeinschaft) add('Gemeinschaftseinrichtungen', ZUSCHLAG.gemeinschaft)
-  if (input.zustandHaus === 'sehr_gut') add('Sehr guter Erhaltungszustand', ZUSCHLAG.zustandSehrGut)
-  if (input.zustandHaus === 'schlecht') add('Schlechter Erhaltungszustand', -ABSCHLAG.zustandSchlecht)
-  if (input.stockwerk === 'erdgeschoss') add('Erdgeschoss/Hochparterre', -ABSCHLAG.stockwerkErdgeschoss)
-  if (input.stockwerk === 'hoch_ohne_lift') add('Hohes Stockwerk ohne Lift', -ABSCHLAG.stockwerkHochOhneLift)
-  if (input.strassenlaerm) add('Straßenlärm/laute Lage', -ABSCHLAG.strassenlaerm)
+  if (input.zustandHaus === 'sehr_gut') teile.push({ label: 'Sehr guter Erhaltungszustand', wert: ZUSTAND_ABSCHLAG.sehr_gut })
+  if (input.zustandHaus === 'schlecht') teile.push({ label: 'Schlechter Erhaltungszustand', wert: ZUSTAND_ABSCHLAG.schlecht })
+  if (input.stockwerk === 'erdgeschoss') teile.push({ label: 'Erdgeschoss/Hochparterre', wert: STOCKWERK_ABSCHLAG.erdgeschoss })
+  if (input.stockwerk === 'hoch_ohne_lift') teile.push({ label: 'Hohes Stockwerk ohne Lift', wert: STOCKWERK_ABSCHLAG.hoch_ohne_lift })
+  if (input.heizung === 'zentral_etage') teile.push({ label: 'Zentral-/Etagenheizung', wert: HEIZUNG_ZUSCHLAG })
   return teile
 }
 
@@ -98,13 +94,13 @@ function computePreis(input: MietobjektInput, art: MietzinsArt): Preisspanne | n
       if (lage.wert > 0) teile.push({ label: 'Lagezuschlag', wert: round2(lage.wert) })
       teile.push(...ausstattungsBestandteile(input))
       let proM2 = teile.reduce((s, t) => s + t.wert, 0)
-      proM2 = Math.max(proM2, KAT_D_HMZ.brauchbar) // nicht unter Kat-D-Niveau
+      proM2 = Math.max(proM2, KAT_D_HMZ.brauchbar)
       if (input.befristet) {
         const abschlag = round2(-proM2 * BEFRISTUNGSABSCHLAG)
         teile.push({ label: 'Befristungsabschlag (25 %)', wert: abschlag })
         proM2 += abschlag
       }
-      bestandteile = teile
+      bestandteile = teile.map((t) => ({ label: t.label, wert: round2(t.wert) }))
       proM2Min = proM2 * 0.94
       proM2Max = proM2 * 1.06
       break
@@ -149,11 +145,6 @@ function computePreis(input: MietobjektInput, art: MietzinsArt): Preisspanne | n
     monatlichMax: round2(proM2Max * flaeche),
     bestandteile,
   }
-}
-
-function katKurz(k: Kategorie): string {
-  if (k === 'D_brauchbar' || k === 'D_unbrauchbar') return 'D'
-  return k
 }
 
 function lageHinweisText(input: MietobjektInput, art: MietzinsArt): string | null {
@@ -345,7 +336,6 @@ export function evaluateMrg(input: MietobjektInput): MrgErgebnis {
     )
   }
 
-  // 1945_1953 (ohne Förderung): mietrechtlicher Neubau -> angemessener HMZ
   return result(
     'angemessen',
     'voll',

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Formular } from './components/Formular'
 import { Ergebnis } from './components/Ergebnis'
 import { evaluateMrg } from './lib/mrgEngine'
+import { leereMerkmale } from './lib/pricingData'
 import type { MietobjektInput } from './lib/types'
 
 const initialInput: MietobjektInput = {
@@ -20,16 +21,7 @@ const initialInput: MietobjektInput = {
   zustandHaus: 'durchschnittlich',
   heizung: 'zentral_etage',
   stockwerk: 'normal',
-  lift: false,
-  balkonTerrasse: false,
-  garten: false,
-  ruhelage: false,
-  ausblick: false,
-  hochwertigeAusstattung: false,
-  keller: false,
-  garage: false,
-  gemeinschaft: false,
-  strassenlaerm: false,
+  merkmale: leereMerkmale(),
 }
 
 function App() {
@@ -54,12 +46,14 @@ function App() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+          {/* Links: alle Eingaben untereinander */}
           <section>
             <h2 className="mb-4 text-base font-semibold text-ink">Eingabe</h2>
             <Formular value={input} onChange={setInput} />
           </section>
 
+          {/* Rechts: Ergebnis */}
           <section className="lg:sticky lg:top-6">
             <h2 className="mb-4 text-base font-semibold text-ink">Ergebnis</h2>
             <Ergebnis ergebnis={ergebnis} />

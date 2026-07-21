@@ -1,4 +1,4 @@
-import type { MietobjektInput } from '../lib/types'
+import type { MietobjektInput, MerkmalKey } from '../lib/types'
 import {
   BAUBEWILLIGUNG_LABEL,
   HEIZUNG_LABEL,
@@ -12,45 +12,28 @@ import {
   zeigeKategorie,
 } from '../lib/labels'
 import { FOERDERUNG_PROGRAMM_LABEL, TILGUNGSSTATUS_LABEL, statusRelevant } from '../lib/foerderung'
-import { BEZIRKE, bezirkAusAnschrift, getBezirk } from '../lib/pricingData'
+import { BEZIRKE, MERKMAL_GRUPPEN, MERKMAL_KATALOG, bezirkAusAnschrift, getBezirk } from '../lib/pricingData'
+import { Checkbox, Field, NumberInput, Section, Select, TextInput } from './ui'
 
 interface Props {
   value: MietobjektInput
   onChange: (next: MietobjektInput) => void
 }
 
-const fieldLabel = 'block text-sm font-medium text-ink mb-1.5'
-const controlBase =
-  'w-full rounded-lg border border-sand-line bg-cream-50 px-3 py-2 text-sm text-ink shadow-sm focus:border-sage focus:outline-none focus:ring-2 focus:ring-sage/40'
-const hint = 'mt-1 text-xs text-ink-faint'
-const checkbox = 'h-4 w-4 rounded border-sand-line bg-cream-50 text-sage focus:ring-sage/40'
-const checkLabel = 'flex items-center gap-2 text-sm text-ink'
-
-function Section({ title, children, className = '' }: { title: string; children: React.ReactNode; className?: string }) {
-  return (
-    <fieldset className={`space-y-4 rounded-xl border border-sand-line bg-cream-100 p-4 sm:p-5 ${className}`}>
-      <legend className="px-2 text-xs font-semibold uppercase tracking-wider text-wine">{title}</legend>
-      {children}
-    </fieldset>
-  )
-}
-
 export function Formular({ value, onChange }: Props) {
   const set = <K extends keyof MietobjektInput>(key: K, v: MietobjektInput[K]) => onChange({ ...value, [key]: v })
+  const setMerkmal = (key: MerkmalKey, v: boolean) => onChange({ ...value, merkmale: { ...value.merkmale, [key]: v } })
 
   const bezirkAusAdresse = bezirkAusAnschrift(value.anschrift)
   const bezirk = getBezirk(bezirkAusAdresse ?? value.bezirk)
 
   return (
-    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+    <div className="flex flex-col gap-5">
+      {/* --- Angaben zum Mietobjekt --- */}
       <Section title="Angaben zum Mietobjekt">
-        <div>
-          <label className={fieldLabel} htmlFor="objektart">
-            Art des Mietgegenstands
-          </label>
-          <select
+        <Field label="Art des Mietgegenstands" htmlFor="objektart">
+          <Select
             id="objektart"
-            className={controlBase}
             value={value.objektart}
             onChange={(e) => set('objektart', e.target.value as MietobjektInput['objektart'])}
           >
@@ -63,17 +46,72 @@ export function Formular({ value, onChange }: Props) {
                 ))}
               </optgroup>
             ))}
-          </select>
+          </Select>
+        </Field>
+
+        <Field
+          label={
+            <>
+              Anschrift <span className="font-normal text-ink-faint">(optional)</span>
+            </>
+          }
+          htmlFor="anschrift"
+          hint={
+            bezirkAusAdresse
+              ? `Erkannt: ${bezirkAusAdresse}. Bezirk (${bezirk.name}) – Lagezuschlag wird geschätzt.`
+              : 'Für die Lagezuschlag-Schätzung. Ohne Anschrift wird die Lage nicht berücksichtigt.'
+          }
+        >
+          <TextInput
+            id="anschrift"
+            placeholder="z.B. Lindengasse 12, 1070 Wien"
+            value={value.anschrift}
+            onChange={(e) => set('anschrift', e.target.value)}
+          />
+        </Field>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Nutzfläche (m²)" htmlFor="flaeche">
+            <NumberInput
+              id="flaeche"
+              min={1}
+              step={1}
+              value={value.flaeche}
+              onChange={(e) => set('flaeche', Math.max(0, Number(e.target.value)))}
+            />
+          </Field>
+          <Field label="Bezirk (Marktpreis)" htmlFor="bezirk">
+            <Select
+              id="bezirk"
+              value={value.bezirk}
+              disabled={bezirkAusAdresse != null}
+              onChange={(e) => set('bezirk', Number(e.target.value))}
+            >
+              {BEZIRKE.map((b) => (
+                <option key={b.nr} value={b.nr}>
+                  {b.nr}. {b.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
         </div>
 
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          <Checkbox
+            checked={value.eigentumswohnung}
+            onChange={(v) => set('eigentumswohnung', v)}
+            label="Eigentumswohnung"
+          />
+          <Checkbox checked={value.befristet} onChange={(v) => set('befristet', v)} label="befristeter Mietvertrag" />
+        </div>
+      </Section>
+
+      {/* --- Förderung (inkl. Baubewilligung) --- */}
+      <Section title="Förderung">
         {zeigeBaujahr(value.objektart) && (
-          <div>
-            <label className={fieldLabel} htmlFor="baubewilligung">
-              Baubewilligung des Gebäudes
-            </label>
-            <select
+          <Field label="Baubewilligung des Gebäudes" htmlFor="baubewilligung">
+            <Select
               id="baubewilligung"
-              className={controlBase}
               value={value.baubewilligungGebaeude}
               onChange={(e) => set('baubewilligungGebaeude', e.target.value as MietobjektInput['baubewilligungGebaeude'])}
             >
@@ -82,120 +120,34 @@ export function Formular({ value, onChange }: Props) {
                   {BAUBEWILLIGUNG_LABEL[k]}
                 </option>
               ))}
-            </select>
-          </div>
+            </Select>
+          </Field>
         )}
 
         {value.objektart === 'dg_ausbau' && (
-          <label className={checkLabel}>
-            <input
-              type="checkbox"
-              className={checkbox}
-              checked={value.dgAusbauNachStichtag}
-              onChange={(e) => set('dgAusbauNachStichtag', e.target.checked)}
-            />
-            Baubewilligung/Mietvertrag nach dem 31.12.2001
-          </label>
-        )}
-
-        {value.objektart === 'zubau' && (
-          <label className={checkLabel}>
-            <input
-              type="checkbox"
-              className={checkbox}
-              checked={value.zubauNachStichtag}
-              onChange={(e) => set('zubauNachStichtag', e.target.checked)}
-            />
-            Baubewilligung nach dem 30.9.2006
-          </label>
-        )}
-
-        <div>
-          <label className={fieldLabel} htmlFor="anschrift">
-            Anschrift <span className="font-normal text-ink-faint">(optional)</span>
-          </label>
-          <input
-            id="anschrift"
-            type="text"
-            className={controlBase}
-            placeholder="z.B. Lindengasse 12, 1070 Wien"
-            value={value.anschrift}
-            onChange={(e) => set('anschrift', e.target.value)}
+          <Checkbox
+            checked={value.dgAusbauNachStichtag}
+            onChange={(v) => set('dgAusbauNachStichtag', v)}
+            label="Baubewilligung/Mietvertrag nach dem 31.12.2001"
           />
-          <p className={hint}>
-            {bezirkAusAdresse
-              ? `Erkannt: ${bezirkAusAdresse}. Bezirk (${bezirk.name}) – Lagezuschlag wird geschätzt.`
-              : 'Für die Lagezuschlag-Schätzung. Ohne Anschrift wird die Lage nicht berücksichtigt.'}
-          </p>
-        </div>
+        )}
+        {value.objektart === 'zubau' && (
+          <Checkbox
+            checked={value.zubauNachStichtag}
+            onChange={(v) => set('zubauNachStichtag', v)}
+            label="Baubewilligung nach dem 30.9.2006"
+          />
+        )}
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={fieldLabel} htmlFor="flaeche">
-              Nutzfläche (m²)
-            </label>
-            <input
-              id="flaeche"
-              type="number"
-              min={1}
-              step={1}
-              className={controlBase}
-              value={value.flaeche}
-              onChange={(e) => set('flaeche', Math.max(0, Number(e.target.value)))}
-            />
-          </div>
-          <div>
-            <label className={fieldLabel} htmlFor="bezirk">
-              Bezirk (Marktpreis)
-            </label>
-            <select
-              id="bezirk"
-              className={controlBase}
-              value={value.bezirk}
-              onChange={(e) => set('bezirk', Number(e.target.value))}
-              disabled={bezirkAusAdresse != null}
-            >
-              {BEZIRKE.map((b) => (
-                <option key={b.nr} value={b.nr}>
-                  {b.nr}. {b.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-x-6 gap-y-2">
-          <label className={checkLabel}>
-            <input
-              type="checkbox"
-              className={checkbox}
-              checked={value.eigentumswohnung}
-              onChange={(e) => set('eigentumswohnung', e.target.checked)}
-            />
-            Eigentumswohnung
-          </label>
-          <label className={checkLabel}>
-            <input
-              type="checkbox"
-              className={checkbox}
-              checked={value.befristet}
-              onChange={(e) => set('befristet', e.target.checked)}
-            />
-            befristeter Mietvertrag
-          </label>
-        </div>
-      </Section>
-
-      <Section title="Förderung">
         {zeigeFoerderung(value.objektart) ? (
           <>
-            <div>
-              <label className={fieldLabel} htmlFor="foerderung">
-                Öffentliche Wohnbauförderung
-              </label>
-              <select
+            <Field
+              label="Öffentliche Wohnbauförderung"
+              htmlFor="foerderung"
+              hint='Datensätze laut Unterlage „Förderungen" (WWG 1948, WFG 1954/1968/1984, WWFSG 1989, gemeinnützige Bauvereinigung).'
+            >
+              <Select
                 id="foerderung"
-                className={controlBase}
                 value={value.foerderungProgramm}
                 onChange={(e) => set('foerderungProgramm', e.target.value as MietobjektInput['foerderungProgramm'])}
               >
@@ -204,17 +156,13 @@ export function Formular({ value, onChange }: Props) {
                     {FOERDERUNG_PROGRAMM_LABEL[k]}
                   </option>
                 ))}
-              </select>
-            </div>
+              </Select>
+            </Field>
 
             {statusRelevant(value.foerderungProgramm) && (
-              <div>
-                <label className={fieldLabel} htmlFor="tilgung">
-                  Tilgungsstatus des Förderungsdarlehens
-                </label>
-                <select
+              <Field label="Tilgungsstatus des Förderungsdarlehens" htmlFor="tilgung">
+                <Select
                   id="tilgung"
-                  className={controlBase}
                   value={value.tilgungsstatus}
                   onChange={(e) => set('tilgungsstatus', e.target.value as MietobjektInput['tilgungsstatus'])}
                 >
@@ -223,30 +171,22 @@ export function Formular({ value, onChange }: Props) {
                       {TILGUNGSSTATUS_LABEL[k]}
                     </option>
                   ))}
-                </select>
-              </div>
+                </Select>
+              </Field>
             )}
-
-            <p className={hint}>
-              Datensätze laut Unterlage „Förderungen" (WWG 1948, WFG 1954/1968/1984, WWFSG 1989, gemeinnützige
-              Bauvereinigung).
-            </p>
           </>
         ) : (
           <p className="text-sm text-ink-soft">Bei dieser Objektart ist die Förderung für die Einstufung ohne Bedeutung.</p>
         )}
       </Section>
 
+      {/* --- Ausstattung, Zustand & Zu-/Abschläge --- */}
       {zeigeAusstattung(value.objektart) && (
-        <Section title="Ausstattung, Zustand & Zu-/Abschläge" className="md:col-span-2">
+        <Section title="Ausstattung, Zustand & Zu-/Abschläge">
           {zeigeKategorie(value.objektart) && (
-            <div>
-              <label className={fieldLabel} htmlFor="kategorie">
-                Ausstattungskategorie
-              </label>
-              <select
+            <Field label="Ausstattungskategorie" htmlFor="kategorie">
+              <Select
                 id="kategorie"
-                className={controlBase}
                 value={value.kategorie}
                 onChange={(e) => set('kategorie', e.target.value as MietobjektInput['kategorie'])}
               >
@@ -255,18 +195,14 @@ export function Formular({ value, onChange }: Props) {
                     {KATEGORIE_LABEL[k]}
                   </option>
                 ))}
-              </select>
-            </div>
+              </Select>
+            </Field>
           )}
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label className={fieldLabel} htmlFor="zustand">
-                Erhaltungszustand des Hauses
-              </label>
-              <select
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <Field label="Erhaltungszustand" htmlFor="zustand">
+              <Select
                 id="zustand"
-                className={controlBase}
                 value={value.zustandHaus}
                 onChange={(e) => set('zustandHaus', e.target.value as MietobjektInput['zustandHaus'])}
               >
@@ -275,15 +211,11 @@ export function Formular({ value, onChange }: Props) {
                     {ZUSTAND_HAUS_LABEL[k]}
                   </option>
                 ))}
-              </select>
-            </div>
-            <div>
-              <label className={fieldLabel} htmlFor="stockwerk">
-                Geschoss
-              </label>
-              <select
+              </Select>
+            </Field>
+            <Field label="Geschoss" htmlFor="stockwerk">
+              <Select
                 id="stockwerk"
-                className={controlBase}
                 value={value.stockwerk}
                 onChange={(e) => set('stockwerk', e.target.value as MietobjektInput['stockwerk'])}
               >
@@ -292,54 +224,38 @@ export function Formular({ value, onChange }: Props) {
                     {STOCKWERK_LABEL[k]}
                   </option>
                 ))}
-              </select>
+              </Select>
+            </Field>
+            <Field label="Heizung" htmlFor="heizung">
+              <Select
+                id="heizung"
+                value={value.heizung}
+                onChange={(e) => set('heizung', e.target.value as MietobjektInput['heizung'])}
+              >
+                {(Object.keys(HEIZUNG_LABEL) as (keyof typeof HEIZUNG_LABEL)[]).map((k) => (
+                  <option key={k} value={k}>
+                    {HEIZUNG_LABEL[k]}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          </div>
+
+          {MERKMAL_GRUPPEN.map((gruppe) => (
+            <div key={gruppe} className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-wider text-sage-700">{gruppe}</p>
+              <div className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
+                {MERKMAL_KATALOG.filter((m) => m.gruppe === gruppe).map((m) => (
+                  <Checkbox
+                    key={m.key}
+                    checked={value.merkmale[m.key]}
+                    onChange={(v) => setMerkmal(m.key, v)}
+                    label={m.label}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-
-          <div>
-            <label className={fieldLabel} htmlFor="heizung">
-              Heizung
-            </label>
-            <select
-              id="heizung"
-              className={controlBase}
-              value={value.heizung}
-              onChange={(e) => set('heizung', e.target.value as MietobjektInput['heizung'])}
-            >
-              {(Object.keys(HEIZUNG_LABEL) as (keyof typeof HEIZUNG_LABEL)[]).map((k) => (
-                <option key={k} value={k}>
-                  {HEIZUNG_LABEL[k]}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
-            {(
-              [
-                ['lift', 'Lift im Haus'],
-                ['balkonTerrasse', 'Balkon/Terrasse/Loggia'],
-                ['garten', 'Eigengarten'],
-                ['ruhelage', 'Besonders ruhige Lage'],
-                ['ausblick', 'Guter Ausblick'],
-                ['hochwertigeAusstattung', 'Hochwertige Ausstattung'],
-                ['keller', 'Keller/Kellerabteil'],
-                ['garage', 'Garage/Stellplatz'],
-                ['gemeinschaft', 'Gemeinschaftseinrichtungen'],
-                ['strassenlaerm', 'Straßenlärm/laute Lage (Abschlag)'],
-              ] as const
-            ).map(([key, label]) => (
-              <label key={key} className={checkLabel}>
-                <input
-                  type="checkbox"
-                  className={checkbox}
-                  checked={value[key] as boolean}
-                  onChange={(e) => set(key, e.target.checked)}
-                />
-                {label}
-              </label>
-            ))}
-          </div>
+          ))}
         </Section>
       )}
     </div>

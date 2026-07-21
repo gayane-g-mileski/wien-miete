@@ -39,6 +39,45 @@ export type FoerderungProgramm =
 
 export type Tilgungsstatus = 'offen' | 'getilgt_wgg' | 'rbg1971' | 'rbg1987'
 
+// Einzelmerkmale (Zu-/Abschläge) als dynamischer Katalog.
+export type MerkmalKey =
+  // Ausstattung der Wohnung
+  | 'hochwertigesBad'
+  | 'zweitesWc'
+  | 'hochwertigeKueche'
+  | 'hochwertigeBoeden'
+  | 'schallschutzfenster'
+  | 'fussbodenheizung'
+  | 'klimaanlage'
+  | 'barrierefrei'
+  // Freiflächen
+  | 'balkon'
+  | 'loggia'
+  | 'terrasse'
+  | 'eigengarten'
+  | 'dachterrasse'
+  // Lage & Grundriss
+  | 'ruhelage'
+  | 'sonnig'
+  | 'ausblick'
+  | 'strassenlaerm'
+  | 'dunkel'
+  | 'schlechterGrundriss'
+  // Gebäude & Allgemeinflächen
+  | 'lift'
+  | 'gegensprechanlage'
+  | 'concierge'
+  | 'gemeinschaft'
+  | 'denkmalschutz'
+  | 'begruenterInnenhof'
+  // Zubehör
+  | 'kellerabteil'
+  | 'dachbodenabteil'
+  | 'garage'
+  | 'stellplatz'
+
+export type Merkmale = Record<MerkmalKey, boolean>
+
 export interface MietobjektInput {
   objektart: Objektart
   baubewilligungGebaeude: BaubewilligungGebaeude
@@ -54,21 +93,12 @@ export interface MietobjektInput {
   foerderungProgramm: FoerderungProgramm
   tilgungsstatus: Tilgungsstatus
 
-  // Ausstattung & Zustand (Zu-/Abschläge)
+  // Ausstattung & Zustand
   kategorie: Kategorie
   zustandHaus: ZustandHaus
   heizung: Heizung
   stockwerk: Stockwerk
-  lift: boolean
-  balkonTerrasse: boolean
-  garten: boolean
-  ruhelage: boolean
-  ausblick: boolean
-  hochwertigeAusstattung: boolean
-  keller: boolean
-  garage: boolean
-  gemeinschaft: boolean
-  strassenlaerm: boolean
+  merkmale: Merkmale
 }
 
 export type MietzinsArt =

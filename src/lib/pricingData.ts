@@ -1,4 +1,6 @@
-// Preis-Referenzdaten. Quellen: mietervereinigung.at (Richtwert, Zuschläge/Abschläge,
+import type { MerkmalKey } from './types'
+
+// Preis-Referenzdaten. Quellen: mietervereinigung.at (Richtwert, Zu-/Abschläge,
 // Lagezuschlag Wien), Richtwertgesetz, allgemeine Marktbeobachtung. Marktmiet- und
 // Lagezuschlag-Werte sind hinterlegte Näherungen (kein Live-Datenabgleich).
 
@@ -24,31 +26,67 @@ export const BEFRISTUNGSABSCHLAG = 0.25
 /** Vereinfachte Umrechnung: angemessener Mietzins ≈ freier Mietzins − 25 %. */
 export const ANGEMESSEN_ABSCHLAG_VON_FREI = 0.25
 
-/**
- * Zu- und Abschläge auf den Richtwert in €/m². Da das Gesetz keine fixen
- * Prozentsätze vorgibt (Einzelfallprüfung/Vergleichswertverfahren), sind dies
- * praxisorientierte Näherungswerte für eine Ersteinschätzung.
- */
-export const ZUSCHLAG = {
-  lift: 0.3,
-  balkonTerrasse: 0.4,
-  garten: 0.6,
-  ruhelage: 0.4,
-  ausblick: 0.25,
-  hochwertigeAusstattung: 0.5,
-  heizungZentral: 0.3,
-  keller: 0.1,
-  garage: 0.35,
-  gemeinschaft: 0.15,
-  zustandSehrGut: 0.4,
-} as const
+/** Zu-/Abschläge aus den Dropdown-Feldern (Zustand, Geschoss, Heizung), €/m². */
+export const ZUSTAND_ABSCHLAG = { sehr_gut: 0.4, schlecht: -0.6 }
+export const STOCKWERK_ABSCHLAG = { erdgeschoss: -0.25, hoch_ohne_lift: -0.3 }
+export const HEIZUNG_ZUSCHLAG = 0.3
 
-export const ABSCHLAG = {
-  zustandSchlecht: 0.6,
-  stockwerkErdgeschoss: 0.25,
-  stockwerkHochOhneLift: 0.3,
-  strassenlaerm: 0.4,
-} as const
+/**
+ * Vollständiger Zu-/Abschlagskatalog (Einzelmerkmale) in €/m². Da das Gesetz
+ * keine fixen Prozentsätze vorgibt (Einzelfallprüfung/Vergleichswertverfahren),
+ * sind dies praxisorientierte Näherungswerte für eine Ersteinschätzung.
+ */
+export interface MerkmalDef {
+  key: MerkmalKey
+  label: string
+  wert: number
+  gruppe: string
+}
+
+export const MERKMAL_GRUPPEN = [
+  'Ausstattung der Wohnung',
+  'Freiflächen',
+  'Lage & Grundriss',
+  'Gebäude & Allgemeinflächen',
+  'Zubehör',
+] as const
+
+export const MERKMAL_KATALOG: MerkmalDef[] = [
+  // Ausstattung der Wohnung
+  { key: 'hochwertigesBad', label: 'Hochwertiges / zweites Bad', wert: 0.35, gruppe: 'Ausstattung der Wohnung' },
+  { key: 'zweitesWc', label: 'Zweites / getrenntes WC', wert: 0.2, gruppe: 'Ausstattung der Wohnung' },
+  { key: 'hochwertigeKueche', label: 'Hochwertige Küche', wert: 0.3, gruppe: 'Ausstattung der Wohnung' },
+  { key: 'hochwertigeBoeden', label: 'Hochwertige Böden (Parkett/Stein)', wert: 0.3, gruppe: 'Ausstattung der Wohnung' },
+  { key: 'schallschutzfenster', label: 'Schallschutz-/Isolierfenster', wert: 0.15, gruppe: 'Ausstattung der Wohnung' },
+  { key: 'fussbodenheizung', label: 'Fußbodenheizung', wert: 0.3, gruppe: 'Ausstattung der Wohnung' },
+  { key: 'klimaanlage', label: 'Klimaanlage', wert: 0.2, gruppe: 'Ausstattung der Wohnung' },
+  { key: 'barrierefrei', label: 'Barrierefrei', wert: 0.15, gruppe: 'Ausstattung der Wohnung' },
+  // Freiflächen
+  { key: 'balkon', label: 'Balkon', wert: 0.3, gruppe: 'Freiflächen' },
+  { key: 'loggia', label: 'Loggia', wert: 0.25, gruppe: 'Freiflächen' },
+  { key: 'terrasse', label: 'Terrasse', wert: 0.45, gruppe: 'Freiflächen' },
+  { key: 'eigengarten', label: 'Eigengarten', wert: 0.6, gruppe: 'Freiflächen' },
+  { key: 'dachterrasse', label: 'Dachterrasse', wert: 0.55, gruppe: 'Freiflächen' },
+  // Lage & Grundriss
+  { key: 'ruhelage', label: 'Besonders ruhige Lage', wert: 0.4, gruppe: 'Lage & Grundriss' },
+  { key: 'sonnig', label: 'Sonnige Ausrichtung', wert: 0.2, gruppe: 'Lage & Grundriss' },
+  { key: 'ausblick', label: 'Schöner Ausblick', wert: 0.25, gruppe: 'Lage & Grundriss' },
+  { key: 'strassenlaerm', label: 'Straßenlärm / laute Lage', wert: -0.4, gruppe: 'Lage & Grundriss' },
+  { key: 'dunkel', label: 'Dunkel / Nordlage', wert: -0.2, gruppe: 'Lage & Grundriss' },
+  { key: 'schlechterGrundriss', label: 'Schlechter Grundriss / Durchgangszimmer', wert: -0.25, gruppe: 'Lage & Grundriss' },
+  // Gebäude & Allgemeinflächen
+  { key: 'lift', label: 'Lift im Haus', wert: 0.3, gruppe: 'Gebäude & Allgemeinflächen' },
+  { key: 'gegensprechanlage', label: 'Gegensprech-/Videoanlage', wert: 0.1, gruppe: 'Gebäude & Allgemeinflächen' },
+  { key: 'concierge', label: 'Concierge / Hausbesorger', wert: 0.2, gruppe: 'Gebäude & Allgemeinflächen' },
+  { key: 'gemeinschaft', label: 'Gemeinschaftseinrichtungen', wert: 0.15, gruppe: 'Gebäude & Allgemeinflächen' },
+  { key: 'denkmalschutz', label: 'Historische Fassade / Denkmalschutz', wert: 0.1, gruppe: 'Gebäude & Allgemeinflächen' },
+  { key: 'begruenterInnenhof', label: 'Begrünter Innenhof', wert: 0.1, gruppe: 'Gebäude & Allgemeinflächen' },
+  // Zubehör
+  { key: 'kellerabteil', label: 'Kellerabteil', wert: 0.1, gruppe: 'Zubehör' },
+  { key: 'dachbodenabteil', label: 'Dachbodenabteil', wert: 0.1, gruppe: 'Zubehör' },
+  { key: 'garage', label: 'Garage / Tiefgaragenplatz', wert: 0.35, gruppe: 'Zubehör' },
+  { key: 'stellplatz', label: 'Autoabstellplatz', wert: 0.2, gruppe: 'Zubehör' },
+]
 
 export interface BezirkInfo {
   nr: number
@@ -59,8 +97,6 @@ export interface BezirkInfo {
   /**
    * Geschätzter Lagezuschlag in €/m² für überdurchschnittliche Lagen des Bezirks.
    * 0 = im Bezirksdurchschnitt keine überdurchschnittliche Lage / kein Lagezuschlag.
-   * Der reale Lagezuschlag wird lt. OGH anhand der Wiener Lagezuschlagskarte auf
-   * Zählgebiets-Ebene (Adressgenauigkeit) bestimmt – hier nur genähert.
    */
   lagezuschlag: number
 }
@@ -97,8 +133,7 @@ export function getBezirk(nr: number): BezirkInfo {
 
 /**
  * Versucht, aus einer Anschrift den Wiener Gemeindebezirk zu bestimmen.
- * Erkennt Wiener Postleitzahlen der Form 1XX0 (z.B. 1070 -> 7. Bezirk) sowie
- * Angaben wie "1070 Wien". Gibt null zurück, wenn kein Bezirk ableitbar ist.
+ * Erkennt Wiener Postleitzahlen der Form 1XX0 (z.B. 1070 -> 7. Bezirk).
  */
 export function bezirkAusAnschrift(anschrift: string): number | null {
   if (!anschrift) return null
@@ -107,4 +142,11 @@ export function bezirkAusAnschrift(anschrift: string): number | null {
   const nr = parseInt(match[1], 10)
   if (nr >= 1 && nr <= 23) return nr
   return null
+}
+
+/** Default: alle Merkmale abgewählt. */
+export function leereMerkmale(): Record<MerkmalKey, boolean> {
+  const m = {} as Record<MerkmalKey, boolean>
+  for (const def of MERKMAL_KATALOG) m[def.key] = false
+  return m
 }

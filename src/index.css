@@ -2,8 +2,8 @@
 
 /*
  * Light-only warme Palette (colorhunt 607456 / EEE0CC / BA6A4C / 7B2525).
- * Als Tailwind-v4-@theme-Tokens definiert, damit Utilities wie bg-cream,
- * text-wine, border-sand automatisch generiert werden.
+ * Textfarben (ink) sind bewusst grün gehalten – wo früher Schwarz/Dunkelgrau
+ * stand, steht jetzt ein Grünton der Palette.
  */
 @theme {
   --color-cream: #eee0cc;
@@ -23,9 +23,12 @@
   --color-wine: #7b2525;
   --color-wine-600: #6a1f1f;
 
-  --color-ink: #2f2a24;
-  --color-ink-soft: #6f6553;
-  --color-ink-faint: #8a8069;
+  /* Textfarben in Grün statt Schwarz/Dunkelgrau */
+  --color-ink: #38472f;
+  --color-ink-soft: #4c5d43;
+  --color-ink-faint: #6a7860;
+
+  --font-sans: 'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif;
 }
 
 :root {
@@ -42,13 +45,7 @@ body {
   margin: 0;
   background-color: var(--color-cream);
   color: var(--color-ink);
-  font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  font-family: 'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
