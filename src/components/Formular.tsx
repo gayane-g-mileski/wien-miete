@@ -186,6 +186,10 @@ export function Formular({ value, onChange }: Props) {
       {/* --- Ausstattung, Zustand & Zu-/Abschläge --- */}
       {zeigeAusstattung(value.objektart) && (
         <Section title="Ausstattung, Zustand & Zu-/Abschläge">
+          <p className="rounded-md bg-neutral-100 px-3 py-2 text-xs text-neutral-600">
+            Diese Zu- und Abschläge wirken nur beim Richtwertmietzins. Beim freien oder angemessenen Mietzins zählt die
+            Marktbandbreite je Bezirk (Ausstattung ist dort bereits im Marktpreis enthalten).
+          </p>
           {zeigeKategorie(value.objektart) && (
             <Field label="Ausstattungskategorie" htmlFor="kategorie">
               <Select
