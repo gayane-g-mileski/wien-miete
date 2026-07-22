@@ -82,8 +82,12 @@ export function laerminfoLink(koords: Koordinaten | null): string {
   return 'https://maps.laerminfo.at/'
 }
 
-/** Link auf den Wiener Flächenwidmungsplan. */
+/**
+ * Link auf den Wiener Flächenwidmungsplan, zentriert auf die eingegebene
+ * Adresse – analog zur Lärmkarte. ViennaGIS-Hash-Format: #c=<lon>,<lat>&z=<zoom>
+ * (Zentrum als WGS84-Koordinaten, Zoomstufe).
+ */
 export function flaechenwidmungLink(koords: Koordinaten | null): string {
-  if (koords) return `https://www.wien.gv.at/flaechenwidmung/public/?y=${koords.lat}&x=${koords.lon}`
+  if (koords) return `https://www.wien.gv.at/flaechenwidmung/public/#c=${koords.lon},${koords.lat}&z=17`
   return 'https://www.wien.gv.at/flaechenwidmung/public/'
 }
