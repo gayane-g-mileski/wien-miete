@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { MerkmalKey, MietobjektInput } from '../lib/types'
 import {
   BAUBEWILLIGUNG_LABEL,
@@ -25,6 +25,9 @@ interface Props {
 
 export function Formular({ value, onChange }: Props) {
   const [ma25Offen, setMa25Offen] = useState(false)
+  const valueRef = useRef(value)
+  valueRef.current = value
+
   const set = <K extends keyof MietobjektInput>(key: K, v: MietobjektInput[K]) => onChange({ ...value, [key]: v })
   const setMerkmal = (key: MerkmalKey, v: boolean) => onChange({ ...value, merkmale: { ...value.merkmale, [key]: v } })
 
@@ -50,12 +53,41 @@ export function Formular({ value, onChange }: Props) {
           </Select>
         </Field>
 
-        <AnschriftFeld
-          value={value.anschrift}
-          onChange={(text, bezirk, koords) =>
-            onChange({ ...value, anschrift: text, anschriftBezirk: bezirk, anschriftKoords: koords })
-          }
-        />
+        {/* Anschrift + Bezirk nebeneinander */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[2fr_1fr]">
+          <AnschriftFeld
+            value={value.anschrift}
+            onChange={(text, bezirk, koords) =>
+              onChange({ ...valueRef.current, anschrift: text, anschriftBezirk: bezirk, anschriftKoords: koords })
+            }
+            onGemeindebau={(detected) => onChange({ ...valueRef.current, gemeindebau: detected })}
+          />
+          <Field label="Bezirk" htmlFor="bezirk">
+            <Select
+              id="bezirk"
+              value={value.bezirk}
+              disabled={value.anschriftBezirk != null}
+              onChange={(e) => set('bezirk', Number(e.target.value))}
+            >
+              {BEZIRKE.map((b) => (
+                <option key={b.nr} value={b.nr}>
+                  {b.nr}. {b.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        </div>
+
+        <div>
+          <Checkbox
+            checked={value.gemeindebau}
+            onChange={(v) => set('gemeindebau', v)}
+            label="Gemeindebau der Stadt Wien (Wiener Wohnen)"
+          />
+          <p className="mt-1 text-xs text-neutral-500">
+            Wird bei Adressauswahl automatisch geprüft. Bei Gemeindebauten gilt immer der Richtwert.
+          </p>
+        </div>
 
         <Field label="Nutzfläche (m²)" htmlFor="flaeche">
           <NumberInput
@@ -67,26 +99,11 @@ export function Formular({ value, onChange }: Props) {
           />
         </Field>
 
-        <Field label="Bezirk (für Marktpreis-Schätzung)" htmlFor="bezirk">
-          <Select
-            id="bezirk"
-            value={value.bezirk}
-            disabled={value.anschriftBezirk != null}
-            onChange={(e) => set('bezirk', Number(e.target.value))}
-          >
-            {BEZIRKE.map((b) => (
-              <option key={b.nr} value={b.nr}>
-                {b.nr}. {b.name}
-              </option>
-            ))}
-          </Select>
-        </Field>
-
         <Checkbox checked={value.eigentumswohnung} onChange={(v) => set('eigentumswohnung', v)} label="Eigentumswohnung" />
         <Checkbox checked={value.befristet} onChange={(v) => set('befristet', v)} label="befristeter Mietvertrag" />
       </Section>
 
-      {/* --- Förderung (inkl. Baubewilligung) --- */}
+      {/* --- Förderung (inkl. Baubewilligung + MA25) --- */}
       <Section title="Förderung">
         {zeigeBaujahr(value.objektart) && (
           <Field label="Baubewilligung des Gebäudes" htmlFor="baubewilligung">
@@ -103,17 +120,6 @@ export function Formular({ value, onChange }: Props) {
               ))}
             </Select>
           </Field>
-        )}
-
-        {zeigeBaujahr(value.objektart) && (
-          <>
-            <Checkbox
-              checked={ma25Offen}
-              onChange={setMa25Offen}
-              label="Baujahr unbekannt? Kostenlos bei der MA 25 anfragen"
-            />
-            {ma25Offen && <Ma25Anfrage anschrift={value.anschrift} />}
-          </>
         )}
 
         {value.objektart === 'dg_ausbau' && (
@@ -141,6 +147,7 @@ export function Formular({ value, onChange }: Props) {
               <Select
                 id="foerderung"
                 value={value.foerderungProgramm}
+                disabled={ma25Offen}
                 onChange={(e) => set('foerderungProgramm', e.target.value as MietobjektInput['foerderungProgramm'])}
               >
                 {(Object.keys(FOERDERUNG_PROGRAMM_LABEL) as (keyof typeof FOERDERUNG_PROGRAMM_LABEL)[]).map((k) => (
@@ -151,7 +158,7 @@ export function Formular({ value, onChange }: Props) {
               </Select>
             </Field>
 
-            {statusRelevant(value.foerderungProgramm) && (
+            {statusRelevant(value.foerderungProgramm) && !ma25Offen && (
               <Field label="Stand der Rückzahlung" htmlFor="tilgung">
                 <Select
                   id="tilgung"
@@ -166,6 +173,16 @@ export function Formular({ value, onChange }: Props) {
                 </Select>
               </Field>
             )}
+
+            {/* MA25-Anfrage: Baujahr UND Förderung unbekannt */}
+            <div>
+              <Checkbox
+                checked={ma25Offen}
+                onChange={setMa25Offen}
+                label="Baujahr und öffentliche Förderung unbekannt? Kostenlos bei der MA 25 anfragen"
+              />
+              {ma25Offen && <Ma25Anfrage anschrift={value.anschrift} />}
+            </div>
           </>
         ) : (
           <p className="text-sm text-neutral-500">Bei dieser Objektart ist die Förderung für die Einstufung ohne Bedeutung.</p>

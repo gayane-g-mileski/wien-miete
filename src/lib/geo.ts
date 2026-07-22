@@ -73,6 +73,29 @@ export async function sucheAdressen(query: string, signal?: AbortSignal): Promis
 }
 
 /**
+ * Best-effort-Erkennung, ob eine Adresse in einem Gemeindebau der Stadt Wien
+ * (Wiener Wohnen) liegt – über den offenen Datensatz "Gemeindebauten Wien".
+ * Läuft im Browser direkt gegen data.wien.gv.at. Bei Fehler/Unerreichbarkeit
+ * wird null zurückgegeben (dann entscheidet die manuelle Auswahl).
+ */
+export async function istGemeindebau(koords: Koordinaten, signal?: AbortSignal): Promise<boolean | null> {
+  const d = 0.0008 // ~80 m
+  const { lat, lon } = koords
+  const bbox = `${lat - d},${lon - d},${lat + d},${lon + d},EPSG:4326`
+  const url =
+    'https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0' +
+    `&srsName=EPSG:4326&outputFormat=json&typeName=ogdwien:WOHNENINWIENGEMEINDEBAUTENOGD&bbox=${encodeURIComponent(bbox)}`
+  try {
+    const res = await fetch(url, { signal })
+    if (!res.ok) return null
+    const data = (await res.json()) as { features?: unknown[] }
+    return Array.isArray(data.features) && data.features.length > 0
+  } catch {
+    return null
+  }
+}
+
+/**
  * Link auf die interaktive Lärmkarte (maps.laerminfo.at), zentriert auf die
  * eingegebene Adresse und mit der Adresse im Suchfeld. Layer "cstrasse22_24h"
  * = Straßenlärm (24h), grauer Hintergrund.

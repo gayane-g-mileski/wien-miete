@@ -86,6 +86,7 @@ export interface MietobjektInput {
   anschrift: string
   anschriftBezirk: number | null // aus gewählter Adresse (Autocomplete)
   anschriftKoords: Koordinaten | null
+  gemeindebau: boolean // Gemeindebau der Stadt Wien (Wiener Wohnen)
   flaeche: number
   bezirk: number // Marktpreis-Fallback
   eigentumswohnung: boolean

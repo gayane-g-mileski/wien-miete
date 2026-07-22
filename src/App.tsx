@@ -13,6 +13,7 @@ const initialInput: MietobjektInput = {
   anschrift: '',
   anschriftBezirk: null,
   anschriftKoords: null,
+  gemeindebau: false,
   flaeche: 75,
   bezirk: 7,
   eigentumswohnung: false,

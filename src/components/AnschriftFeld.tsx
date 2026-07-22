@@ -1,19 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 import type { AdressTreffer } from '../lib/geo'
-import { sucheAdressen } from '../lib/geo'
+import { istGemeindebau, sucheAdressen } from '../lib/geo'
 import type { Koordinaten } from '../lib/types'
 import { Field } from './ui'
 
 interface Props {
   value: string
   onChange: (text: string, bezirk: number | null, koords: Koordinaten | null) => void
+  onGemeindebau?: (detected: boolean) => void
 }
 
 const inputClass =
   'w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm ' +
   'placeholder:text-neutral-400 focus:border-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-300'
 
-export function AnschriftFeld({ value, onChange }: Props) {
+export function AnschriftFeld({ value, onChange, onGemeindebau }: Props) {
   const [treffer, setTreffer] = useState<AdressTreffer[]>([])
   const [offen, setOffen] = useState(false)
   const [laedt, setLaedt] = useState(false)
@@ -64,6 +65,12 @@ export function AnschriftFeld({ value, onChange }: Props) {
     onChange(t.label, t.bezirk, t.koords)
     setOffen(false)
     setTreffer([])
+    // Gemeindebau best-effort erkennen (nur bei bekannten Koordinaten)
+    if (t.koords && onGemeindebau) {
+      istGemeindebau(t.koords).then((gb) => {
+        if (gb != null) onGemeindebau(gb)
+      })
+    }
   }
 
   return (

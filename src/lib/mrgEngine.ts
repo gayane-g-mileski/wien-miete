@@ -261,6 +261,18 @@ export function evaluateMrg(input: MietobjektInput): MrgErgebnis {
       break
   }
 
+  // ---- Gemeindebau: immer Richtwert ----
+  const istWohnung = input.objektart === 'wohnung' || input.objektart === 'dg_ausbau' || input.objektart === 'zubau'
+  if (input.gemeindebau && istWohnung) {
+    return result(
+      'richtwert',
+      'voll',
+      input,
+      [GESETZ.mrg(), GESETZ.richtwertgesetz()],
+      ['Diese Adresse ist ein Gemeindebau der Stadt Wien (Wiener Wohnen). Für Gemeindewohnungen gilt die gesetzliche Miet-Obergrenze nach dem Richtwert – dazu kommen Zu- und Abschläge.'],
+    )
+  }
+
   // ---- 2) Förderung ----
   const foe = evaluateFoerderung(input.foerderungProgramm, input.tilgungsstatus, input.eigentumswohnung)
   if (foe) {
