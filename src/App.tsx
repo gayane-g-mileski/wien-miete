@@ -54,7 +54,7 @@ function App() {
           {/* Links: alle Eingaben untereinander (schwarz-weiß) */}
           <section>
             <h2 className="mb-4 text-base font-semibold text-neutral-700">Eingabe</h2>
-            <Formular value={input} onChange={setInput} />
+            <Formular value={input} onChange={setInput} istRichtwert={ergebnis.mietzinsArt === 'richtwert'} />
           </section>
 
           {/* Rechts: Ergebnis (farbig) */}

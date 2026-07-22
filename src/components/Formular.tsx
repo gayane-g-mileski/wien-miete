@@ -20,9 +20,10 @@ import { Ma25Anfrage } from './Ma25Anfrage'
 interface Props {
   value: MietobjektInput
   onChange: (next: MietobjektInput) => void
+  istRichtwert: boolean
 }
 
-export function Formular({ value, onChange }: Props) {
+export function Formular({ value, onChange, istRichtwert }: Props) {
   const [ma25Offen, setMa25Offen] = useState(false)
   const valueRef = useRef(value)
   valueRef.current = value
@@ -186,10 +187,6 @@ export function Formular({ value, onChange }: Props) {
       {/* --- Ausstattung, Zustand & Zu-/Abschläge --- */}
       {zeigeAusstattung(value.objektart) && (
         <Section title="Ausstattung, Zustand & Zu-/Abschläge">
-          <p className="rounded-md bg-neutral-100 px-3 py-2 text-xs text-neutral-600">
-            Diese Zu- und Abschläge wirken nur beim Richtwertmietzins. Beim freien oder angemessenen Mietzins zählt die
-            Marktbandbreite je Bezirk (Ausstattung ist dort bereits im Marktpreis enthalten).
-          </p>
           {zeigeKategorie(value.objektart) && (
             <Field label="Ausstattungskategorie" htmlFor="kategorie">
               <Select
@@ -206,6 +203,16 @@ export function Formular({ value, onChange }: Props) {
             </Field>
           )}
 
+          {!istRichtwert && (
+            <p className="rounded-md bg-neutral-100 px-3 py-2 text-xs text-neutral-600">
+              Für diese Wohnung gilt kein Richtwert – daher sind hier keine Zu- und Abschläge anzugeben. Beim freien oder
+              angemessenen Mietzins zählt die Marktbandbreite je Bezirk (Ausstattung ist dort bereits im Marktpreis
+              enthalten).
+            </p>
+          )}
+
+          {istRichtwert && (
+            <>
           <Field label="Erhaltungszustand des Hauses" htmlFor="zustand">
             <Select
               id="zustand"
@@ -255,6 +262,8 @@ export function Formular({ value, onChange }: Props) {
               </div>
             </div>
           ))}
+            </>
+          )}
         </Section>
       )}
     </div>
