@@ -10,7 +10,7 @@ export interface Gesetzeslink {
 const GESNR = {
   mrg: 10002531,
   wgg: 10011533,
-  richtwertgesetz: 10003338,
+  richtwertgesetz: 10003166,
   abgb: 10001622,
 }
 
