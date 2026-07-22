@@ -2,7 +2,6 @@ import { useRef, useState } from 'react'
 import type { MerkmalKey, MietobjektInput } from '../lib/types'
 import {
   BAUBEWILLIGUNG_LABEL,
-  HEIZUNG_LABEL,
   KATEGORIE_LABEL,
   OBJEKTART_GRUPPEN,
   STOCKWERK_LABEL,
@@ -231,19 +230,11 @@ export function Formular({ value, onChange }: Props) {
             </Select>
           </Field>
 
-          <Field label="Heizung" htmlFor="heizung">
-            <Select
-              id="heizung"
-              value={value.heizung}
-              onChange={(e) => set('heizung', e.target.value as MietobjektInput['heizung'])}
-            >
-              {(Object.keys(HEIZUNG_LABEL) as (keyof typeof HEIZUNG_LABEL)[]).map((k) => (
-                <option key={k} value={k}>
-                  {HEIZUNG_LABEL[k]}
-                </option>
-              ))}
-            </Select>
-          </Field>
+          <Checkbox
+            checked={value.heizung === 'zentral_etage'}
+            onChange={(v) => set('heizung', v ? 'zentral_etage' : 'keine')}
+            label="Zentral- oder Etagenheizung"
+          />
 
           {MERKMAL_GRUPPEN.map((gruppe) => (
             <div key={gruppe} className="space-y-2">
