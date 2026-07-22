@@ -116,10 +116,10 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
           <p className={LAGE_STYLE[lage.status]}>{lage.text}</p>
           {lage.bezirk != null && (
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-              <a className="text-sage-700 underline hover:text-sage" href={laerminfoLink(lage.koords)} target="_blank" rel="noreferrer">
+              <a className="text-sage-700 underline hover:text-sage" href={laerminfoLink(lage.koords, lage.adresse)} target="_blank" rel="noreferrer">
                 Lärm an dieser Adresse prüfen (laerminfo.at)
               </a>
-              <a className="text-sage-700 underline hover:text-sage" href={flaechenwidmungLink(lage.koords)} target="_blank" rel="noreferrer">
+              <a className="text-sage-700 underline hover:text-sage" href={flaechenwidmungLink(lage.koords, lage.adresse)} target="_blank" rel="noreferrer">
                 Flächenwidmung ansehen (Stadt Wien)
               </a>
             </div>

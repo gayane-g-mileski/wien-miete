@@ -131,6 +131,7 @@ export interface LageInfo {
   text: string // menschliche Erklärung
   bezirk: number | null
   koords: Koordinaten | null
+  adresse: string
 }
 
 export interface MrgErgebnis {

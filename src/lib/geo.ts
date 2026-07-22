@@ -74,20 +74,23 @@ export async function sucheAdressen(query: string, signal?: AbortSignal): Promis
 
 /**
  * Link auf die interaktive Lärmkarte (maps.laerminfo.at), zentriert auf die
- * eingegebene Adresse. Layer "cstrasse22_24h" = Straßenlärm (24h), grauer
- * Hintergrund. Format: /#/<layer>/<hintergrund>/a-/@<lat>,<lon>,<zoom>z
+ * eingegebene Adresse und mit der Adresse im Suchfeld. Layer "cstrasse22_24h"
+ * = Straßenlärm (24h), grauer Hintergrund.
+ * Format: /#/<layer>/<hintergrund>/a-<adresse>/@<lat>,<lon>,<zoom>z
  */
-export function laerminfoLink(koords: Koordinaten | null): string {
-  if (koords) return `https://maps.laerminfo.at/#/cstrasse22_24h/bgrau/a-/@${koords.lat},${koords.lon},17z`
+export function laerminfoLink(koords: Koordinaten | null, adresse = ''): string {
+  const adr = adresse.trim() ? `a-${encodeURIComponent(adresse.trim())}` : 'a-'
+  if (koords) return `https://maps.laerminfo.at/#/cstrasse22_24h/bgrau/${adr}/@${koords.lat},${koords.lon},17z`
   return 'https://maps.laerminfo.at/'
 }
 
 /**
  * Link auf den Wiener Flächenwidmungsplan, zentriert auf die eingegebene
- * Adresse – analog zur Lärmkarte. ViennaGIS-Hash-Format: #c=<lon>,<lat>&z=<zoom>
- * (Zentrum als WGS84-Koordinaten, Zoomstufe).
+ * Adresse und mit der Adresse im Suchfeld. ViennaGIS-Hash-Format:
+ * #c=<lon>,<lat>&z=<zoom>&q=<adresse>.
  */
-export function flaechenwidmungLink(koords: Koordinaten | null): string {
-  if (koords) return `https://www.wien.gv.at/flaechenwidmung/public/#c=${koords.lon},${koords.lat}&z=17`
+export function flaechenwidmungLink(koords: Koordinaten | null, adresse = ''): string {
+  const q = adresse.trim() ? `&q=${encodeURIComponent(adresse.trim())}` : ''
+  if (koords) return `https://www.wien.gv.at/flaechenwidmung/public/#c=${koords.lon},${koords.lat}&z=17${q}`
   return 'https://www.wien.gv.at/flaechenwidmung/public/'
 }
