@@ -1,14 +1,15 @@
 import type { FoerderungProgramm, MietzinsArt, MrgAnwendung, Tilgungsstatus } from './types'
+import { GESETZ, type Gesetzeslink } from './gesetze'
 
 // Datensätze aus der Unterlage "Förderungen": je Förderungsprogramm und
-// Tilgungsstatus des Förderungsdarlehens ergibt sich Anwendungsbereich und
-// Mietzinsart. Programme, die keine Mietzinsbildungsregeln enthalten, führen
-// unabhängig vom Tilgungsstatus in den Teilanwendungsbereich (freier Mietzins).
+// Tilgungsstatus ergibt sich Anwendungsbereich und Mietzinsart. Die
+// Begründungstexte sind bewusst in Alltagssprache gehalten – die genauen
+// Paragraphen stehen hinter den Gesetzes-Links.
 
 export interface FoerderungOutcome {
   mietzinsArt: MietzinsArt
   anwendung: MrgAnwendung
-  rechtsgrundlagen: string[]
+  gesetze: Gesetzeslink[]
   begruendung: string[]
   hinweise: string[]
 }
@@ -25,29 +26,24 @@ export const FOERDERUNG_PROGRAMM_LABEL: Record<FoerderungProgramm, string> = {
 }
 
 export const TILGUNGSSTATUS_LABEL: Record<Tilgungsstatus, string> = {
-  offen: 'Förderungsdarlehen offen / in Tilgung',
-  getilgt_wgg: 'Tilgung laut Plan erfolgt bzw. begünstigt nach dem WGG',
-  rbg1971: 'Begünstigt getilgt nach RBG 1971 (Ansuchen bis 30.1.1982, Tilgung bis 31.12.1982)',
-  rbg1987: 'Begünstigt getilgt nach RBG 1987',
+  offen: 'Förderungsdarlehen läuft noch / wird noch zurückgezahlt',
+  getilgt_wgg: 'Planmäßig zurückgezahlt',
+  rbg1971: 'Vorzeitig zurückgezahlt (bis Ende 1982)',
+  rbg1987: 'Vorzeitig zurückgezahlt (bis Ende 1988)',
 }
 
-/** Programme ohne Tilgungsstatus-Abhängigkeit (Auswahl wird ausgeblendet). */
 export function statusRelevant(programm: FoerderungProgramm): boolean {
   return programm === 'wwg1948' || programm === 'wfg1968'
 }
 
-const TEIL_FREI = (grundlage: string, text: string, hinweise: string[] = []): FoerderungOutcome => ({
+const teilFrei = (text: string, hinweise: string[] = []): FoerderungOutcome => ({
   mietzinsArt: 'frei',
   anwendung: 'teil',
-  rechtsgrundlagen: [grundlage],
+  gesetze: [GESETZ.mrg(), GESETZ.abgb()],
   begruendung: [text],
   hinweise,
 })
 
-/**
- * Ermittelt das Förderungs-Ergebnis. Gibt null zurück, wenn keine Förderung
- * vorliegt (dann greift die reguläre Baualters-Logik der MRG-Engine).
- */
 export function evaluateFoerderung(
   programm: FoerderungProgramm,
   status: Tilgungsstatus,
@@ -61,34 +57,27 @@ export function evaluateFoerderung(
       return {
         mietzinsArt: 'wgg',
         anwendung: 'voll',
-        rechtsgrundlagen: ['§ 13–14 WGG', '§ 1 MRG (subsidiär anwendbare Bestimmungen)'],
+        gesetze: [GESETZ.wgg(), GESETZ.mrg()],
         begruendung: [
-          'Vermietung durch eine gemeinnützige Bauvereinigung: kein § 16 MRG, stattdessen WGG-Mietzinsobergrenzen (Entgeltrichtlinien); andere MRG-Bestimmungen (z.B. zwingender Betriebskostenbegriff) bleiben anwendbar.',
+          'Die Wohnung gehört einer gemeinnützigen Bauvereinigung (Genossenschaft). Dafür gelten eigene, meist günstigere Miet-Obergrenzen statt der normalen Regeln.',
         ],
-        hinweise: [
-          'Der konkrete Betrag ist bei der Bauvereinigung zu erfragen (Grundkosten-, Kapital- und Erhaltungs-/Verbesserungsbeitrag).',
-        ],
+        hinweise: ['Den genauen Betrag nennt dir die Bauvereinigung (er setzt sich u.a. aus Grund-, Bau- und Erhaltungskosten zusammen).'],
       }
 
     case 'wfg1954':
-      return TEIL_FREI(
-        '§ 1 Abs 4 Z 3 MRG (WFG 1954)',
-        'Wohnbauförderung 1954: keine Mietzinsbildungsregeln und kein Verweis auf das MRG – Teilanwendungsbereich, freier Mietzins nach ABGB-Regeln.',
+      return teilFrei(
+        'Das Haus wurde 1954 gefördert. Für die Miethöhe gibt es hier keine gesetzliche Obergrenze – der Preis ist frei vereinbar. Ein Kündigungsschutz besteht aber.',
       )
 
     case 'gr_beschluss':
-      return TEIL_FREI(
-        '§ 1 Abs 4 Z 3 MRG (Wohnbauaktionen der Stadt Wien)',
-        'Diverse Wohnbauaktionen der Stadt Wien (bis 1969 sowie 2011/2015): keine Mietzinsbildungsregeln – Teilanwendungsbereich, freier Mietzins nach ABGB-Regeln.',
+      return teilFrei(
+        'Das Haus wurde über eine Wohnbauaktion der Stadt Wien gefördert. Für die Miethöhe gibt es keine gesetzliche Obergrenze – der Preis ist frei vereinbar. Ein Kündigungsschutz besteht aber.',
       )
 
     case 'wwfsg1989':
-      return TEIL_FREI(
-        '§ 1 Abs 4 Z 3 MRG (WWFSG 1989)',
-        'Wohnbauförderung 1989: keine Mietzinsbildungsregeln für Eigentumswohnungen und kein Verweis auf das MRG – Teilanwendungsbereich, freier Mietzins nach ABGB-Regeln.',
-        [
-          'Achtung: förderungsrechtliche Sanktionen bei Vermietung während der Schutzfrist (20 bzw. 40 Jahre) oder während der Tilgungsdauer – Kündigung des Förderungsdarlehens bzw. Rückzahlung des Baukostenzuschusses.',
-        ],
+      return teilFrei(
+        'Das Haus wurde 1989 oder später gefördert. Für die Miethöhe gibt es keine feste Obergrenze – der Preis ist frei vereinbar. Ein Kündigungsschutz besteht aber.',
+        ['Solange die Förderung läuft (Schutzfrist bzw. Rückzahlungsdauer), kann eine Vermietung zu Nachteilen bei der Förderung führen.'],
       )
 
     case 'wwg1948':
@@ -97,19 +86,19 @@ export function evaluateFoerderung(
           return {
             mietzinsArt: 'foerderungsrechtlich',
             anwendung: 'voll',
-            rechtsgrundlagen: ['§ 15 WWG idjF iVm § 58 Abs 4 MRG'],
+            gesetze: [GESETZ.mrg(), GESETZ.wfg()],
             begruendung: [
-              'Wohnhauswiederaufbaufonds, Förderungsdarlehen offen: Mietzinsbildung gemäß § 15 WWG in der jeweiligen Fassung.',
+              'Das Haus wurde nach dem Krieg mit öffentlicher Hilfe wieder aufgebaut und diese läuft noch. Die Miethöhe richtet sich nach den Förderungsregeln.',
             ],
-            hinweise: ['Bei Wiedervermietung gilt § 33 Abs 4 StEmG.'],
+            hinweise: [],
           }
         case 'getilgt_wgg':
           return {
             mietzinsArt: 'richtwert',
             anwendung: 'voll',
-            rechtsgrundlagen: ['§ 16 Abs 2 MRG', 'ggf. § 16 Abs 1 Z 2–5 MRG'],
+            gesetze: [GESETZ.mrg(), GESETZ.richtwertgesetz()],
             begruendung: [
-              'Wohnhauswiederaufbaufonds, Tilgung laut Plan/WGG erfolgt: Richtwertmietzins gemäß § 16 Abs 2 MRG bzw. angemessener Hauptmietzins gemäß § 16 Abs 1 Z 2–5 MRG, wenn die Voraussetzungen vorliegen.',
+              'Das Haus wurde nach dem Krieg mit öffentlicher Hilfe aufgebaut, die inzwischen zurückgezahlt ist. Für die Miete gilt eine gesetzliche Obergrenze (Richtwert).',
             ],
             hinweise: [],
           }
@@ -117,9 +106,9 @@ export function evaluateFoerderung(
           return {
             mietzinsArt: 'frei',
             anwendung: 'voll',
-            rechtsgrundlagen: ['§ 12 Abs 3 RBG 1971'],
+            gesetze: [GESETZ.mrg(), GESETZ.rbg()],
             begruendung: [
-              'Wohnhauswiederaufbaufonds, begünstigte Tilgung nach RBG 1971: Vollanwendungsbereich MRG, jedoch freier, nach ABGB-Kriterien zu vereinbarender Mietzins.',
+              'Die öffentliche Hilfe wurde vorzeitig (bis Ende 1982) zurückgezahlt. Die Miethöhe ist dadurch frei vereinbar, ein Kündigungsschutz besteht aber.',
             ],
             hinweise: [],
           }
@@ -127,9 +116,9 @@ export function evaluateFoerderung(
           return {
             mietzinsArt: 'angemessen',
             anwendung: 'voll',
-            rechtsgrundlagen: ['§ 9 Abs 4 RBG 1987'],
+            gesetze: [GESETZ.mrg(), GESETZ.rbg()],
             begruendung: [
-              'Wohnhauswiederaufbaufonds, begünstigte Tilgung nach RBG 1987: angemessener Mietzins.',
+              'Die öffentliche Hilfe wurde vorzeitig (bis Ende 1988) zurückgezahlt. Die Miete darf hier so hoch sein wie bei vergleichbaren Wohnungen üblich ("angemessen").',
             ],
             hinweise: [],
           }
@@ -140,13 +129,12 @@ export function evaluateFoerderung(
       switch (status) {
         case 'offen':
           if (eigentumswohnung) {
-            // "bei Eigentumswohnungen wie nach Tilgung"
             return {
               mietzinsArt: 'angemessen',
               anwendung: 'voll',
-              rechtsgrundlagen: ['§ 16 Abs 1 Z 2 MRG'],
+              gesetze: [GESETZ.mrg()],
               begruendung: [
-                'Wohnbauförderung 1968, Eigentumswohnung: Behandlung wie nach Tilgung – angemessener Mietzins.',
+                'Es handelt sich um eine geförderte Eigentumswohnung (Förderung von 1968). Die Miete darf so hoch sein wie bei vergleichbaren Wohnungen üblich ("angemessen").',
               ],
               hinweise: [],
             }
@@ -154,9 +142,9 @@ export function evaluateFoerderung(
           return {
             mietzinsArt: 'wgg',
             anwendung: 'voll',
-            rechtsgrundlagen: ['§ 32 Abs 1 WFG 1968', '§ 68 Abs 2 WWFSG 1989 (Kategoriemietzins)'],
+            gesetze: [GESETZ.mrg(), GESETZ.wwfsg()],
             begruendung: [
-              'Wohnbauförderung 1968, Mietwohnung, Darlehen offen: Vollanwendungsbereich MRG, Kategoriemietzins gemäß § 68 Abs 2 WWFSG 1989 (siehe auch OGH 28.9.2004, 5 Ob 192/04b).',
+              'Das Haus wurde 1968 gefördert und die Förderung läuft noch. Für die Miete gilt eine Obergrenze, die sich nach der Ausstattung richtet (Kategorie).',
             ],
             hinweise: [],
           }
@@ -164,17 +152,19 @@ export function evaluateFoerderung(
           return {
             mietzinsArt: 'angemessen',
             anwendung: 'voll',
-            rechtsgrundlagen: ['§ 16 Abs 1 Z 2 MRG'],
-            begruendung: ['Wohnbauförderung 1968, Tilgung laut Plan/WGG erfolgt: angemessener Mietzins.'],
+            gesetze: [GESETZ.mrg()],
+            begruendung: [
+              'Die Förderung von 1968 ist planmäßig zurückgezahlt. Die Miete darf so hoch sein wie bei vergleichbaren Wohnungen üblich ("angemessen").',
+            ],
             hinweise: [],
           }
         case 'rbg1971':
           return {
             mietzinsArt: 'frei',
             anwendung: 'voll',
-            rechtsgrundlagen: ['§ 12 Abs 3 RBG 1971 idF BGBl 520/1982'],
+            gesetze: [GESETZ.mrg(), GESETZ.rbg()],
             begruendung: [
-              'Wohnbauförderung 1968, begünstigte Tilgung nach RBG 1971: freier, nach ABGB-Kriterien zu vereinbarender Mietzins.',
+              'Die Förderung wurde vorzeitig (bis Ende 1982) zurückgezahlt. Die Miethöhe ist frei vereinbar, ein Kündigungsschutz besteht aber.',
             ],
             hinweise: [],
           }
@@ -182,30 +172,29 @@ export function evaluateFoerderung(
           return {
             mietzinsArt: 'angemessen',
             anwendung: 'voll',
-            rechtsgrundlagen: ['§ 9 Abs 4 RBG 1987'],
-            begruendung: ['Wohnbauförderung 1968, begünstigte Tilgung nach RBG 1987: angemessener Mietzins.'],
+            gesetze: [GESETZ.mrg(), GESETZ.rbg()],
+            begruendung: [
+              'Die Förderung wurde vorzeitig (bis Ende 1988) zurückgezahlt. Die Miete darf so hoch sein wie bei vergleichbaren Wohnungen üblich ("angemessen").',
+            ],
             hinweise: [],
           }
       }
       break
 
     case 'wfg1984':
-      // "offen": Mietwohnung -> Kategoriemietzins; Eigentumswohnung wie nach Tilgung.
-      // Übrige Status: kein Verweis auf MRG -> Teilanwendung, freier Mietzins.
       if (status === 'offen' && !eigentumswohnung) {
         return {
           mietzinsArt: 'wgg',
           anwendung: 'voll',
-          rechtsgrundlagen: ['§ 68 Abs 2 WWFSG 1989 (Kategoriemietzins)'],
+          gesetze: [GESETZ.mrg(), GESETZ.wwfsg()],
           begruendung: [
-            'Wohnbauförderung 1984, Mietwohnung, Darlehen offen: Kategoriemietzins gemäß § 68 Abs 2 WWFSG 1989.',
+            'Das Haus wurde 1984 gefördert und die Förderung läuft noch. Für die Miete gilt eine Obergrenze, die sich nach der Ausstattung richtet (Kategorie).',
           ],
           hinweise: [],
         }
       }
-      return TEIL_FREI(
-        '§ 1 Abs 4 Z 3 MRG (WFG 1984)',
-        'Wohnbauförderung 1984: kein Verweis auf das MRG – Teilanwendungsbereich, freier Mietzins nach ABGB-Regeln.',
+      return teilFrei(
+        'Das Haus wurde 1984 gefördert. Für die Miethöhe gibt es keine feste Obergrenze – der Preis ist frei vereinbar. Ein Kündigungsschutz besteht aber.',
       )
   }
 

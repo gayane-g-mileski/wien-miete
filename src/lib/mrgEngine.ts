@@ -1,5 +1,6 @@
 import type {
   Kategorie,
+  LageInfo,
   MietobjektInput,
   MietzinsArt,
   MrgAnwendung,
@@ -21,6 +22,7 @@ import {
   getBezirk,
 } from './pricingData'
 import { evaluateFoerderung } from './foerderung'
+import { GESETZ, type Gesetzeslink } from './gesetze'
 
 const MIETZINS_LABEL: Record<MietzinsArt, string> = {
   richtwert: 'Richtwertmietzins',
@@ -32,9 +34,9 @@ const MIETZINS_LABEL: Record<MietzinsArt, string> = {
 }
 
 const ANWENDUNG_LABEL: Record<MrgAnwendung, string> = {
-  voll: 'Vollanwendung des MRG',
-  teil: 'Teilanwendung (Teilausnahme) des MRG',
-  ausnahme: 'Vollausnahme vom MRG',
+  voll: 'Volle gesetzliche Mietobergrenze',
+  teil: 'Teilweiser Schutz (freie Miete, aber Kündigungsschutz)',
+  ausnahme: 'Kein gesetzlicher Schutz (freie Miete)',
 }
 
 function kategorieFaktorABC(k: Kategorie): number {
@@ -51,20 +53,22 @@ function katKurz(k: Kategorie): string {
   return k
 }
 
-/** Lagezuschlag in €/m² aus der Anschrift; 0 ohne (verwertbare) Anschrift. */
-function lagezuschlagAusAnschrift(input: MietobjektInput): { wert: number; bezirk: number | null } {
-  const nr = bezirkAusAnschrift(input.anschrift)
+function bezirkVonEingabe(input: MietobjektInput): number | null {
+  return input.anschriftBezirk ?? bezirkAusAnschrift(input.anschrift)
+}
+
+function lagezuschlagWert(input: MietobjektInput): { wert: number; bezirk: number | null } {
+  const nr = bezirkVonEingabe(input)
   if (nr == null) return { wert: 0, bezirk: null }
   return { wert: getBezirk(nr).lagezuschlag, bezirk: nr }
 }
 
 function marktband(input: MietobjektInput): { min: number; max: number } {
-  const nr = bezirkAusAnschrift(input.anschrift) ?? input.bezirk
+  const nr = bezirkVonEingabe(input) ?? input.bezirk
   const b = getBezirk(nr)
   return { min: b.marktmieteMin, max: b.marktmieteMax }
 }
 
-/** Summe der Ausstattungs-/Zustands-Zu- und -Abschläge in €/m² (ohne Lage). */
 function ausstattungsBestandteile(input: MietobjektInput): Preisbestandteil[] {
   const teile: Preisbestandteil[] = []
   for (const def of MERKMAL_KATALOG) {
@@ -89,15 +93,15 @@ function computePreis(input: MietobjektInput, art: MietzinsArt): Preisspanne | n
   switch (art) {
     case 'richtwert': {
       const basis = round2(RICHTWERT_WIEN * kategorieFaktorABC(input.kategorie))
-      const teile: Preisbestandteil[] = [{ label: `Richtwert (Kat. ${katKurz(input.kategorie)})`, wert: basis }]
-      const lage = lagezuschlagAusAnschrift(input)
+      const teile: Preisbestandteil[] = [{ label: `Grundwert (Kat. ${katKurz(input.kategorie)})`, wert: basis }]
+      const lage = lagezuschlagWert(input)
       if (lage.wert > 0) teile.push({ label: 'Lagezuschlag', wert: round2(lage.wert) })
       teile.push(...ausstattungsBestandteile(input))
       let proM2 = teile.reduce((s, t) => s + t.wert, 0)
       proM2 = Math.max(proM2, KAT_D_HMZ.brauchbar)
       if (input.befristet) {
         const abschlag = round2(-proM2 * BEFRISTUNGSABSCHLAG)
-        teile.push({ label: 'Befristungsabschlag (25 %)', wert: abschlag })
+        teile.push({ label: 'Abschlag für befristeten Vertrag (25 %)', wert: abschlag })
         proM2 += abschlag
       }
       bestandteile = teile.map((t) => ({ label: t.label, wert: round2(t.wert) }))
@@ -147,24 +151,41 @@ function computePreis(input: MietobjektInput, art: MietzinsArt): Preisspanne | n
   }
 }
 
-function lageHinweisText(input: MietobjektInput, art: MietzinsArt): string | null {
-  if (art !== 'richtwert') return null
-  const lage = lagezuschlagAusAnschrift(input)
-  if (lage.bezirk == null) {
-    return 'Ohne Anschrift wird kein Lagezuschlag berücksichtigt. Gib eine Anschrift (mit Wiener PLZ) ein, um eine Lagezuschlag-Schätzung zu erhalten.'
+/** Menschliche Lage-Erklärung (Zuschlag/Abschlag/neutral/unbekannt). */
+function lageInfo(input: MietobjektInput, art: MietzinsArt): LageInfo {
+  const nr = bezirkVonEingabe(input)
+  const koords = input.anschriftKoords
+  const laut = input.merkmale.strassenlaerm
+
+  if (nr == null) {
+    return {
+      status: 'unbekannt',
+      bezirk: null,
+      koords,
+      text: 'Du hast keine Anschrift angegeben – die Lage fließt daher nicht in die Berechnung ein. Gib eine Wiener Adresse ein, um zu sehen, ob die Lage die Miete erhöht oder senkt.',
+    }
   }
-  const b = getBezirk(lage.bezirk)
-  if (lage.wert > 0) {
-    return `Anschrift im ${lage.bezirk}. Bezirk (${b.name}): geschätzter Lagezuschlag ${lage.wert.toFixed(2).replace('.', ',')} €/m². Der reale Lagezuschlag wird lt. Wiener Lagezuschlagskarte adressgenau (Zählgebiet) bestimmt.`
+
+  const b = getBezirk(nr)
+  const zuschlag = art === 'richtwert' ? b.lagezuschlag : 0
+
+  if (zuschlag > 0) {
+    const betrag = zuschlag.toFixed(2).replace('.', ',')
+    let text = `Die Adresse liegt in einer gefragten Gegend (${nr}. Bezirk, ${b.name}). Für so eine gute Lage darf die Miete etwas höher sein – hier rund ${betrag} € pro m² zusätzlich.`
+    if (laut) text += ' Weil du "laute Lage/Straßenlärm" angehakt hast, wird das mit einem Abzug gegengerechnet.'
+    return { status: laut ? 'abschlag' : 'zuschlag', bezirk: nr, koords, text }
   }
-  return `Anschrift im ${lage.bezirk}. Bezirk (${b.name}): im Bezirksdurchschnitt keine überdurchschnittliche Lage – kein Lagezuschlag angesetzt.`
+
+  let text = `Die Adresse liegt im ${nr}. Bezirk (${b.name}). Diese Lage gilt im Schnitt als durchschnittlich – dafür gibt es keinen Aufschlag, aber auch keinen Abzug.`
+  if (laut) text = `Die Adresse liegt im ${nr}. Bezirk (${b.name}). Weil du "laute Lage/Straßenlärm" angehakt hast, wird die Miete etwas nach unten korrigiert.`
+  return { status: laut ? 'abschlag' : 'neutral', bezirk: nr, koords, text }
 }
 
 function result(
   mietzinsArt: MietzinsArt,
   anwendung: MrgAnwendung,
   input: MietobjektInput,
-  rechtsgrundlagen: string[],
+  gesetze: Gesetzeslink[],
   begruendung: string[],
   hinweise: string[] = [],
 ): MrgErgebnis {
@@ -176,20 +197,20 @@ function result(
     kuendigungsschutz: anwendung !== 'ausnahme',
     preisschutz: anwendung === 'voll',
     preis: computePreis(input, mietzinsArt),
-    rechtsgrundlagen,
     begruendung,
+    gesetze,
     hinweise,
-    lageHinweis: lageHinweisText(input, mietzinsArt),
+    lage: lageInfo(input, mietzinsArt),
   }
 }
 
 /**
- * Ermittelt Mietzinsart, MRG-Anwendungsbereich und Preisbandbreite.
- * Prüfreihenfolge: Vollausnahmen (Objektart) → Förderung → sonstige
- * Teilausnahmen → Baualters-abhängige Vollanwendung.
+ * Ermittelt Mietzinsart, Schutzumfang und Preisbandbreite.
+ * Prüfreihenfolge: Vollausnahmen → Förderung → sonstige Teilausnahmen →
+ * baualtersabhängige volle Anwendung.
  */
 export function evaluateMrg(input: MietobjektInput): MrgErgebnis {
-  // ---- 1) Vollausnahmen vom MRG (Objektart) ----
+  // ---- 1) Vollausnahmen (kein gesetzlicher Schutz) ----
   switch (input.objektart) {
     case 'einfamilienhaus':
     case 'zweifamilienhaus':
@@ -197,82 +218,64 @@ export function evaluateMrg(input: MietobjektInput): MrgErgebnis {
         'frei',
         'ausnahme',
         input,
-        ['§ 1 Abs 2 Z 5 MRG'],
-        ['Gebäude mit nicht mehr als zwei selbständigen Objekten (Ein- oder Zweifamilienhaus).'],
-        ['Bei Mietvertragsabschluss vor dem 1.1.2002 galt für solche Objekte noch die Teilanwendung des MRG.'],
+        [GESETZ.mrg()],
+        ['Das Gebäude hat höchstens zwei Wohnungen (Ein- oder Zweifamilienhaus). Dafür gelten die Mietregeln nicht – Preis und Kündigung sind frei.'],
+        ['Wurde der Vertrag vor 2002 abgeschlossen, kann teilweise doch ein Kündigungsschutz gelten.'],
       )
     case 'dienstwohnung':
-      return result('frei', 'ausnahme', input, ['§ 1 Abs 2 Z 2 MRG'], ['Dienst-, Natural- oder Werkswohnung.'])
+      return result('frei', 'ausnahme', input, [GESETZ.mrg()], ['Es ist eine Wohnung, die zum Job gehört (Dienst- oder Werkswohnung). Dafür gelten die Mietregeln nicht.'])
     case 'karitatives_wohnen':
       return result(
         'frei',
         'ausnahme',
         input,
-        ['§ 1 Abs 2 Z 1a MRG'],
-        ['Vermietung durch eine karitative/humanitäre Organisation im Rahmen sozialpädagogisch betreuten Wohnens.'],
-        ['Gilt für Mietverträge, die nach dem 31.12.2001 geschlossen wurden.'],
+        [GESETZ.mrg()],
+        ['Die Wohnung wird von einer sozialen Einrichtung im Rahmen von betreutem Wohnen vermietet. Dafür gelten die Mietregeln nicht.'],
+        ['Gilt für Verträge ab 2002.'],
       )
     case 'heim_beherbergung':
-      return result(
-        'frei',
-        'ausnahme',
-        input,
-        ['§ 1 Abs 2 Z 1 MRG'],
-        ['Beherbergungsbetrieb oder Heim (z.B. Studenten-, Senioren-, Lehrlingsheim).'],
-      )
+      return result('frei', 'ausnahme', input, [GESETZ.mrg()], ['Es ist ein Heim oder Beherbergungsbetrieb (z.B. Studenten- oder Seniorenheim, Pension). Dafür gelten die Mietregeln nicht.'])
     case 'zweitwohnung_befristet':
       if (input.kategorie === 'A' || input.kategorie === 'B') {
         return result(
           'frei',
           'ausnahme',
           input,
-          ['§ 1 Abs 2 Z 3b MRG'],
-          ['Höchstens halbjährig befristete, beruflich bedingte Zweitwohnung der Kategorie A oder B ("Philharmoniker-Wohnung").'],
-          ['Zweck muss schriftlich vereinbart sein. Bei Verlängerung über 6 Monate hinaus ist das MRG anzuwenden.'],
+          [GESETZ.mrg()],
+          ['Es ist eine gut ausgestattete Zweitwohnung, die aus beruflichen Gründen für höchstens ein halbes Jahr gemietet wird. Dafür gelten die Mietregeln nicht.'],
+          ['Der berufliche Grund muss schriftlich vereinbart sein. Dauert es länger als 6 Monate, gelten die Mietregeln doch.'],
         )
       }
       break
     case 'ferienwohnung':
-      return result(
-        'frei',
-        'ausnahme',
-        input,
-        ['§ 1 Abs 2 Z 4 MRG'],
-        ['Ferien-/Freizeitwohnung neben einem gewöhnlichen Aufenthalt (Erstwohnsitz).'],
-      )
+      return result('frei', 'ausnahme', input, [GESETZ.mrg()], ['Es ist eine Ferien-/Freizeitwohnung neben einem Hauptwohnsitz. Dafür gelten die Mietregeln nicht.'])
     case 'pacht':
-      return result('frei', 'ausnahme', input, ['Umkehrschluss § 1 Abs 1 MRG'], ['Pachtverhältnis, kein Mietverhältnis im Sinne des MRG.'])
+      return result('frei', 'ausnahme', input, [GESETZ.mrg()], ['Es ist eine Pacht, keine Miete. Dafür gelten die Mietregeln nicht.'])
     case 'nebenflaeche_separat':
-      return result(
-        'frei',
-        'ausnahme',
-        input,
-        ['Umkehrschluss § 1 Abs 1 MRG'],
-        ['Separat (nicht mitvermietete) Fläche/neutrales Objekt, z.B. Stellplatz, Garage, Garten, Hobbyraum.'],
-      )
+      return result('frei', 'ausnahme', input, [GESETZ.mrg()], ['Es ist eine einzeln vermietete Nebenfläche (z.B. Garage, Stellplatz, Garten). Dafür gelten die Mietregeln nicht.'])
     case 'geschaeftsraum_kurzzeit':
-      return result('frei', 'ausnahme', input, ['§ 1 Abs 2 Z 3a MRG'], ['Geschäftsräumlichkeit, höchstens ein halbes Jahr befristet vermietet.'])
+      return result('frei', 'ausnahme', input, [GESETZ.mrg()], ['Es ist ein Geschäftslokal, das für höchstens ein halbes Jahr vermietet wird. Dafür gelten die Mietregeln nicht.'])
     default:
       break
   }
 
-  // ---- 2) Förderung (Datensätze aus Unterlage "Förderungen") ----
+  // ---- 2) Förderung ----
   const foe = evaluateFoerderung(input.foerderungProgramm, input.tilgungsstatus, input.eigentumswohnung)
   if (foe) {
-    return result(foe.mietzinsArt, foe.anwendung, input, foe.rechtsgrundlagen, foe.begruendung, foe.hinweise)
+    return result(foe.mietzinsArt, foe.anwendung, input, foe.gesetze, foe.begruendung, foe.hinweise)
   }
 
-  // ---- 3) Sonstige Teilausnahmen (nur ohne Förderung) ----
+  // ---- 3) Sonstige Teilausnahmen ----
   if (input.objektart === 'wirtschaftspark') {
-    return result('frei', 'teil', input, ['§ 1 Abs 5 MRG'], ['Mietgegenstand in einem Wirtschaftspark.'])
+    return result('frei', 'teil', input, [GESETZ.mrg()], ['Das Objekt liegt in einem Wirtschaftspark. Die Miethöhe ist frei, ein Kündigungsschutz besteht aber.'])
   }
   if (input.objektart === 'dg_ausbau' && input.dgAusbauNachStichtag) {
     return result(
       'frei',
       'teil',
       input,
-      ['§ 1 Abs 4 Z 2 MRG'],
-      ['Dachgeschoß-Ausbau/-Aufstockung bzw. Rohdachboden mit Baubewilligung/Mietvertrag nach dem 31.12.2001.'],
+      [GESETZ.mrg()],
+      ['Es ist ein neuerer Dachgeschoss-Ausbau (ab 2002). Die Miethöhe ist frei, ein Kündigungsschutz besteht aber.'],
     )
   }
   if (input.objektart === 'zubau' && input.zubauNachStichtag) {
@@ -280,8 +283,8 @@ export function evaluateMrg(input: MietobjektInput): MrgErgebnis {
       'frei',
       'teil',
       input,
-      ['§ 1 Abs 4 Z 2a MRG'],
-      ['Mietgegenstand durch Zubau auf Grund einer nach dem 30.9.2006 erteilten Baubewilligung neu geschaffen.'],
+      [GESETZ.mrg()],
+      ['Es ist ein neuerer Zubau (ab Oktober 2006). Die Miethöhe ist frei, ein Kündigungsschutz besteht aber.'],
     )
   }
   const istWohnObjekt = input.objektart === 'wohnung' || input.objektart === 'dg_ausbau' || input.objektart === 'zubau'
@@ -291,8 +294,8 @@ export function evaluateMrg(input: MietobjektInput): MrgErgebnis {
       'frei',
       'teil',
       input,
-      ['§ 1 Abs 4 Z 1 MRG'],
-      ['Gebäude frei finanziert (ohne öffentliche Fördermittel) mit Baubewilligung nach dem 30.6.1953.'],
+      [GESETZ.mrg()],
+      ['Das Haus ist ein Neubau (Baubewilligung nach Juni 1953) ohne öffentliche Förderung. Die Miethöhe ist frei, ein Kündigungsschutz besteht aber.'],
     )
   }
   if (input.objektart === 'wohnung' && input.eigentumswohnung && input.baubewilligungGebaeude === 'nach_1953') {
@@ -300,20 +303,20 @@ export function evaluateMrg(input: MietobjektInput): MrgErgebnis {
       'frei',
       'teil',
       input,
-      ['§ 1 Abs 4 Z 3 MRG'],
-      ['Eigentumswohnung in einem Gebäude mit Baubewilligung nach dem 30.6.1953: Teilanwendung, freier Mietzins.'],
-      ['Ausnahme: aus Mitteln des Wohnhauswiederaufbaufonds oder des WFG 1968 errichtete Eigentumswohnungen fallen in die Vollanwendung (angemessener Hauptmietzins).'],
+      [GESETZ.mrg()],
+      ['Es ist eine Eigentumswohnung in einem Neubau (nach Juni 1953). Die Miethöhe ist frei, ein Kündigungsschutz besteht aber.'],
+      ['Wurde die Wohnung mit bestimmten alten Förderungen gebaut, kann doch eine Obergrenze gelten.'],
     )
   }
 
-  // ---- 4) Vollanwendung (baualtersabhängig) ----
+  // ---- 4) Volle Anwendung ----
   if (input.objektart === 'geschaeftsraum') {
     return result(
       'angemessen',
       'voll',
       input,
-      ['§ 16 Abs 1 Z 1 MRG'],
-      ['Geschäftsraum in Vollanwendung des MRG: dient nicht Wohnzwecken – angemessener Hauptmietzins.'],
+      [GESETZ.mrg()],
+      ['Es ist ein Geschäftslokal. Die Miete darf so hoch sein wie bei vergleichbaren Lokalen üblich ("angemessen").'],
     )
   }
 
@@ -323,16 +326,16 @@ export function evaluateMrg(input: MietobjektInput): MrgErgebnis {
         'kategorie_d',
         'voll',
         input,
-        ['§ 16 Abs 5 MRG'],
-        ['Wohnung der Ausstattungskategorie D, Gebäude mit Baubewilligung bis 8.5.1945: gesetzlich fixierter Kategorie-D-Hauptmietzins.'],
+        [GESETZ.mrg()],
+        ['Es ist eine einfach ausgestattete Wohnung (Kategorie D) in einem alten Haus. Dafür gibt es eine niedrige, gesetzlich fixe Obergrenze.'],
       )
     }
     return result(
       'richtwert',
       'voll',
       input,
-      ['§ 16 Abs 2–4 MRG', 'Richtwertgesetz'],
-      ['Wohnung der Kategorie A, B oder C in einem Gebäude mit Baubewilligung bis 8.5.1945 (klassischer Altbau): Richtwertmietzins.'],
+      [GESETZ.mrg(), GESETZ.richtwertgesetz()],
+      ['Es ist eine Wohnung in einem alten Haus (Baubewilligung vor Mai 1945). Für die Miete gilt eine gesetzliche Obergrenze (Richtwert), zu der Zu- und Abschläge kommen.'],
     )
   }
 
@@ -340,7 +343,7 @@ export function evaluateMrg(input: MietobjektInput): MrgErgebnis {
     'angemessen',
     'voll',
     input,
-    ['§ 16 Abs 1 Z 2 1. Fall MRG'],
-    ['Gebäude mit Baubewilligung zwischen 8.5.1945 und 30.6.1953, ohne öffentliche Fördermittel: "mietrechtlicher Neubau" – angemessener Hauptmietzins.'],
+    [GESETZ.mrg()],
+    ['Das Haus stammt aus den Jahren 1945–1953 und wurde ohne öffentliche Förderung gebaut. Die Miete darf so hoch sein wie bei vergleichbaren Wohnungen üblich ("angemessen").'],
   )
 }

@@ -1,5 +1,6 @@
 // Domain types für den Wiener Mietzins-Check.
-// Terminologie folgt dem Mietrechtsgesetz (MRG) und dem Richtwertgesetz.
+
+import type { Gesetzeslink } from './gesetze'
 
 export type Objektart =
   | 'wohnung'
@@ -26,7 +27,6 @@ export type ZustandHaus = 'sehr_gut' | 'durchschnittlich' | 'schlecht'
 export type Heizung = 'zentral_etage' | 'keine'
 export type Stockwerk = 'erdgeschoss' | 'normal' | 'hoch_ohne_lift'
 
-// Förderungsprogramme laut Unterlage "Förderungen".
 export type FoerderungProgramm =
   | 'keine'
   | 'wwg1948'
@@ -39,9 +39,7 @@ export type FoerderungProgramm =
 
 export type Tilgungsstatus = 'offen' | 'getilgt_wgg' | 'rbg1971' | 'rbg1987'
 
-// Einzelmerkmale (Zu-/Abschläge) als dynamischer Katalog.
 export type MerkmalKey =
-  // Ausstattung der Wohnung
   | 'hochwertigesBad'
   | 'zweitesWc'
   | 'hochwertigeKueche'
@@ -50,27 +48,23 @@ export type MerkmalKey =
   | 'fussbodenheizung'
   | 'klimaanlage'
   | 'barrierefrei'
-  // Freiflächen
   | 'balkon'
   | 'loggia'
   | 'terrasse'
   | 'eigengarten'
   | 'dachterrasse'
-  // Lage & Grundriss
   | 'ruhelage'
   | 'sonnig'
   | 'ausblick'
   | 'strassenlaerm'
   | 'dunkel'
   | 'schlechterGrundriss'
-  // Gebäude & Allgemeinflächen
   | 'lift'
   | 'gegensprechanlage'
   | 'concierge'
   | 'gemeinschaft'
   | 'denkmalschutz'
   | 'begruenterInnenhof'
-  // Zubehör
   | 'kellerabteil'
   | 'dachbodenabteil'
   | 'garage'
@@ -78,21 +72,27 @@ export type MerkmalKey =
 
 export type Merkmale = Record<MerkmalKey, boolean>
 
+export interface Koordinaten {
+  lat: number
+  lon: number
+}
+
 export interface MietobjektInput {
   objektart: Objektart
   baubewilligungGebaeude: BaubewilligungGebaeude
   dgAusbauNachStichtag: boolean
   zubauNachStichtag: boolean
-  anschrift: string // optional; leer = ohne Lageberücksichtigung
-  flaeche: number // m²
-  bezirk: number // 1-23 (für Marktpreis)
+  // Anschrift
+  anschrift: string
+  anschriftBezirk: number | null // aus gewählter Adresse (Autocomplete)
+  anschriftKoords: Koordinaten | null
+  flaeche: number
+  bezirk: number // Marktpreis-Fallback
   eigentumswohnung: boolean
   befristet: boolean
-
   // Förderung
   foerderungProgramm: FoerderungProgramm
   tilgungsstatus: Tilgungsstatus
-
   // Ausstattung & Zustand
   kategorie: Kategorie
   zustandHaus: ZustandHaus
@@ -124,6 +124,15 @@ export interface Preisspanne {
   bestandteile?: Preisbestandteil[]
 }
 
+export type LageStatus = 'unbekannt' | 'zuschlag' | 'neutral' | 'abschlag'
+
+export interface LageInfo {
+  status: LageStatus
+  text: string // menschliche Erklärung
+  bezirk: number | null
+  koords: Koordinaten | null
+}
+
 export interface MrgErgebnis {
   mietzinsArt: MietzinsArt
   mietzinsArtLabel: string
@@ -132,8 +141,8 @@ export interface MrgErgebnis {
   kuendigungsschutz: boolean
   preisschutz: boolean
   preis: Preisspanne | null
-  rechtsgrundlagen: string[]
-  begruendung: string[]
+  begruendung: string[] // menschlich, ohne Paragraphen
+  gesetze: Gesetzeslink[] // Links zu den Gesetzestexten
   hinweise: string[]
-  lageHinweis: string | null
+  lage: LageInfo
 }
