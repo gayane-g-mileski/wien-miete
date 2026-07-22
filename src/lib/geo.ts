@@ -79,17 +79,25 @@ export async function sucheAdressen(query: string, signal?: AbortSignal): Promis
  * wird null zurückgegeben (dann entscheidet die manuelle Auswahl).
  */
 export async function istGemeindebau(koords: Koordinaten, signal?: AbortSignal): Promise<boolean | null> {
-  const d = 0.0008 // ~80 m
+  const d = 0.0009 // ~90 m
   const { lat, lon } = koords
-  const bbox = `${lat - d},${lon - d},${lat + d},${lon + d},EPSG:4326`
-  const url =
+  const base =
     'https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0' +
-    `&srsName=EPSG:4326&outputFormat=json&typeName=ogdwien:WOHNENINWIENGEMEINDEBAUTENOGD&bbox=${encodeURIComponent(bbox)}`
+    '&srsName=EPSG:4326&outputFormat=json&typeName=ogdwien:GEMBAUTENFLOGD&bbox='
+  // GeoServer WFS 1.1.0 nutzt bei EPSG:4326 die Achsreihenfolge lat,lon –
+  // zur Sicherheit wird auch die vertauschte Reihenfolge versucht.
+  const boxes = [
+    `${lat - d},${lon - d},${lat + d},${lon + d},EPSG:4326`,
+    `${lon - d},${lat - d},${lon + d},${lat + d},EPSG:4326`,
+  ]
   try {
-    const res = await fetch(url, { signal })
-    if (!res.ok) return null
-    const data = (await res.json()) as { features?: unknown[] }
-    return Array.isArray(data.features) && data.features.length > 0
+    for (const box of boxes) {
+      const res = await fetch(base + encodeURIComponent(box), { signal })
+      if (!res.ok) continue
+      const data = (await res.json()) as { features?: unknown[] }
+      if (Array.isArray(data.features) && data.features.length > 0) return true
+    }
+    return false
   } catch {
     return null
   }
