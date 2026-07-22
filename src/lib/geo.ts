@@ -72,10 +72,14 @@ export async function sucheAdressen(query: string, signal?: AbortSignal): Promis
   return treffer
 }
 
-/** Link auf die österreichische Lärmkarte (laerminfo.at). */
+/**
+ * Link auf die interaktive Lärmkarte (maps.laerminfo.at), zentriert auf die
+ * eingegebene Adresse. Layer "cstrasse22_24h" = Straßenlärm (24h), grauer
+ * Hintergrund. Format: /#/<layer>/<hintergrund>/a-/@<lat>,<lon>,<zoom>z
+ */
 export function laerminfoLink(koords: Koordinaten | null): string {
-  if (koords) return `https://www.laerminfo.at/?lat=${koords.lat}&lon=${koords.lon}&zoom=17`
-  return 'https://www.laerminfo.at/'
+  if (koords) return `https://maps.laerminfo.at/#/cstrasse22_24h/bgrau/a-/@${koords.lat},${koords.lon},17z`
+  return 'https://maps.laerminfo.at/'
 }
 
 /** Link auf den Wiener Flächenwidmungsplan. */
