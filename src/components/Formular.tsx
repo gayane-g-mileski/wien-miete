@@ -58,7 +58,13 @@ export function Formular({ value, onChange }: Props) {
           <AnschriftFeld
             value={value.anschrift}
             onChange={(text, bezirk, koords) =>
-              onChange({ ...valueRef.current, anschrift: text, anschriftBezirk: bezirk, anschriftKoords: koords })
+              onChange({
+                ...valueRef.current,
+                anschrift: text,
+                anschriftBezirk: bezirk,
+                anschriftKoords: koords,
+                gemeindebau: false,
+              })
             }
             onGemeindebau={(detected) => onChange({ ...valueRef.current, gemeindebau: detected })}
           />
@@ -76,17 +82,6 @@ export function Formular({ value, onChange }: Props) {
               ))}
             </Select>
           </Field>
-        </div>
-
-        <div>
-          <Checkbox
-            checked={value.gemeindebau}
-            onChange={(v) => set('gemeindebau', v)}
-            label="Gemeindebau der Stadt Wien (Wiener Wohnen)"
-          />
-          <p className="mt-1 text-xs text-neutral-500">
-            Wird bei Adressauswahl automatisch geprüft. Bei Gemeindebauten gilt immer der Richtwert.
-          </p>
         </div>
 
         <Field label="Nutzfläche (m²)" htmlFor="flaeche">
