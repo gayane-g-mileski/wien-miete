@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Field, TextInput, Textarea } from './ui'
+import { TextareaField, TextField } from './ui'
 
 const MA25_EMAIL = 'post@ma25.wien.gv.at'
 const MAX_MB = 5
@@ -60,41 +60,36 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
     setGesendet(true)
   }
 
-  const labelCls = 'mb-1.5 block text-sm font-medium text-neutral-800'
   const btnUpload =
-    'inline-flex cursor-pointer items-center gap-2 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-800 hover:bg-neutral-100'
+    'inline-flex cursor-pointer items-center gap-2 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-base font-medium text-neutral-800 hover:bg-neutral-100'
 
   return (
-    <div className="mt-3 space-y-4 rounded-xl border border-neutral-300 bg-neutral-50 p-4">
-      <div className="rounded-md bg-neutral-900 px-3 py-1.5 text-center text-xs font-semibold uppercase tracking-wide text-white">
+    <div className="mt-3 space-y-5 rounded-xl border border-neutral-300 bg-neutral-50 p-4">
+      <div className="rounded-md bg-neutral-900 px-3 py-1.5 text-center text-sm font-semibold uppercase tracking-wide text-white">
         Diese Anfrage ist kostenlos
       </div>
 
-      <p className="text-sm text-neutral-600">
+      <p className="text-base text-neutral-600">
         Die MA 25 kann dir das Jahr der Baubewilligung nennen. Wenn du alle Infos beisammen hast, komm einfach zurück und
         lass die Miete hier neu berechnen.
       </p>
 
-      <Field label="Name" htmlFor="ma25-name">
-        <TextInput id="ma25-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Vor- und Nachname" />
-      </Field>
+      <TextField label="Name" id="ma25-name" value={name} onChange={(e) => setName(e.target.value)} />
 
-      <Field label="E-Mail-Adresse" htmlFor="ma25-email">
-        <TextInput
-          id="ma25-email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="name@beispiel.at"
-        />
-      </Field>
+      <TextField
+        label="E-Mail-Adresse"
+        id="ma25-email"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
-      <Field label="Nachricht" htmlFor="ma25-text">
-        <Textarea id="ma25-text" rows={7} value={text} onChange={(e) => setText(e.target.value)} />
-      </Field>
+      <TextareaField label="Nachricht" id="ma25-text" rows={7} value={text} onChange={(e) => setText(e.target.value)} />
 
       <div>
-        <span className={labelCls}>Unterlagen (Meldezettel, Eigentumsnachweis, Vollmacht …)</span>
+        <span className="mb-1.5 block text-base font-medium text-neutral-800">
+          Unterlagen (Meldezettel, Eigentumsnachweis, Vollmacht …)
+        </span>
         <label className={btnUpload}>
           Dateien auswählen
           <input
@@ -108,12 +103,12 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
             }}
           />
         </label>
-        <p className="mt-1 text-xs text-neutral-500">Mehrere möglich. PDF, JPG oder PNG, je max. {MAX_MB} MB.</p>
+        <p className="mt-1 text-sm text-neutral-500">Mehrere möglich. PDF, JPG oder PNG, je max. {MAX_MB} MB.</p>
 
         {dateien.length > 0 && (
           <ul className="mt-2 space-y-1">
             {dateien.map((f, i) => (
-              <li key={`${f.name}-${i}`} className="flex items-center justify-between gap-3 rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-sm text-neutral-700">
+              <li key={`${f.name}-${i}`} className="flex items-center justify-between gap-3 rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-base text-neutral-700">
                 <span className="truncate">
                   {f.name} <span className="text-neutral-400">({(f.size / 1024 / 1024).toFixed(1)} MB)</span>
                 </span>
@@ -126,18 +121,18 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
         )}
       </div>
 
-      {fehler && <p className="text-sm font-medium text-red-700">{fehler}</p>}
+      {fehler && <p className="text-base font-medium text-red-700">{fehler}</p>}
 
       <button
         type="button"
         onClick={senden}
-        className="w-full rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-neutral-700"
+        className="w-full rounded-lg bg-neutral-900 px-4 py-2.5 text-base font-semibold text-white hover:bg-neutral-700"
       >
         Anfrage senden
       </button>
 
       {gesendet && (
-        <p className="text-sm text-neutral-600">
+        <p className="text-base text-neutral-600">
           Deine E-Mail an die MA 25 wurde vorbereitet und in deinem E-Mail-Programm geöffnet. Bitte hänge die ausgewählten
           Dateien dort noch an und schick sie ab.
         </p>

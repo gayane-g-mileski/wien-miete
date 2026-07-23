@@ -1,42 +1,35 @@
 import { useState } from 'react'
-import { Textarea } from './ui'
+import { TextareaField } from './ui'
 
-/**
- * Hinweis-Box für den Wohnhauswiederaufbaufonds (WWG 1948): Wo man den Stand
- * der Rückzahlung erfragt, ein vorausgefüllter E-Mail-Text zur Anfrage und was
- * die drei möglichen Antworten bedeuten.
- */
+// Empfänger beim Bundeswohnbaufonds – eine Adresse hinterlegt.
+const EMPFAENGER = 'gerlinde.weiss@bmdw.gv.at'
+
 function anfrageText(anschrift: string): string {
-  const adr = anschrift.trim() || 'Wien XY, ………………….'
+  const adr = anschrift.trim() || 'Wien …'
   return (
-    `Ich bin Eigentümer des Hauses ${adr} bzw. der Wohnung Top Nr. XY, im Haus ${adr} ` +
-    'und ersuche um Mitteilung,\n\n' +
-    '• ob und falls ja, wann (Datum der Entscheidung/Bewilligung über das Fondsansuchen) der ' +
-    'Wohnhauswiederaufbaufonds bzw. der Bundeswohn- und Siedlungsfonds für Wiederherstellungsmaßnahmen an diesem ' +
-    'Haus ein Darlehen gewährt hat,\n' +
-    '• ob sich die geförderten Baumaßnahmen (auch) auf das gegenständliche Mietobjekt Top Nr. XY oder nur auf ' +
-    'allgemeine Teile des Hauses bezogen haben,\n' +
-    '• ob und falls ja, wann dieses unter Inanspruchnahme des Rückzahlungsbegünstigungsgesetzes 1971 ' +
-    '(RBG 1971, BGBl. Nr. 336/1971) und RBG 1987 (BGBl. Nr. 340/1987) in der geltenden Fassung gänzlich getilgt wurde.'
+    'Sehr geehrte Damen und Herren,\n\n' +
+    `ich bin Eigentümer des Hauses ${adr} bzw. der Wohnung Top-Nr. … in diesem Haus und ersuche um Auskunft ` +
+    'zu folgenden Fragen:\n\n' +
+    'Hat der Wohnhauswiederaufbaufonds bzw. der Bundeswohn- und Siedlungsfonds für die Wiederherstellung dieses ' +
+    'Hauses ein Darlehen gewährt? Falls ja, wann wurde es bewilligt?\n\n' +
+    'Bezogen sich die geförderten Bauarbeiten auch auf meine Wohnung, oder nur auf allgemeine Teile des Hauses wie ' +
+    'Stiegenhaus, Dach oder Außenmauern?\n\n' +
+    'Wurde dieses Darlehen bereits vollständig zurückgezahlt? Falls ja, wann und nach welcher Regelung?\n\n' +
+    'Vielen Dank für Ihre Auskunft.\n\n' +
+    'Mit freundlichen Grüßen'
   )
 }
-
-const KONTAKTE = [
-  { name: 'Gerlinde Weiss', email: 'gerlinde.weiss@bmdw.gv.at' },
-  { name: 'Monika Kail', email: 'monika.kail@bmdw.gv.at' },
-  { name: 'Ilse Kovacs', email: 'ilse.kovacs@bmdw.gv.at' },
-]
 
 export function WwafHinweis({ anschrift }: { anschrift: string }) {
   const [text, setText] = useState(() => anfrageText(anschrift))
 
-  const senden = (email: string) => {
-    const href = `mailto:${email}?subject=${encodeURIComponent('Anfrage Bundeswohnbaufonds – Stand der Rückzahlung')}&body=${encodeURIComponent(text)}`
+  const senden = () => {
+    const href = `mailto:${EMPFAENGER}?subject=${encodeURIComponent('Anfrage Bundeswohnbaufonds – Stand der Rückzahlung')}&body=${encodeURIComponent(text)}`
     window.location.href = href
   }
 
   return (
-    <div className="space-y-3 rounded-xl border border-neutral-300 bg-neutral-50 p-4 text-sm text-neutral-700">
+    <div className="space-y-4 rounded-xl border border-neutral-300 bg-neutral-50 p-4 text-base text-neutral-700">
       <div>
         <p className="font-semibold text-neutral-800">Stand der Rückzahlung unbekannt?</p>
         <p className="mt-1">Diese Auskunft bekommst du über eine Anfrage an das</p>
@@ -53,46 +46,39 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
       </div>
 
       <div>
-        <p className="mb-1.5 font-semibold text-neutral-800">Anfrage-Text</p>
-        <Textarea rows={10} value={text} onChange={(e) => setText(e.target.value)} />
-        <p className="mt-2 text-xs text-neutral-500">Anfrage per E-Mail an eine zuständige Person senden:</p>
-        <div className="mt-1 flex flex-col gap-2 sm:flex-row">
-          {KONTAKTE.map((k) => (
-            <button
-              key={k.email}
-              type="button"
-              onClick={() => senden(k.email)}
-              className="flex-1 rounded-lg bg-neutral-900 px-3 py-2 text-sm font-semibold text-white hover:bg-neutral-700"
-            >
-              {k.name}
-            </button>
-          ))}
-        </div>
+        <TextareaField label="Anfrage-Text" id="wwaf-text" rows={11} value={text} onChange={(e) => setText(e.target.value)} />
+        <button
+          type="button"
+          onClick={senden}
+          className="mt-3 w-full rounded-lg bg-neutral-900 px-4 py-2.5 text-base font-semibold text-white hover:bg-neutral-700"
+        >
+          Anfrage per E-Mail senden
+        </button>
       </div>
 
       <div>
-        <p className="font-semibold text-neutral-800">Drei mögliche Antworten:</p>
+        <p className="font-semibold text-neutral-800">Was die Antwort für deine Miete bedeutet</p>
         <ul className="mt-1 space-y-2">
           <li>
-            <span className="font-medium text-neutral-800">Tilgung laut Plan</span> (bzw. gemäß § 15 Abs. 7 WWG):
-            Richtwertmietzins gemäß § 16 Abs. 2 MRG – bzw. angemessener Hauptmietzins, wenn die Voraussetzungen gemäß
-            § 16 Abs. 1 Z 1–5 MRG vorliegen (Geschäftsraum, Neuschaffung, Denkmalschutz, Kategorie A/B über 130 m²).
+            <span className="font-medium text-neutral-800">Darlehen planmäßig zurückgezahlt:</span> Es gilt in der Regel
+            die Richtwert-Obergrenze. In bestimmten Fällen darf die Miete auch marktüblich sein – etwa bei
+            Geschäftsräumen, neu geschaffenem Wohnraum, Denkmalschutz oder großen A/B-Wohnungen über 130 m².
           </li>
           <li>
-            <span className="font-medium text-neutral-800">Tilgung nach dem RBG 1987</span>: angemessener Hauptmietzins
-            gemäß § 9 Abs. 4 RBG 1987.
+            <span className="font-medium text-neutral-800">Vorzeitig bis Ende 1988 zurückgezahlt:</span> Die Miete darf so
+            hoch sein wie bei vergleichbaren Wohnungen üblich.
           </li>
           <li>
-            <span className="font-medium text-neutral-800">Tilgung nach dem RBG 1971</span>: freier Mietzins gemäß
-            § 12 Abs. 3 erster Satz RBG 1971.
+            <span className="font-medium text-neutral-800">Vorzeitig bis Ende 1982 zurückgezahlt:</span> Die Miethöhe ist
+            frei vereinbar.
           </li>
         </ul>
       </div>
 
-      <p className="text-xs text-neutral-500">
-        Das gilt aber nur, wenn die konkret angefragte Wohnung mit Mitteln des Wohnhaus-Wiederaufbaufonds (WWAF)
-        wiederhergestellt wurde – es sei denn, die Bewilligung des WWAF-Darlehens erfolgte nach dem 31.8.1952: Dann
-        genügt, dass allgemeine Teile wiederhergestellt wurden (z.B. Stiegenhaus, Dach, Außenmauer).
+      <p className="text-sm text-neutral-500">
+        Das gilt aber nur, wenn gerade deine Wohnung mit Mitteln des Wiederaufbaufonds saniert wurde. Wurde das Darlehen
+        nach dem 31.8.1952 bewilligt, genügt es, dass allgemeine Teile des Hauses wiederhergestellt wurden – zum Beispiel
+        Stiegenhaus, Dach oder Außenmauern.
       </p>
     </div>
   )

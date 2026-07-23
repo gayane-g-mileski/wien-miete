@@ -29,6 +29,14 @@
   --color-ink-faint: #6a7860;
 
   --font-sans: 'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif;
+
+  /* Schriftgrößen: allgemein 16px, kleinste 14px */
+  --text-xs: 14px;
+  --text-xs--line-height: 20px;
+  --text-sm: 16px;
+  --text-sm--line-height: 24px;
+  --text-base: 16px;
+  --text-base--line-height: 24px;
 }
 
 :root {

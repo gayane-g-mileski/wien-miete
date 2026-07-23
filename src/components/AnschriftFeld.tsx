@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import type { AdressTreffer } from '../lib/geo'
 import { istGemeindebau, sucheAdressen } from '../lib/geo'
 import type { Koordinaten } from '../lib/types'
-import { Field } from './ui'
 
 interface Props {
   value: string
@@ -10,19 +9,23 @@ interface Props {
   onGemeindebau?: (detected: boolean) => void
 }
 
-const inputClass =
-  'w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm ' +
-  'placeholder:text-neutral-400 focus:border-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-300'
+const box =
+  'peer h-14 w-full rounded-md border border-neutral-400 bg-transparent px-3 pt-4 pb-1 text-base text-neutral-900 ' +
+  'outline-none transition-colors focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900'
+
+const floatLabel =
+  'pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base text-neutral-500 transition-all ' +
+  'peer-focus:top-0 peer-focus:text-sm peer-focus:text-neutral-900 peer-focus:bg-white peer-focus:px-1 ' +
+  'peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-sm ' +
+  'peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-1'
 
 export function AnschriftFeld({ value, onChange, onGemeindebau }: Props) {
   const [treffer, setTreffer] = useState<AdressTreffer[]>([])
   const [offen, setOffen] = useState(false)
-  const [laedt, setLaedt] = useState(false)
   const [fehler, setFehler] = useState(false)
   const boxRef = useRef<HTMLDivElement>(null)
   const abortRef = useRef<AbortController | null>(null)
 
-  // Autocomplete ab dem 3. Zeichen (debounced).
   useEffect(() => {
     const q = value.trim()
     if (q.length < 3) {
@@ -34,7 +37,6 @@ export function AnschriftFeld({ value, onChange, onGemeindebau }: Props) {
       abortRef.current?.abort()
       const ctrl = new AbortController()
       abortRef.current = ctrl
-      setLaedt(true)
       setFehler(false)
       try {
         const res = await sucheAdressen(q, ctrl.signal)
@@ -45,14 +47,11 @@ export function AnschriftFeld({ value, onChange, onGemeindebau }: Props) {
           setTreffer([])
           setFehler(true)
         }
-      } finally {
-        setLaedt(false)
       }
     }, 250)
     return () => clearTimeout(t)
   }, [value])
 
-  // Klick außerhalb schließt die Vorschlagsliste.
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
       if (boxRef.current && !boxRef.current.contains(e.target as Node)) setOffen(false)
@@ -65,7 +64,6 @@ export function AnschriftFeld({ value, onChange, onGemeindebau }: Props) {
     onChange(t.label, t.bezirk, t.koords)
     setOffen(false)
     setTreffer([])
-    // Gemeindebau best-effort erkennen (nur bei bekannten Koordinaten)
     if (t.koords && onGemeindebau) {
       istGemeindebau(t.koords).then((gb) => {
         if (gb != null) onGemeindebau(gb)
@@ -74,26 +72,14 @@ export function AnschriftFeld({ value, onChange, onGemeindebau }: Props) {
   }
 
   return (
-    <Field
-      label={
-        <>
-          Anschrift <span className="font-normal text-neutral-400">(optional)</span>
-        </>
-      }
-      htmlFor="anschrift"
-      hint={
-        fehler
-          ? 'Adresssuche gerade nicht erreichbar – du kannst die Adresse trotzdem eintippen (mit Wiener PLZ wird die Lage erkannt).'
-          : 'Nach dem 3. Zeichen erscheinen Vorschläge. Ohne Anschrift wird die Lage nicht berücksichtigt.'
-      }
-    >
+    <div>
       <div ref={boxRef} className="relative">
         <input
           id="anschrift"
           type="text"
           autoComplete="off"
-          className={inputClass}
-          placeholder="z.B. Lindengasse 12, 1070 Wien"
+          placeholder=" "
+          className={box}
           value={value}
           onChange={(e) => {
             onChange(e.target.value, null, null)
@@ -101,15 +87,17 @@ export function AnschriftFeld({ value, onChange, onGemeindebau }: Props) {
           }}
           onFocus={() => treffer.length > 0 && setOffen(true)}
         />
-        {laedt && <span className="absolute right-3 top-2.5 text-xs text-neutral-400">…</span>}
+        <label htmlFor="anschrift" className={floatLabel}>
+          Anschrift (optional)
+        </label>
         {offen && treffer.length > 0 && (
-          <ul className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-lg border border-neutral-300 bg-white py-1 shadow-lg">
+          <ul className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-md border border-neutral-300 bg-white py-1 shadow-lg">
             {treffer.map((t) => (
               <li key={t.label}>
                 <button
                   type="button"
                   onClick={() => waehle(t)}
-                  className="block w-full px-3 py-2 text-left text-sm text-neutral-800 hover:bg-neutral-100"
+                  className="block w-full px-3 py-2 text-left text-base text-neutral-800 hover:bg-neutral-100"
                 >
                   {t.label}
                 </button>
@@ -118,6 +106,11 @@ export function AnschriftFeld({ value, onChange, onGemeindebau }: Props) {
           </ul>
         )}
       </div>
-    </Field>
+      <p className="mt-1 px-1 text-sm text-neutral-500">
+        {fehler
+          ? 'Adresssuche gerade nicht erreichbar – du kannst die Adresse trotzdem eintippen (mit Wiener PLZ wird die Lage erkannt).'
+          : 'Nach dem 3. Zeichen erscheinen Vorschläge. Ohne Anschrift wird die Lage nicht berücksichtigt.'}
+      </p>
+    </div>
   )
 }

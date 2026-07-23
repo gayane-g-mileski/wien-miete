@@ -13,7 +13,7 @@ import {
 } from '../lib/labels'
 import { FOERDERUNG_PROGRAMM_LABEL, TILGUNGSSTATUS_LABEL, statusRelevant } from '../lib/foerderung'
 import { BEZIRKE, MERKMAL_GRUPPEN, MERKMAL_KATALOG } from '../lib/pricingData'
-import { Checkbox, Field, NumberInput, Section, Select } from './ui'
+import { Checkbox, NumberField, Section, SelectField } from './ui'
 import { AnschriftFeld } from './AnschriftFeld'
 import { Ma25Anfrage } from './Ma25Anfrage'
 import { WwafHinweis } from './WwafHinweis'
@@ -25,11 +25,13 @@ interface Props {
 }
 
 export function Formular({ value, onChange, mietzinsArt }: Props) {
-  const istRichtwert = mietzinsArt === 'richtwert'
-  const zeigeKat = istRichtwert || mietzinsArt === 'kategorie_d'
   const [ma25Offen, setMa25Offen] = useState(false)
+  const [rueckzahlungOffen, setRueckzahlungOffen] = useState(false)
   const valueRef = useRef(value)
   valueRef.current = value
+
+  const istRichtwert = mietzinsArt === 'richtwert'
+  const zeigeKat = istRichtwert || mietzinsArt === 'kategorie_d'
 
   const set = <K extends keyof MietobjektInput>(key: K, v: MietobjektInput[K]) => onChange({ ...value, [key]: v })
   const setMerkmal = (key: MerkmalKey, v: boolean) => onChange({ ...value, merkmale: { ...value.merkmale, [key]: v } })
@@ -38,26 +40,25 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
     <div className="flex flex-col gap-5">
       {/* --- Angaben zum Mietobjekt --- */}
       <Section title="Angaben zum Mietobjekt">
-        <Field label="Art des Mietgegenstands" htmlFor="objektart">
-          <Select
-            id="objektart"
-            value={value.objektart}
-            onChange={(e) => set('objektart', e.target.value as MietobjektInput['objektart'])}
-          >
-            {OBJEKTART_GRUPPEN.map((gruppe) => (
-              <optgroup key={gruppe.label} label={gruppe.label}>
-                {gruppe.optionen.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </Select>
-        </Field>
+        <SelectField
+          label="Art des Mietgegenstands"
+          id="objektart"
+          value={value.objektart}
+          onChange={(e) => set('objektart', e.target.value as MietobjektInput['objektart'])}
+        >
+          {OBJEKTART_GRUPPEN.map((gruppe) => (
+            <optgroup key={gruppe.label} label={gruppe.label}>
+              {gruppe.optionen.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </SelectField>
 
         {/* Anschrift + Bezirk nebeneinander */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[2fr_1fr]">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-[2fr_1fr]">
           <AnschriftFeld
             value={value.anschrift}
             onChange={(text, bezirk, koords) =>
@@ -71,31 +72,29 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
             }
             onGemeindebau={(detected) => onChange({ ...valueRef.current, gemeindebau: detected })}
           />
-          <Field label="Bezirk" htmlFor="bezirk">
-            <Select
-              id="bezirk"
-              value={value.bezirk}
-              disabled={value.anschriftBezirk != null}
-              onChange={(e) => set('bezirk', Number(e.target.value))}
-            >
-              {BEZIRKE.map((b) => (
-                <option key={b.nr} value={b.nr}>
-                  {b.nr}. {b.name}
-                </option>
-              ))}
-            </Select>
-          </Field>
+          <SelectField
+            label="Bezirk"
+            id="bezirk"
+            value={value.bezirk}
+            disabled={value.anschriftBezirk != null}
+            onChange={(e) => set('bezirk', Number(e.target.value))}
+          >
+            {BEZIRKE.map((b) => (
+              <option key={b.nr} value={b.nr}>
+                {b.nr}. {b.name}
+              </option>
+            ))}
+          </SelectField>
         </div>
 
-        <Field label="Nutzfläche (m²)" htmlFor="flaeche">
-          <NumberInput
-            id="flaeche"
-            min={1}
-            step={1}
-            value={value.flaeche}
-            onChange={(e) => set('flaeche', Math.max(0, Number(e.target.value)))}
-          />
-        </Field>
+        <NumberField
+          label="Nutzfläche (m²)"
+          id="flaeche"
+          min={1}
+          step={1}
+          value={value.flaeche}
+          onChange={(e) => set('flaeche', Math.max(0, Number(e.target.value)))}
+        />
 
         <Checkbox checked={value.eigentumswohnung} onChange={(v) => set('eigentumswohnung', v)} label="Eigentumswohnung" />
         <Checkbox checked={value.befristet} onChange={(v) => set('befristet', v)} label="befristeter Mietvertrag" />
@@ -104,20 +103,19 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
       {/* --- Förderung (inkl. Baubewilligung + MA25) --- */}
       <Section title="Förderung">
         {zeigeBaujahr(value.objektart) && (
-          <Field label="Baubewilligung des Gebäudes" htmlFor="baubewilligung">
-            <Select
-              id="baubewilligung"
-              value={value.baubewilligungGebaeude}
-              disabled={ma25Offen}
-              onChange={(e) => set('baubewilligungGebaeude', e.target.value as MietobjektInput['baubewilligungGebaeude'])}
-            >
-              {(Object.keys(BAUBEWILLIGUNG_LABEL) as (keyof typeof BAUBEWILLIGUNG_LABEL)[]).map((k) => (
-                <option key={k} value={k}>
-                  {BAUBEWILLIGUNG_LABEL[k]}
-                </option>
-              ))}
-            </Select>
-          </Field>
+          <SelectField
+            label="Baubewilligung des Gebäudes"
+            id="baubewilligung"
+            value={value.baubewilligungGebaeude}
+            disabled={ma25Offen}
+            onChange={(e) => set('baubewilligungGebaeude', e.target.value as MietobjektInput['baubewilligungGebaeude'])}
+          >
+            {(Object.keys(BAUBEWILLIGUNG_LABEL) as (keyof typeof BAUBEWILLIGUNG_LABEL)[]).map((k) => (
+              <option key={k} value={k}>
+                {BAUBEWILLIGUNG_LABEL[k]}
+              </option>
+            ))}
+          </SelectField>
         )}
 
         {value.objektart === 'dg_ausbau' && (
@@ -137,42 +135,48 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
 
         {zeigeFoerderung(value.objektart) ? (
           <>
-            <Field
+            <SelectField
               label="Öffentliche Wohnbauförderung"
-              htmlFor="foerderung"
+              id="foerderung"
               hint='Datensätze laut Unterlage „Förderungen".'
+              value={value.foerderungProgramm}
+              disabled={ma25Offen}
+              onChange={(e) => set('foerderungProgramm', e.target.value as MietobjektInput['foerderungProgramm'])}
             >
-              <Select
-                id="foerderung"
-                value={value.foerderungProgramm}
-                disabled={ma25Offen}
-                onChange={(e) => set('foerderungProgramm', e.target.value as MietobjektInput['foerderungProgramm'])}
-              >
-                {(Object.keys(FOERDERUNG_PROGRAMM_LABEL) as (keyof typeof FOERDERUNG_PROGRAMM_LABEL)[]).map((k) => (
-                  <option key={k} value={k}>
-                    {FOERDERUNG_PROGRAMM_LABEL[k]}
-                  </option>
-                ))}
-              </Select>
-            </Field>
+              {(Object.keys(FOERDERUNG_PROGRAMM_LABEL) as (keyof typeof FOERDERUNG_PROGRAMM_LABEL)[]).map((k) => (
+                <option key={k} value={k}>
+                  {FOERDERUNG_PROGRAMM_LABEL[k]}
+                </option>
+              ))}
+            </SelectField>
 
+            {/* Rückzahlung erst nach Klick auf die Checkbox */}
             {statusRelevant(value.foerderungProgramm) && !ma25Offen && (
-              <Field label="Stand der Rückzahlung" htmlFor="tilgung">
-                <Select
-                  id="tilgung"
-                  value={value.tilgungsstatus}
-                  onChange={(e) => set('tilgungsstatus', e.target.value as MietobjektInput['tilgungsstatus'])}
-                >
-                  {(Object.keys(TILGUNGSSTATUS_LABEL) as (keyof typeof TILGUNGSSTATUS_LABEL)[]).map((k) => (
-                    <option key={k} value={k}>
-                      {TILGUNGSSTATUS_LABEL[k]}
-                    </option>
-                  ))}
-                </Select>
-              </Field>
+              <div>
+                <Checkbox
+                  checked={rueckzahlungOffen}
+                  onChange={setRueckzahlungOffen}
+                  label="Angaben zum Stand der Rückzahlung"
+                />
+                {rueckzahlungOffen && (
+                  <div className="mt-4 space-y-4">
+                    <SelectField
+                      label="Stand der Rückzahlung"
+                      id="tilgung"
+                      value={value.tilgungsstatus}
+                      onChange={(e) => set('tilgungsstatus', e.target.value as MietobjektInput['tilgungsstatus'])}
+                    >
+                      {(Object.keys(TILGUNGSSTATUS_LABEL) as (keyof typeof TILGUNGSSTATUS_LABEL)[]).map((k) => (
+                        <option key={k} value={k}>
+                          {TILGUNGSSTATUS_LABEL[k]}
+                        </option>
+                      ))}
+                    </SelectField>
+                    {value.foerderungProgramm === 'wwg1948' && <WwafHinweis anschrift={value.anschrift} />}
+                  </div>
+                )}
+              </div>
             )}
-
-            {value.foerderungProgramm === 'wwg1948' && !ma25Offen && <WwafHinweis anschrift={value.anschrift} />}
 
             {/* MA25-Anfrage: Baujahr UND Förderung unbekannt */}
             <div>
@@ -185,7 +189,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
             </div>
           </>
         ) : (
-          <p className="text-sm text-neutral-500">Bei dieser Objektart ist die Förderung für die Einstufung ohne Bedeutung.</p>
+          <p className="text-base text-neutral-500">Bei dieser Objektart ist die Förderung für die Einstufung ohne Bedeutung.</p>
         )}
       </Section>
 
@@ -193,23 +197,22 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
       {zeigeAusstattung(value.objektart) && (
         <Section title="Ausstattung, Zustand & Zu-/Abschläge">
           {zeigeKategorie(value.objektart) && zeigeKat && (
-            <Field label="Ausstattungskategorie" htmlFor="kategorie">
-              <Select
-                id="kategorie"
-                value={value.kategorie}
-                onChange={(e) => set('kategorie', e.target.value as MietobjektInput['kategorie'])}
-              >
-                {(Object.keys(KATEGORIE_LABEL) as (keyof typeof KATEGORIE_LABEL)[]).map((k) => (
-                  <option key={k} value={k}>
-                    {KATEGORIE_LABEL[k]}
-                  </option>
-                ))}
-              </Select>
-            </Field>
+            <SelectField
+              label="Ausstattungskategorie"
+              id="kategorie"
+              value={value.kategorie}
+              onChange={(e) => set('kategorie', e.target.value as MietobjektInput['kategorie'])}
+            >
+              {(Object.keys(KATEGORIE_LABEL) as (keyof typeof KATEGORIE_LABEL)[]).map((k) => (
+                <option key={k} value={k}>
+                  {KATEGORIE_LABEL[k]}
+                </option>
+              ))}
+            </SelectField>
           )}
 
           {!istRichtwert && (
-            <p className="rounded-md bg-neutral-100 px-3 py-2 text-xs text-neutral-600">
+            <p className="rounded-md bg-neutral-100 px-3 py-2 text-sm text-neutral-600">
               Für diese Wohnung gilt kein Richtwert – daher sind hier keine Zu- und Abschläge anzugeben. Beim freien oder
               angemessenen Mietzins zählt die Marktbandbreite je Bezirk (Ausstattung ist dort bereits im Marktpreis
               enthalten).
@@ -218,55 +221,53 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
 
           {istRichtwert && (
             <>
-          <Field label="Erhaltungszustand des Hauses" htmlFor="zustand">
-            <Select
-              id="zustand"
-              value={value.zustandHaus}
-              onChange={(e) => set('zustandHaus', e.target.value as MietobjektInput['zustandHaus'])}
-            >
-              {(Object.keys(ZUSTAND_HAUS_LABEL) as (keyof typeof ZUSTAND_HAUS_LABEL)[]).map((k) => (
-                <option key={k} value={k}>
-                  {ZUSTAND_HAUS_LABEL[k]}
-                </option>
-              ))}
-            </Select>
-          </Field>
-
-          <Field label="Geschoss" htmlFor="stockwerk">
-            <Select
-              id="stockwerk"
-              value={value.stockwerk}
-              onChange={(e) => set('stockwerk', e.target.value as MietobjektInput['stockwerk'])}
-            >
-              {(Object.keys(STOCKWERK_LABEL) as (keyof typeof STOCKWERK_LABEL)[]).map((k) => (
-                <option key={k} value={k}>
-                  {STOCKWERK_LABEL[k]}
-                </option>
-              ))}
-            </Select>
-          </Field>
-
-          <Checkbox
-            checked={value.heizung === 'zentral_etage'}
-            onChange={(v) => set('heizung', v ? 'zentral_etage' : 'keine')}
-            label="Zentral- oder Etagenheizung"
-          />
-
-          {MERKMAL_GRUPPEN.map((gruppe) => (
-            <div key={gruppe} className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">{gruppe}</p>
-              <div className="flex flex-col gap-2">
-                {MERKMAL_KATALOG.filter((m) => m.gruppe === gruppe).map((m) => (
-                  <Checkbox
-                    key={m.key}
-                    checked={value.merkmale[m.key]}
-                    onChange={(v) => setMerkmal(m.key, v)}
-                    label={m.label}
-                  />
+              <SelectField
+                label="Erhaltungszustand des Hauses"
+                id="zustand"
+                value={value.zustandHaus}
+                onChange={(e) => set('zustandHaus', e.target.value as MietobjektInput['zustandHaus'])}
+              >
+                {(Object.keys(ZUSTAND_HAUS_LABEL) as (keyof typeof ZUSTAND_HAUS_LABEL)[]).map((k) => (
+                  <option key={k} value={k}>
+                    {ZUSTAND_HAUS_LABEL[k]}
+                  </option>
                 ))}
-              </div>
-            </div>
-          ))}
+              </SelectField>
+
+              <SelectField
+                label="Geschoss"
+                id="stockwerk"
+                value={value.stockwerk}
+                onChange={(e) => set('stockwerk', e.target.value as MietobjektInput['stockwerk'])}
+              >
+                {(Object.keys(STOCKWERK_LABEL) as (keyof typeof STOCKWERK_LABEL)[]).map((k) => (
+                  <option key={k} value={k}>
+                    {STOCKWERK_LABEL[k]}
+                  </option>
+                ))}
+              </SelectField>
+
+              <Checkbox
+                checked={value.heizung === 'zentral_etage'}
+                onChange={(v) => set('heizung', v ? 'zentral_etage' : 'keine')}
+                label="Zentral- oder Etagenheizung"
+              />
+
+              {MERKMAL_GRUPPEN.map((gruppe) => (
+                <div key={gruppe} className="space-y-2">
+                  <p className="text-sm font-semibold uppercase tracking-wider text-neutral-500">{gruppe}</p>
+                  <div className="flex flex-col gap-2">
+                    {MERKMAL_KATALOG.filter((m) => m.gruppe === gruppe).map((m) => (
+                      <Checkbox
+                        key={m.key}
+                        checked={value.merkmale[m.key]}
+                        onChange={(v) => setMerkmal(m.key, v)}
+                        label={m.label}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
             </>
           )}
         </Section>

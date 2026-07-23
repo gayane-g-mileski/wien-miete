@@ -40,9 +40,9 @@ function App() {
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cream-50 text-sm font-bold text-sage">
               MZ
             </span>
-            <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Mietzins-Check Wien</h1>
+            <h1 className="text-[2rem] font-bold leading-tight tracking-tight">Mietzins-Check Wien</h1>
           </div>
-          <p className="max-w-2xl text-sm text-cream-200">
+          <p className="max-w-2xl text-base text-cream-200">
             Ersteinschätzung von Mietzinsart, Schutzumfang und marktüblicher Preisbandbreite – für Vermieter:innen und
             Immobilien-Anleger:innen in Wien.
           </p>
@@ -53,13 +53,13 @@ function App() {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
           {/* Links: alle Eingaben untereinander (schwarz-weiß) */}
           <section>
-            <h2 className="mb-4 text-base font-semibold text-neutral-700">Eingabe</h2>
+            <h2 className="mb-4 text-2xl font-semibold text-neutral-700">Eingabe</h2>
             <Formular value={input} onChange={setInput} mietzinsArt={ergebnis.mietzinsArt} />
           </section>
 
           {/* Rechts: Ergebnis (farbig) */}
           <section className="lg:sticky lg:top-6">
-            <h2 className="mb-4 text-base font-semibold text-neutral-700">Ergebnis</h2>
+            <h2 className="mb-4 text-2xl font-semibold text-neutral-700">Ergebnis</h2>
             <Ergebnis ergebnis={ergebnis} />
           </section>
         </div>

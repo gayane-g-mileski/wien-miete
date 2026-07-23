@@ -38,8 +38,8 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
 
   return (
     <div className={`rounded-2xl border border-sand-line bg-cream-50 p-5 shadow-sm ring-1 sm:p-6 ${style.ring}`}>
-      <h2 className="mb-1 text-lg font-semibold text-wine">Ergebnis der Ersteinschätzung</h2>
-      <p className="mb-4 text-sm text-ink-soft">Basierend auf den eingegebenen Objektmerkmalen.</p>
+      <h2 className="mb-1 text-2xl font-semibold text-wine">Ergebnis der Ersteinschätzung</h2>
+      <p className="mb-4 text-base text-ink-soft">Basierend auf den eingegebenen Objektmerkmalen.</p>
 
       <div>
         <Zeile nr={1} label="Mietzinsart">
