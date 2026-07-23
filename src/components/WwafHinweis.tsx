@@ -21,11 +21,17 @@ function anfrageText(anschrift: string): string {
   )
 }
 
+const KONTAKTE = [
+  { name: 'Gerlinde Weiss', email: 'gerlinde.weiss@bmdw.gv.at' },
+  { name: 'Monika Kail', email: 'monika.kail@bmdw.gv.at' },
+  { name: 'Ilse Kovacs', email: 'ilse.kovacs@bmdw.gv.at' },
+]
+
 export function WwafHinweis({ anschrift }: { anschrift: string }) {
   const [text, setText] = useState(() => anfrageText(anschrift))
 
-  const senden = () => {
-    const href = `mailto:?subject=${encodeURIComponent('Anfrage Bundeswohnbaufonds – Stand der Rückzahlung')}&body=${encodeURIComponent(text)}`
+  const senden = (email: string) => {
+    const href = `mailto:${email}?subject=${encodeURIComponent('Anfrage Bundeswohnbaufonds – Stand der Rückzahlung')}&body=${encodeURIComponent(text)}`
     window.location.href = href
   }
 
@@ -49,13 +55,19 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
       <div>
         <p className="mb-1.5 font-semibold text-neutral-800">Anfrage-Text</p>
         <Textarea rows={10} value={text} onChange={(e) => setText(e.target.value)} />
-        <button
-          type="button"
-          onClick={senden}
-          className="mt-2 w-full rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-neutral-700"
-        >
-          Anfrage per E-Mail öffnen
-        </button>
+        <p className="mt-2 text-xs text-neutral-500">Anfrage per E-Mail an eine zuständige Person senden:</p>
+        <div className="mt-1 flex flex-col gap-2 sm:flex-row">
+          {KONTAKTE.map((k) => (
+            <button
+              key={k.email}
+              type="button"
+              onClick={() => senden(k.email)}
+              className="flex-1 rounded-lg bg-neutral-900 px-3 py-2 text-sm font-semibold text-white hover:bg-neutral-700"
+            >
+              {k.name}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div>
