@@ -16,6 +16,7 @@ import { BEZIRKE, MERKMAL_GRUPPEN, MERKMAL_KATALOG } from '../lib/pricingData'
 import { Checkbox, Field, NumberInput, Section, Select } from './ui'
 import { AnschriftFeld } from './AnschriftFeld'
 import { Ma25Anfrage } from './Ma25Anfrage'
+import { WwafHinweis } from './WwafHinweis'
 
 interface Props {
   value: MietobjektInput
@@ -170,6 +171,8 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                 </Select>
               </Field>
             )}
+
+            {value.foerderungProgramm === 'wwg1948' && !ma25Offen && <WwafHinweis anschrift={value.anschrift} />}
 
             {/* MA25-Anfrage: Baujahr UND Förderung unbekannt */}
             <div>
