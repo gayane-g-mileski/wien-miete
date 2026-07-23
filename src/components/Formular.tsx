@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import type { MerkmalKey, MietobjektInput } from '../lib/types'
+import type { MerkmalKey, MietobjektInput, MietzinsArt } from '../lib/types'
 import {
   BAUBEWILLIGUNG_LABEL,
   KATEGORIE_LABEL,
@@ -20,10 +20,12 @@ import { Ma25Anfrage } from './Ma25Anfrage'
 interface Props {
   value: MietobjektInput
   onChange: (next: MietobjektInput) => void
-  istRichtwert: boolean
+  mietzinsArt: MietzinsArt
 }
 
-export function Formular({ value, onChange, istRichtwert }: Props) {
+export function Formular({ value, onChange, mietzinsArt }: Props) {
+  const istRichtwert = mietzinsArt === 'richtwert'
+  const zeigeKat = istRichtwert || mietzinsArt === 'kategorie_d'
   const [ma25Offen, setMa25Offen] = useState(false)
   const valueRef = useRef(value)
   valueRef.current = value
@@ -187,7 +189,7 @@ export function Formular({ value, onChange, istRichtwert }: Props) {
       {/* --- Ausstattung, Zustand & Zu-/Abschläge --- */}
       {zeigeAusstattung(value.objektart) && (
         <Section title="Ausstattung, Zustand & Zu-/Abschläge">
-          {zeigeKategorie(value.objektart) && (
+          {zeigeKategorie(value.objektart) && zeigeKat && (
             <Field label="Ausstattungskategorie" htmlFor="kategorie">
               <Select
                 id="kategorie"
