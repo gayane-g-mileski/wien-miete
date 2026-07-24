@@ -26,7 +26,7 @@ interface Props {
 
 export function Formular({ value, onChange, mietzinsArt }: Props) {
   const [ma25Offen, setMa25Offen] = useState(false)
-  const [rueckzahlungOffen, setRueckzahlungOffen] = useState(false)
+  const [rueckzahlungUnbekannt, setRueckzahlungUnbekannt] = useState(false)
   const valueRef = useRef(value)
   valueRef.current = value
 
@@ -150,32 +150,35 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
               ))}
             </SelectField>
 
-            {/* Rückzahlung erst nach Klick auf die Checkbox */}
+            {/* Stand der Rückzahlung: Dropdown sofort sichtbar (wenn relevant) */}
             {statusRelevant(value.foerderungProgramm) && !ma25Offen && (
-              <div>
-                <Checkbox
-                  checked={rueckzahlungOffen}
-                  onChange={setRueckzahlungOffen}
-                  label="Angaben zum Stand der Rückzahlung"
-                />
-                {rueckzahlungOffen && (
-                  <div className="mt-4 space-y-4">
-                    <SelectField
-                      label="Stand der Rückzahlung"
-                      id="tilgung"
-                      value={value.tilgungsstatus}
-                      onChange={(e) => set('tilgungsstatus', e.target.value as MietobjektInput['tilgungsstatus'])}
-                    >
-                      {(Object.keys(TILGUNGSSTATUS_LABEL) as (keyof typeof TILGUNGSSTATUS_LABEL)[]).map((k) => (
-                        <option key={k} value={k}>
-                          {TILGUNGSSTATUS_LABEL[k]}
-                        </option>
-                      ))}
-                    </SelectField>
-                    {value.foerderungProgramm === 'wwg1948' && <WwafHinweis anschrift={value.anschrift} />}
+              <>
+                <SelectField
+                  label="Stand der Rückzahlung"
+                  id="tilgung"
+                  value={value.tilgungsstatus}
+                  disabled={rueckzahlungUnbekannt}
+                  onChange={(e) => set('tilgungsstatus', e.target.value as MietobjektInput['tilgungsstatus'])}
+                >
+                  {(Object.keys(TILGUNGSSTATUS_LABEL) as (keyof typeof TILGUNGSSTATUS_LABEL)[]).map((k) => (
+                    <option key={k} value={k}>
+                      {TILGUNGSSTATUS_LABEL[k]}
+                    </option>
+                  ))}
+                </SelectField>
+
+                {/* Nur der unbekannte Status: Anfrage beim Bundeswohnbaufonds */}
+                {value.foerderungProgramm === 'wwg1948' && (
+                  <div>
+                    <Checkbox
+                      checked={rueckzahlungUnbekannt}
+                      onChange={setRueckzahlungUnbekannt}
+                      label="Stand der Rückzahlung unbekannt? Beim Bundeswohnbaufonds anfragen"
+                    />
+                    {rueckzahlungUnbekannt && <WwafHinweis anschrift={value.anschrift} />}
                   </div>
                 )}
-              </div>
+              </>
             )}
 
             {/* MA25-Anfrage: Baujahr UND Förderung unbekannt */}
