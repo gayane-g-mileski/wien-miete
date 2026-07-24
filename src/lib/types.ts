@@ -19,7 +19,7 @@ export type Objektart =
   | 'nebenflaeche_separat'
   | 'wirtschaftspark'
 
-export type BaubewilligungGebaeude = 'vor_1945' | '1945_1953' | '1953_2001' | '2002_2006' | 'nach_2006'
+export type BaubewilligungGebaeude = 'vor_1945' | '1945_1953' | 'nach_1953'
 
 export type Kategorie = 'A' | 'B' | 'C' | 'D_brauchbar' | 'D_unbrauchbar'
 

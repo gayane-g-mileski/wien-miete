@@ -46,9 +46,7 @@ export const OBJEKTART_GRUPPEN: { label: string; optionen: { value: Objektart; l
 export const BAUBEWILLIGUNG_LABEL: Record<BaubewilligungGebaeude, string> = {
   vor_1945: 'bis 8.5.1945 (Altbau)',
   '1945_1953': '9.5.1945 – 30.6.1953',
-  '1953_2001': '1.7.1953 – 31.12.2001 (Neubau)',
-  '2002_2006': '1.1.2002 – 30.9.2006 (Neubau)',
-  nach_2006: 'nach dem 30.9.2006 (Neubau)',
+  nach_1953: 'nach dem 30.6.1953 (Neubau)',
 }
 
 export const KATEGORIE_LABEL: Record<Kategorie, string> = {

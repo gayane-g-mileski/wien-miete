@@ -80,7 +80,11 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
       <p className="text-sm text-neutral-500">
         Das gilt aber nur, wenn gerade deine Wohnung mit Mitteln des Wiederaufbaufonds saniert wurde. Wurde das Darlehen
         nach dem 31.8.1952 bewilligt, genügt es, dass allgemeine Teile des Hauses wiederhergestellt wurden – zum Beispiel
-        Stiegenhaus, Dach oder Außenmauern.
+        Stiegenhaus, Dach oder Außenmauern.{' '}
+        <span className="text-neutral-700">
+          Ist diese Voraussetzung erfüllt, gilt einer der drei Fälle oben. Ist sie nicht erfüllt, wird die Wohnung wie ein
+          gewöhnlicher Altbau behandelt – dann gilt der <span className="font-semibold text-neutral-900">Richtwertmietzins</span>.
+        </span>
       </p>
     </div>
   )
