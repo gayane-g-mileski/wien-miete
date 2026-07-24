@@ -303,7 +303,11 @@ export function evaluateMrg(input: MietobjektInput): MrgErgebnis {
   }
   const istWohnObjekt = input.objektart === 'wohnung' || input.objektart === 'dg_ausbau' || input.objektart === 'zubau'
   const istGeschaeft = input.objektart === 'geschaeftsraum'
-  if ((istWohnObjekt || istGeschaeft) && input.baubewilligungGebaeude === 'nach_1953' && !input.eigentumswohnung) {
+  const nach1953 =
+    input.baubewilligungGebaeude === '1953_2001' ||
+    input.baubewilligungGebaeude === '2002_2006' ||
+    input.baubewilligungGebaeude === 'nach_2006'
+  if ((istWohnObjekt || istGeschaeft) && nach1953 && !input.eigentumswohnung) {
     return result(
       'frei',
       'teil',
@@ -312,7 +316,7 @@ export function evaluateMrg(input: MietobjektInput): MrgErgebnis {
       ['Das Haus ist ein Neubau (Baubewilligung nach Juni 1953) ohne öffentliche Förderung. Die Miethöhe ist frei, ein Kündigungsschutz besteht aber.'],
     )
   }
-  if (input.objektart === 'wohnung' && input.eigentumswohnung && input.baubewilligungGebaeude === 'nach_1953') {
+  if (input.objektart === 'wohnung' && input.eigentumswohnung && nach1953) {
     return result(
       'frei',
       'teil',
