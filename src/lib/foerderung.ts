@@ -1,4 +1,4 @@
-import type { FoerderungProgramm, MietzinsArt, MrgAnwendung, Tilgungsstatus } from './types'
+import type { BaubewilligungGebaeude, FoerderungProgramm, MietzinsArt, MrgAnwendung, Tilgungsstatus } from './types'
 import { GESETZ, type Gesetzeslink } from './gesetze'
 
 // Datensätze aus der Unterlage "Förderungen": je Förderungsprogramm und
@@ -34,6 +34,17 @@ export const TILGUNGSSTATUS_LABEL: Record<Tilgungsstatus, string> = {
 
 export function statusRelevant(programm: FoerderungProgramm): boolean {
   return programm === 'wwg1948' || programm === 'wfg1968'
+}
+
+/**
+ * Nur die Förderungen anbieten, die zum Baualter passen: der
+ * Wohnhauswiederaufbaufonds betrifft kriegsbeschädigte Altbauten, die
+ * späteren Wohnbauförderungen nur Neubauten ab ihrer Einführung.
+ */
+export function foerderungenFuer(baujahr: BaubewilligungGebaeude): FoerderungProgramm[] {
+  if (baujahr === 'vor_1945') return ['keine', 'wwg1948']
+  if (baujahr === '1945_1953') return ['keine', 'wwg1948', 'gr_beschluss', 'wgg']
+  return ['keine', 'wfg1954', 'gr_beschluss', 'wfg1968', 'wfg1984', 'wwfsg1989', 'wgg']
 }
 
 const teilFrei = (text: string, hinweise: string[] = []): FoerderungOutcome => ({

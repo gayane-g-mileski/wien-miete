@@ -11,8 +11,8 @@ import {
   zeigeFoerderung,
   zeigeKategorie,
 } from '../lib/labels'
-import { FOERDERUNG_PROGRAMM_LABEL, TILGUNGSSTATUS_LABEL, statusRelevant } from '../lib/foerderung'
-import { BEZIRKE, MERKMAL_GRUPPEN, MERKMAL_KATALOG } from '../lib/pricingData'
+import { FOERDERUNG_PROGRAMM_LABEL, TILGUNGSSTATUS_LABEL, foerderungenFuer, statusRelevant } from '../lib/foerderung'
+import { BEZIRKE, MERKMAL_GRUPPEN, MERKMAL_KATALOG, bezirkAusAnschrift } from '../lib/pricingData'
 import { Checkbox, NumberField, Section, SelectField } from './ui'
 import { AnschriftFeld } from './AnschriftFeld'
 import { Ma25Anfrage } from './Ma25Anfrage'
@@ -32,6 +32,8 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
 
   const istRichtwert = mietzinsArt === 'richtwert'
   const zeigeKat = istRichtwert || mietzinsArt === 'kategorie_d'
+  // Bezirk aus der Anschrift (gewählte Adresse oder erkannte PLZ)
+  const bezirkErkannt = value.anschriftBezirk ?? bezirkAusAnschrift(value.anschrift)
 
   const set = <K extends keyof MietobjektInput>(key: K, v: MietobjektInput[K]) => onChange({ ...value, [key]: v })
   const setMerkmal = (key: MerkmalKey, v: boolean) => onChange({ ...value, merkmale: { ...value.merkmale, [key]: v } })
@@ -57,8 +59,21 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
           ))}
         </SelectField>
 
-        {/* Anschrift + Bezirk nebeneinander */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-[2fr_1fr]">
+        {/* Bezirk links, Anschrift rechts */}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-[1fr_2fr]">
+          <SelectField
+            label="Bezirk"
+            id="bezirk"
+            value={bezirkErkannt ?? value.bezirk}
+            disabled={bezirkErkannt != null}
+            onChange={(e) => set('bezirk', Number(e.target.value))}
+          >
+            {BEZIRKE.map((b) => (
+              <option key={b.nr} value={b.nr}>
+                {b.nr}. {b.name}
+              </option>
+            ))}
+          </SelectField>
           <AnschriftFeld
             value={value.anschrift}
             onChange={(text, bezirk, koords) =>
@@ -72,19 +87,6 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
             }
             onGemeindebau={(detected) => onChange({ ...valueRef.current, gemeindebau: detected })}
           />
-          <SelectField
-            label="Bezirk"
-            id="bezirk"
-            value={value.bezirk}
-            disabled={value.anschriftBezirk != null}
-            onChange={(e) => set('bezirk', Number(e.target.value))}
-          >
-            {BEZIRKE.map((b) => (
-              <option key={b.nr} value={b.nr}>
-                {b.nr}. {b.name}
-              </option>
-            ))}
-          </SelectField>
         </div>
 
         <NumberField
@@ -97,7 +99,9 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
         />
 
         <Checkbox checked={value.eigentumswohnung} onChange={(v) => set('eigentumswohnung', v)} label="Eigentumswohnung" />
-        <Checkbox checked={value.befristet} onChange={(v) => set('befristet', v)} label="befristeter Mietvertrag" />
+        {istRichtwert && (
+          <Checkbox checked={value.befristet} onChange={(v) => set('befristet', v)} label="befristeter Mietvertrag" />
+        )}
       </Section>
 
       {/* --- Förderung (inkl. Baubewilligung + MA25) --- */}
@@ -108,7 +112,12 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
             id="baubewilligung"
             value={value.baubewilligungGebaeude}
             disabled={ma25Offen}
-            onChange={(e) => set('baubewilligungGebaeude', e.target.value as MietobjektInput['baubewilligungGebaeude'])}
+            onChange={(e) => {
+              const b = e.target.value as MietobjektInput['baubewilligungGebaeude']
+              const erlaubt = foerderungenFuer(b)
+              const prog = erlaubt.includes(value.foerderungProgramm) ? value.foerderungProgramm : 'keine'
+              onChange({ ...value, baubewilligungGebaeude: b, foerderungProgramm: prog })
+            }}
           >
             {(Object.keys(BAUBEWILLIGUNG_LABEL) as (keyof typeof BAUBEWILLIGUNG_LABEL)[]).map((k) => (
               <option key={k} value={k}>
@@ -135,57 +144,48 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
 
         {zeigeFoerderung(value.objektart) ? (
           <>
-            {value.baubewilligungGebaeude === 'vor_1945' ? (
-              <p className="rounded-md bg-neutral-100 px-3 py-2 text-sm text-neutral-600">
-                Bei einem Altbau (Baubewilligung bis 8.5.1945) ist die öffentliche Förderung für die Einstufung ohne
-                Bedeutung.
-              </p>
-            ) : (
+            <SelectField
+              label="Öffentliche Wohnbauförderung"
+              id="foerderung"
+              hint='Datensätze laut Unterlage „Förderungen".'
+              value={value.foerderungProgramm}
+              disabled={ma25Offen}
+              onChange={(e) => set('foerderungProgramm', e.target.value as MietobjektInput['foerderungProgramm'])}
+            >
+              {foerderungenFuer(value.baubewilligungGebaeude).map((k) => (
+                <option key={k} value={k}>
+                  {FOERDERUNG_PROGRAMM_LABEL[k]}
+                </option>
+              ))}
+            </SelectField>
+
+            {/* Stand der Rückzahlung: Dropdown sofort sichtbar (wenn relevant) */}
+            {statusRelevant(value.foerderungProgramm) && !ma25Offen && (
               <>
                 <SelectField
-                  label="Öffentliche Wohnbauförderung"
-                  id="foerderung"
-                  hint='Datensätze laut Unterlage „Förderungen".'
-                  value={value.foerderungProgramm}
-                  disabled={ma25Offen}
-                  onChange={(e) => set('foerderungProgramm', e.target.value as MietobjektInput['foerderungProgramm'])}
+                  label="Stand der Rückzahlung"
+                  id="tilgung"
+                  value={value.tilgungsstatus}
+                  disabled={rueckzahlungUnbekannt}
+                  onChange={(e) => set('tilgungsstatus', e.target.value as MietobjektInput['tilgungsstatus'])}
                 >
-                  {(Object.keys(FOERDERUNG_PROGRAMM_LABEL) as (keyof typeof FOERDERUNG_PROGRAMM_LABEL)[]).map((k) => (
+                  {(Object.keys(TILGUNGSSTATUS_LABEL) as (keyof typeof TILGUNGSSTATUS_LABEL)[]).map((k) => (
                     <option key={k} value={k}>
-                      {FOERDERUNG_PROGRAMM_LABEL[k]}
+                      {TILGUNGSSTATUS_LABEL[k]}
                     </option>
                   ))}
                 </SelectField>
 
-                {/* Stand der Rückzahlung: Dropdown sofort sichtbar (wenn relevant) */}
-                {statusRelevant(value.foerderungProgramm) && !ma25Offen && (
-                  <>
-                    <SelectField
-                      label="Stand der Rückzahlung"
-                      id="tilgung"
-                      value={value.tilgungsstatus}
-                      disabled={rueckzahlungUnbekannt}
-                      onChange={(e) => set('tilgungsstatus', e.target.value as MietobjektInput['tilgungsstatus'])}
-                    >
-                      {(Object.keys(TILGUNGSSTATUS_LABEL) as (keyof typeof TILGUNGSSTATUS_LABEL)[]).map((k) => (
-                        <option key={k} value={k}>
-                          {TILGUNGSSTATUS_LABEL[k]}
-                        </option>
-                      ))}
-                    </SelectField>
-
-                    {/* Nur der unbekannte Status: Anfrage beim Bundeswohnbaufonds */}
-                    {value.foerderungProgramm === 'wwg1948' && (
-                      <div>
-                        <Checkbox
-                          checked={rueckzahlungUnbekannt}
-                          onChange={setRueckzahlungUnbekannt}
-                          label="Stand der Rückzahlung unbekannt? Beim Bundeswohnbaufonds anfragen"
-                        />
-                        {rueckzahlungUnbekannt && <WwafHinweis anschrift={value.anschrift} />}
-                      </div>
-                    )}
-                  </>
+                {/* Nur der unbekannte Status: Anfrage beim Bundeswohnbaufonds */}
+                {value.foerderungProgramm === 'wwg1948' && (
+                  <div>
+                    <Checkbox
+                      checked={rueckzahlungUnbekannt}
+                      onChange={setRueckzahlungUnbekannt}
+                      label="Stand der Rückzahlung unbekannt? Beim Bundeswohnbaufonds anfragen"
+                    />
+                    {rueckzahlungUnbekannt && <WwafHinweis anschrift={value.anschrift} />}
+                  </div>
                 )}
               </>
             )}

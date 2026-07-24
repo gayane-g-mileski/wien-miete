@@ -122,12 +122,12 @@ export function Checkbox({
   )
 }
 
-/** Abschnitts-Container mit Titel. */
+/** Abschnitts-Container – Titel steht außerhalb, oberhalb des Rahmens. */
 export function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <fieldset className="space-y-5 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">
-      <legend className="px-2 text-sm font-semibold uppercase tracking-wider text-neutral-500">{title}</legend>
-      {children}
-    </fieldset>
+    <section>
+      <h3 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wider text-neutral-500">{title}</h3>
+      <div className="space-y-5 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">{children}</div>
+    </section>
   )
 }
