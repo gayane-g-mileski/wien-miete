@@ -62,15 +62,17 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
           <li>
             <span className="font-medium text-neutral-800">Darlehen planmäßig zurückgezahlt:</span> Es gilt in der Regel
             die Richtwert-Obergrenze. In bestimmten Fällen darf die Miete auch marktüblich sein – etwa bei
-            Geschäftsräumen, neu geschaffenem Wohnraum, Denkmalschutz oder großen A/B-Wohnungen über 130 m².
+            Geschäftsräumen, neu geschaffenem Wohnraum, Denkmalschutz oder großen A/B-Wohnungen über 130 m².{' '}
+            <span className="font-semibold text-neutral-900">→ Richtwertmietzins (in bestimmten Fällen angemessener Mietzins)</span>
           </li>
           <li>
             <span className="font-medium text-neutral-800">Vorzeitig bis Ende 1988 zurückgezahlt:</span> Die Miete darf so
-            hoch sein wie bei vergleichbaren Wohnungen üblich.
+            hoch sein wie bei vergleichbaren Wohnungen üblich.{' '}
+            <span className="font-semibold text-neutral-900">→ angemessener Mietzins</span>
           </li>
           <li>
             <span className="font-medium text-neutral-800">Vorzeitig bis Ende 1982 zurückgezahlt:</span> Die Miethöhe ist
-            frei vereinbar.
+            frei vereinbar. <span className="font-semibold text-neutral-900">→ freier Mietzins</span>
           </li>
         </ul>
       </div>
