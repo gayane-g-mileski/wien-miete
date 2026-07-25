@@ -114,10 +114,12 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
           onChange={(e) => set('flaeche', Math.max(0, Number(e.target.value)))}
         />
 
-        <Checkbox checked={value.eigentumswohnung} onChange={(v) => set('eigentumswohnung', v)} label="Eigentumswohnung" />
-        {istRichtwert && (
-          <Checkbox checked={value.befristet} onChange={(v) => set('befristet', v)} label="befristeter Mietvertrag" />
-        )}
+        <div className="space-y-2">
+          <Checkbox checked={value.eigentumswohnung} onChange={(v) => set('eigentumswohnung', v)} label="Eigentumswohnung" />
+          {istRichtwert && (
+            <Checkbox checked={value.befristet} onChange={(v) => set('befristet', v)} label="Befristeter Mietvertrag" />
+          )}
+        </div>
       </Section>
 
       {/* --- Förderung (inkl. Baubewilligung + MA25) --- */}

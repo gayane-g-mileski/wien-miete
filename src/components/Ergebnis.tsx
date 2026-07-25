@@ -1,10 +1,10 @@
 import type { LageStatus, MrgAnwendung, MrgErgebnis } from '../lib/types'
 import { flaechenwidmungLink, laerminfoLink } from '../lib/geo'
 
-const ANWENDUNG_STYLE: Record<MrgAnwendung, { badge: string; ring: string; dot: string }> = {
-  voll: { badge: 'bg-wine/10 text-wine ring-wine/30', ring: 'ring-wine/20', dot: 'bg-wine' },
-  teil: { badge: 'bg-terracotta/15 text-terracotta-600 ring-terracotta/40', ring: 'ring-terracotta/25', dot: 'bg-terracotta' },
-  ausnahme: { badge: 'bg-sage/15 text-sage-700 ring-sage/40', ring: 'ring-sage/25', dot: 'bg-sage' },
+const ANWENDUNG_STYLE: Record<MrgAnwendung, { accent: string; ring: string }> = {
+  voll: { accent: 'border-wine text-wine', ring: 'ring-wine/20' },
+  teil: { accent: 'border-terracotta text-terracotta-600', ring: 'ring-terracotta/25' },
+  ausnahme: { accent: 'border-sage text-sage-700', ring: 'ring-sage/25' },
 }
 
 const LAGE_STYLE: Record<LageStatus, string> = {
@@ -43,19 +43,24 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
 
       <div>
         <Zeile nr={1} label="Mietzinsart">
-          <span className="flex w-full items-center justify-center rounded-lg bg-cream-200 px-3 py-2 text-base font-semibold text-ink ring-1 ring-sand-line">
+          <span className="inline-flex items-center gap-2 border-l-2 border-sand-line pl-3 text-lg font-semibold text-ink">
             {ergebnis.mietzinsArtLabel}
           </span>
         </Zeile>
 
         <Zeile nr={2} label="Schutz & Preisgrenze">
           <div className="flex flex-col gap-2">
-            <span className={`flex w-full items-center justify-center rounded-lg px-3 py-2 text-base font-semibold ring-1 ${style.badge}`}>
+            <span className={`inline-flex items-center gap-2 border-l-2 pl-3 text-lg font-semibold ${style.accent}`}>
               {ergebnis.anwendungLabel}
             </span>
             <span className="text-[12px] text-ink-faint">
-              Kündigungsschutz: <strong className="text-ink-soft">{ergebnis.kuendigungsschutz ? 'ja' : 'nein'}</strong> ·
-              gesetzliche Preisgrenze: <strong className="text-ink-soft">{ergebnis.preisschutz ? 'ja' : 'nein'}</strong>
+              {(() => {
+                const teile = [
+                  ergebnis.kuendigungsschutz ? 'Kündigungsschutz' : null,
+                  ergebnis.preisschutz ? 'Gesetzliche Preisgrenze' : null,
+                ].filter(Boolean)
+                return teile.length > 0 ? teile.join(' · ') : 'Kein Kündigungsschutz, keine gesetzliche Preisgrenze'
+              })()}
             </span>
           </div>
         </Zeile>
