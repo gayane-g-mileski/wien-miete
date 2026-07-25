@@ -209,7 +209,11 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                       onChange={setRueckzahlungUnbekannt}
                       label="Stand der Rückzahlung unbekannt? Beim Bundeswohnbaufonds anfragen"
                     />
-                    {rueckzahlungUnbekannt && <WwafHinweis anschrift={value.anschrift} />}
+                    {rueckzahlungUnbekannt && (
+                      <div className="mt-5">
+                        <WwafHinweis anschrift={value.anschrift} />
+                      </div>
+                    )}
                   </div>
                 )}
               </>
@@ -224,7 +228,11 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                 onChange={setMa25Offen}
                 label="Baujahr und öffentliche Förderung unbekannt? Kostenlos bei der MA 25 anfragen"
               />
-              {ma25Offen && <Ma25Anfrage anschrift={value.anschrift} />}
+              {ma25Offen && (
+                <div className="mt-5">
+                  <Ma25Anfrage anschrift={value.anschrift} />
+                </div>
+              )}
             </div>
           </>
         ) : (

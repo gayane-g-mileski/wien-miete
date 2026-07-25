@@ -20,8 +20,29 @@ function anfrageText(anschrift: string): string {
   )
 }
 
+const FAELLE = [
+  {
+    titel: 'Darlehen planmäßig zurückgezahlt',
+    text:
+      'Es gilt in der Regel die Richtwert-Obergrenze. In bestimmten Fällen darf die Miete auch marktüblich sein – ' +
+      'etwa bei Geschäftsräumen, neu geschaffenem Wohnraum, Denkmalschutz oder großen A/B-Wohnungen über 130 m².',
+    ergebnis: '→ Richtwertmietzins (in bestimmten Fällen angemessener Mietzins)',
+  },
+  {
+    titel: 'Vorzeitig bis Ende 1988 zurückgezahlt',
+    text: 'Die Miete darf so hoch sein wie bei vergleichbaren Wohnungen üblich.',
+    ergebnis: '→ angemessener Mietzins',
+  },
+  {
+    titel: 'Vorzeitig bis Ende 1982 zurückgezahlt',
+    text: 'Die Miethöhe ist frei vereinbar.',
+    ergebnis: '→ freier Mietzins',
+  },
+]
+
 export function WwafHinweis({ anschrift }: { anschrift: string }) {
   const [text, setText] = useState(() => anfrageText(anschrift))
+  const [bedeutungOffen, setBedeutungOffen] = useState(false)
 
   const senden = () => {
     const href = `mailto:${EMPFAENGER}?subject=${encodeURIComponent('Anfrage Bundeswohnbaufonds – Stand der Rückzahlung')}&body=${encodeURIComponent(text)}`
@@ -29,11 +50,12 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
   }
 
   return (
-    <div className="space-y-4 rounded-xl border border-neutral-300 bg-neutral-50 p-4 text-base text-neutral-700">
+    <div className="space-y-5 rounded-xl border border-sage/30 bg-cream-50 p-5 text-base text-neutral-700">
+      <p className="text-sm font-semibold uppercase tracking-wide text-sage-700">Diese Anfrage ist kostenlos</p>
+
       <div>
-        <p className="font-semibold text-neutral-800">Stand der Rückzahlung unbekannt?</p>
-        <p className="mt-1">Diese Auskunft bekommst du über eine Anfrage an das</p>
-        <address className="mt-1 not-italic leading-relaxed text-neutral-600">
+        <p>Diese Auskunft bekommst du über eine Anfrage an das</p>
+        <address className="my-4 border-l-2 border-sage pl-3 not-italic font-medium leading-relaxed text-sage-700">
           Bundesministerium für Wissenschaft, Forschung und Wirtschaft
           <br />
           Verwaltungsstelle Bundeswohnbaufonds
@@ -42,7 +64,7 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
           <br />
           1010 Wien
         </address>
-        <p className="mt-1">oder mittels E-Mail.</p>
+        <p>oder mittels E-Mail.</p>
       </div>
 
       <div>
@@ -50,42 +72,52 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
         <button
           type="button"
           onClick={senden}
-          className="mt-3 w-full rounded-lg bg-neutral-900 px-4 py-2.5 text-base font-semibold text-white hover:bg-neutral-700"
+          className="mt-3 w-full rounded-lg bg-sage px-4 py-2.5 text-base font-semibold text-cream-50 hover:bg-sage-600"
         >
           Anfrage per E-Mail senden
         </button>
       </div>
 
-      <div>
-        <p className="font-semibold text-neutral-800">Was die Antwort für deine Miete bedeutet</p>
-        <ul className="mt-1 space-y-2">
-          <li>
-            <span className="font-medium text-neutral-800">Darlehen planmäßig zurückgezahlt:</span> Es gilt in der Regel
-            die Richtwert-Obergrenze. In bestimmten Fällen darf die Miete auch marktüblich sein – etwa bei
-            Geschäftsräumen, neu geschaffenem Wohnraum, Denkmalschutz oder großen A/B-Wohnungen über 130 m².{' '}
-            <span className="font-semibold text-neutral-900">→ Richtwertmietzins (in bestimmten Fällen angemessener Mietzins)</span>
-          </li>
-          <li>
-            <span className="font-medium text-neutral-800">Vorzeitig bis Ende 1988 zurückgezahlt:</span> Die Miete darf so
-            hoch sein wie bei vergleichbaren Wohnungen üblich.{' '}
-            <span className="font-semibold text-neutral-900">→ angemessener Mietzins</span>
-          </li>
-          <li>
-            <span className="font-medium text-neutral-800">Vorzeitig bis Ende 1982 zurückgezahlt:</span> Die Miethöhe ist
-            frei vereinbar. <span className="font-semibold text-neutral-900">→ freier Mietzins</span>
-          </li>
-        </ul>
-      </div>
+      <div className="border-t border-sand-line/70 pt-4">
+        <button
+          type="button"
+          onClick={() => setBedeutungOffen((o) => !o)}
+          aria-expanded={bedeutungOffen}
+          className="flex w-full items-center justify-between gap-2 text-left text-base font-semibold text-neutral-800"
+        >
+          <span>Was die Antwort für deine Miete bedeutet</span>
+          <svg
+            viewBox="0 0 24 24"
+            className={`h-5 w-5 shrink-0 text-sage-700 transition-transform ${bedeutungOffen ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </button>
 
-      <p className="text-sm text-neutral-500">
-        Das gilt aber nur, wenn gerade deine Wohnung mit Mitteln des Wiederaufbaufonds saniert wurde. Wurde das Darlehen
-        nach dem 31.8.1952 bewilligt, genügt es, dass allgemeine Teile des Hauses wiederhergestellt wurden – zum Beispiel
-        Stiegenhaus, Dach oder Außenmauern.{' '}
-        <span className="text-neutral-700">
-          Ist diese Voraussetzung erfüllt, gilt einer der drei Fälle oben. Ist sie nicht erfüllt, wird die Wohnung wie ein
-          gewöhnlicher Altbau behandelt – dann gilt der <span className="font-semibold text-neutral-900">Richtwertmietzins</span>.
-        </span>
-      </p>
+        {bedeutungOffen && (
+          <div className="mt-4 space-y-3">
+            {FAELLE.map((f) => (
+              <div key={f.titel} className="rounded-lg border border-sand-line/70 bg-white p-3">
+                <p className="font-semibold text-neutral-800">{f.titel}</p>
+                <p className="mt-1 text-sm leading-relaxed text-neutral-600">{f.text}</p>
+                <p className="mt-2 text-sm font-semibold text-sage-700">{f.ergebnis}</p>
+              </div>
+            ))}
+            <p className="text-sm leading-relaxed text-neutral-500">
+              Das gilt aber nur, wenn gerade deine Wohnung mit Mitteln des Wiederaufbaufonds saniert wurde. Wurde das
+              Darlehen nach dem 31.8.1952 bewilligt, genügt es, dass allgemeine Teile des Hauses wiederhergestellt wurden
+              – zum Beispiel Stiegenhaus, Dach oder Außenmauern. Ist diese Voraussetzung erfüllt, gilt einer der drei
+              Fälle oben. Ist sie nicht erfüllt, wird die Wohnung wie ein gewöhnlicher Altbau behandelt – dann gilt der{' '}
+              <span className="font-semibold text-neutral-800">Richtwertmietzins</span>.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

@@ -61,13 +61,11 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
   }
 
   const btnUpload =
-    'inline-flex cursor-pointer items-center gap-2 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-base font-medium text-neutral-800 hover:bg-neutral-100'
+    'inline-flex cursor-pointer items-center gap-2 rounded-lg border border-sage/50 bg-white px-3 py-2 text-base font-medium text-sage-700 hover:bg-sage/10'
 
   return (
-    <div className="mt-3 space-y-5 rounded-xl border border-neutral-300 bg-neutral-50 p-4">
-      <div className="rounded-md bg-neutral-900 px-3 py-1.5 text-center text-sm font-semibold uppercase tracking-wide text-white">
-        Diese Anfrage ist kostenlos
-      </div>
+    <div className="space-y-5 rounded-xl border border-sage/30 bg-cream-50 p-5">
+      <p className="text-sm font-semibold uppercase tracking-wide text-sage-700">Diese Anfrage ist kostenlos</p>
 
       <p className="text-base text-neutral-600">
         Die MA 25 kann dir das Jahr der Baubewilligung nennen. Wenn du alle Infos beisammen hast, komm einfach zurück und
@@ -126,7 +124,7 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
       <button
         type="button"
         onClick={senden}
-        className="w-full rounded-lg bg-neutral-900 px-4 py-2.5 text-base font-semibold text-white hover:bg-neutral-700"
+        className="w-full rounded-lg bg-sage px-4 py-2.5 text-base font-semibold text-cream-50 hover:bg-sage-600"
       >
         Anfrage senden
       </button>
