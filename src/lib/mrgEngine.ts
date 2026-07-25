@@ -34,9 +34,9 @@ const MIETZINS_LABEL: Record<MietzinsArt, string> = {
 }
 
 const ANWENDUNG_LABEL: Record<MrgAnwendung, string> = {
-  voll: 'Volle gesetzliche Mietobergrenze',
-  teil: 'Teilweiser Schutz (freie Miete, aber Kündigungsschutz)',
-  ausnahme: 'Kein gesetzlicher Schutz (freie Miete)',
+  voll: 'Vollanwendung des MRG',
+  teil: 'Teilanwendung des MRG',
+  ausnahme: 'Vollausnahme vom MRG',
 }
 
 function kategorieFaktorABC(k: Kategorie): number {

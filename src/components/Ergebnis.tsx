@@ -1,10 +1,10 @@
 import type { LageStatus, MrgAnwendung, MrgErgebnis } from '../lib/types'
 import { flaechenwidmungLink, laerminfoLink } from '../lib/geo'
 
-const ANWENDUNG_STYLE: Record<MrgAnwendung, { accent: string; ring: string }> = {
-  voll: { accent: 'border-wine text-wine', ring: 'ring-wine/20' },
-  teil: { accent: 'border-terracotta text-terracotta-600', ring: 'ring-terracotta/25' },
-  ausnahme: { accent: 'border-sage text-sage-700', ring: 'ring-sage/25' },
+const ANWENDUNG_STYLE: Record<MrgAnwendung, { text: string; ring: string }> = {
+  voll: { text: 'text-wine', ring: 'ring-wine/20' },
+  teil: { text: 'text-terracotta-600', ring: 'ring-terracotta/25' },
+  ausnahme: { text: 'text-sage-700', ring: 'ring-sage/25' },
 }
 
 const LAGE_STYLE: Record<LageStatus, string> = {
@@ -18,17 +18,24 @@ function formatEuro(n: number): string {
   return n.toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
-function Zeile({ nr, label, children }: { nr: number; label: string; children: React.ReactNode }) {
+function Zeile({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-2 border-b border-sand-line/70 py-4 last:border-0">
-      <div className="flex items-center gap-2">
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sage text-sm font-semibold text-cream-50">
-          {nr}
-        </span>
-        <span className="text-base font-medium text-ink-soft">{label}</span>
-      </div>
+    <div className="flex flex-col gap-2 py-4">
+      <span className="text-sm font-semibold uppercase tracking-wider text-ink-faint">{label}</span>
       <div>{children}</div>
     </div>
+  )
+}
+
+function SchutzZeile({ label, aktiv }: { label: string; aktiv: boolean }) {
+  if (!aktiv) return null
+  return (
+    <span className="flex items-center justify-between gap-3 text-base text-ink-soft">
+      {label}
+      <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-sage" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 13l4 4L19 7" />
+      </svg>
+    </span>
   )
 }
 
@@ -41,44 +48,41 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
       <h2 className="mb-1 text-2xl font-semibold text-wine">Ergebnis der Ersteinschätzung</h2>
       <p className="mb-4 text-base text-ink-soft">Basierend auf den eingegebenen Objektmerkmalen.</p>
 
-      <div>
-        <Zeile nr={1} label="Mietzinsart">
-          <span className="inline-flex items-center gap-2 border-l-2 border-sand-line pl-3 text-lg font-semibold text-ink">
-            {ergebnis.mietzinsArtLabel}
-          </span>
+      <div className="space-y-1">
+        <Zeile label="Mietzinsart">
+          <span className="text-lg font-semibold text-ink">{ergebnis.mietzinsArtLabel}</span>
         </Zeile>
 
-        <Zeile nr={2} label="Schutz & Preisgrenze">
+        <Zeile label="Schutz & Preisgrenze">
           <div className="flex flex-col gap-2">
-            <span className={`inline-flex items-center gap-2 border-l-2 pl-3 text-lg font-semibold ${style.accent}`}>
-              {ergebnis.anwendungLabel}
-            </span>
-            <span className="text-[12px] text-ink-faint">
-              {(() => {
-                const teile = [
-                  ergebnis.kuendigungsschutz ? 'Kündigungsschutz' : null,
-                  ergebnis.preisschutz ? 'Gesetzliche Preisgrenze' : null,
-                ].filter(Boolean)
-                return teile.length > 0 ? teile.join(' · ') : 'Kein Kündigungsschutz, keine gesetzliche Preisgrenze'
-              })()}
-            </span>
+            <span className={`text-lg font-semibold ${style.text}`}>{ergebnis.anwendungLabel}</span>
+            {ergebnis.kuendigungsschutz || ergebnis.preisschutz ? (
+              <div className="flex flex-col gap-1">
+                <SchutzZeile label="Kündigungsschutz" aktiv={ergebnis.kuendigungsschutz} />
+                <SchutzZeile label="Gesetzliche Preisgrenze" aktiv={ergebnis.preisschutz} />
+              </div>
+            ) : (
+              <span className="text-base text-ink-faint">Kein Kündigungsschutz, keine gesetzliche Preisgrenze</span>
+            )}
           </div>
         </Zeile>
 
-        <Zeile nr={3} label="Preisbandbreite">
+        <Zeile label="Preisbandbreite">
           {ergebnis.preis ? (
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
-                <div>
-                  <span className="text-2xl font-bold text-wine">
-                    {formatEuro(ergebnis.preis.proM2Min)}–{formatEuro(ergebnis.preis.proM2Max)} €
-                  </span>
+            <div className="space-y-3">
+              <div className="rounded-xl bg-cream-100 px-4 py-3">
+                <div className="flex flex-wrap items-baseline gap-x-2 tabular-nums">
+                  <span className="text-3xl font-bold text-wine">{formatEuro(ergebnis.preis.proM2Min)}</span>
+                  <span className="px-1 text-2xl font-light text-wine/70">—</span>
+                  <span className="text-3xl font-bold text-wine">{formatEuro(ergebnis.preis.proM2Max)}</span>
+                  <span className="text-2xl font-semibold text-wine">€</span>
                   <span className="ml-1 text-sm text-ink-faint">/ m² monatlich, netto</span>
                 </div>
-                <div>
-                  <span className="text-lg font-semibold text-ink">
-                    {formatEuro(ergebnis.preis.monatlichMin)}–{formatEuro(ergebnis.preis.monatlichMax)} €
-                  </span>
+                <div className="mt-1 flex flex-wrap items-baseline gap-x-2 tabular-nums">
+                  <span className="text-lg font-semibold text-ink">{formatEuro(ergebnis.preis.monatlichMin)}</span>
+                  <span className="px-1 text-base font-light text-ink-faint">—</span>
+                  <span className="text-lg font-semibold text-ink">{formatEuro(ergebnis.preis.monatlichMax)}</span>
+                  <span className="text-base font-semibold text-ink">€</span>
                   <span className="ml-1 text-sm text-ink-faint">/ Monat gesamt</span>
                 </div>
               </div>
