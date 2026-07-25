@@ -18,8 +18,19 @@ const floatLabel =
 const topLabel =
   'pointer-events-none absolute left-3 top-0 -translate-y-1/2 bg-white px-1 text-sm text-neutral-600 peer-focus:text-neutral-900'
 
+// Eigener Chevron (24px) mit 12px Abstand rechts – native Select-Pfeile sind nicht stylbar.
+const CHEVRON =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23404040' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"
+
+const selectChevronStyle = {
+  backgroundImage: `url("${CHEVRON}")`,
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'right 12px center',
+  backgroundSize: '24px 24px',
+} as const
+
 function Hint({ children }: { children?: ReactNode }) {
-  return children ? <p className="mt-1 px-1 text-sm text-neutral-500">{children}</p> : null
+  return children ? <p className="mt-1 px-1 text-[12px] text-neutral-500">{children}</p> : null
 }
 
 interface FieldProps {
@@ -65,7 +76,7 @@ export function SelectField({
   return (
     <div>
       <div className="relative">
-        <select id={id} {...props} className={`${box} h-14 px-3 pt-2`}>
+        <select id={id} {...props} style={selectChevronStyle} className={`${box} h-14 appearance-none px-3 pr-10 pt-2`}>
           {children}
         </select>
         <label htmlFor={id} className={topLabel}>

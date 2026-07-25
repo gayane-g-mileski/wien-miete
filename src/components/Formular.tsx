@@ -27,6 +27,7 @@ interface Props {
 export function Formular({ value, onChange, mietzinsArt }: Props) {
   const [ma25Offen, setMa25Offen] = useState(false)
   const [rueckzahlungUnbekannt, setRueckzahlungUnbekannt] = useState(false)
+  const [anschriftFehler, setAnschriftFehler] = useState(false)
   const valueRef = useRef(value)
   valueRef.current = value
 
@@ -86,8 +87,14 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
               })
             }
             onGemeindebau={(detected) => onChange({ ...valueRef.current, gemeindebau: detected })}
+            onFehlerChange={setAnschriftFehler}
           />
         </div>
+        <p className="px-1 text-[12px] text-neutral-500">
+          {anschriftFehler
+            ? 'Adresssuche gerade nicht erreichbar – du kannst die Adresse trotzdem eintippen (mit Wiener PLZ wird die Lage erkannt).'
+            : 'Nach dem 3. Zeichen erscheinen Vorschläge. Ohne Anschrift wird die Lage nicht berücksichtigt.'}
+        </p>
 
         <NumberField
           label="Nutzfläche (m²)"

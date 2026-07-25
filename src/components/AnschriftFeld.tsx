@@ -7,6 +7,7 @@ interface Props {
   value: string
   onChange: (text: string, bezirk: number | null, koords: Koordinaten | null) => void
   onGemeindebau?: (detected: boolean) => void
+  onFehlerChange?: (fehler: boolean) => void
 }
 
 const box =
@@ -19,10 +20,9 @@ const floatLabel =
   'peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-sm ' +
   'peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-1'
 
-export function AnschriftFeld({ value, onChange, onGemeindebau }: Props) {
+export function AnschriftFeld({ value, onChange, onGemeindebau, onFehlerChange }: Props) {
   const [treffer, setTreffer] = useState<AdressTreffer[]>([])
   const [offen, setOffen] = useState(false)
-  const [fehler, setFehler] = useState(false)
   const boxRef = useRef<HTMLDivElement>(null)
   const abortRef = useRef<AbortController | null>(null)
 
@@ -30,14 +30,14 @@ export function AnschriftFeld({ value, onChange, onGemeindebau }: Props) {
     const q = value.trim()
     if (q.length < 3) {
       setTreffer([])
-      setFehler(false)
+      onFehlerChange?.(false)
       return
     }
     const t = setTimeout(async () => {
       abortRef.current?.abort()
       const ctrl = new AbortController()
       abortRef.current = ctrl
-      setFehler(false)
+      onFehlerChange?.(false)
       try {
         const res = await sucheAdressen(q, ctrl.signal)
         setTreffer(res)
@@ -45,12 +45,12 @@ export function AnschriftFeld({ value, onChange, onGemeindebau }: Props) {
       } catch (e) {
         if (!(e instanceof DOMException && e.name === 'AbortError')) {
           setTreffer([])
-          setFehler(true)
+          onFehlerChange?.(true)
         }
       }
     }, 250)
     return () => clearTimeout(t)
-  }, [value])
+  }, [value, onFehlerChange])
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
@@ -72,45 +72,38 @@ export function AnschriftFeld({ value, onChange, onGemeindebau }: Props) {
   }
 
   return (
-    <div>
-      <div ref={boxRef} className="relative">
-        <input
-          id="anschrift"
-          type="text"
-          autoComplete="off"
-          placeholder=" "
-          className={box}
-          value={value}
-          onChange={(e) => {
-            onChange(e.target.value, null, null)
-            setOffen(true)
-          }}
-          onFocus={() => treffer.length > 0 && setOffen(true)}
-        />
-        <label htmlFor="anschrift" className={floatLabel}>
-          Anschrift (optional)
-        </label>
-        {offen && treffer.length > 0 && (
-          <ul className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-md border border-neutral-300 bg-white py-1 shadow-lg">
-            {treffer.map((t) => (
-              <li key={t.label}>
-                <button
-                  type="button"
-                  onClick={() => waehle(t)}
-                  className="block w-full px-3 py-2 text-left text-base text-neutral-800 hover:bg-neutral-100"
-                >
-                  {t.label}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      <p className="mt-1 px-1 text-sm text-neutral-500">
-        {fehler
-          ? 'Adresssuche gerade nicht erreichbar – du kannst die Adresse trotzdem eintippen (mit Wiener PLZ wird die Lage erkannt).'
-          : 'Nach dem 3. Zeichen erscheinen Vorschläge. Ohne Anschrift wird die Lage nicht berücksichtigt.'}
-      </p>
+    <div ref={boxRef} className="relative">
+      <input
+        id="anschrift"
+        type="text"
+        autoComplete="off"
+        placeholder=" "
+        className={box}
+        value={value}
+        onChange={(e) => {
+          onChange(e.target.value, null, null)
+          setOffen(true)
+        }}
+        onFocus={() => treffer.length > 0 && setOffen(true)}
+      />
+      <label htmlFor="anschrift" className={floatLabel}>
+        Anschrift (optional)
+      </label>
+      {offen && treffer.length > 0 && (
+        <ul className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-md border border-neutral-300 bg-white py-1 shadow-lg">
+          {treffer.map((t) => (
+            <li key={t.label}>
+              <button
+                type="button"
+                onClick={() => waehle(t)}
+                className="block w-full px-3 py-2 text-left text-base text-neutral-800 hover:bg-neutral-100"
+              >
+                {t.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

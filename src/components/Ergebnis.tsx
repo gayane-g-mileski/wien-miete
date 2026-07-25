@@ -20,14 +20,14 @@ function formatEuro(n: number): string {
 
 function Zeile({ nr, label, children }: { nr: number; label: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-2 border-b border-sand-line/70 py-4 last:border-0 sm:flex-row sm:items-center sm:gap-6">
-      <div className="flex items-center gap-2 sm:w-48 sm:shrink-0">
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sage text-xs font-semibold text-cream-50">
+    <div className="flex flex-col gap-2 border-b border-sand-line/70 py-4 last:border-0">
+      <div className="flex items-center gap-2">
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sage text-sm font-semibold text-cream-50">
           {nr}
         </span>
-        <span className="text-sm font-medium text-ink-soft">{label}</span>
+        <span className="text-base font-medium text-ink-soft">{label}</span>
       </div>
-      <div className="flex-1">{children}</div>
+      <div>{children}</div>
     </div>
   )
 }
@@ -43,18 +43,18 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
 
       <div>
         <Zeile nr={1} label="Mietzinsart">
-          <span className="inline-flex items-center rounded-lg bg-cream-200 px-3 py-1.5 text-sm font-semibold text-ink ring-1 ring-sand-line">
+          <span className="flex w-full items-center justify-center rounded-lg bg-cream-200 px-3 py-2 text-base font-semibold text-ink ring-1 ring-sand-line">
             {ergebnis.mietzinsArtLabel}
           </span>
         </Zeile>
 
         <Zeile nr={2} label="Schutz & Preisgrenze">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 ${style.badge}`}>
+          <div className="flex flex-col gap-2">
+            <span className={`flex w-full items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-base font-semibold ring-1 ${style.badge}`}>
               <span className={`h-2 w-2 rounded-full ${style.dot}`} />
               {ergebnis.anwendungLabel}
             </span>
-            <span className="text-xs text-ink-faint">
+            <span className="text-[12px] text-ink-faint">
               Kündigungsschutz: <strong className="text-ink-soft">{ergebnis.kuendigungsschutz ? 'ja' : 'nein'}</strong> ·
               gesetzliche Preisgrenze: <strong className="text-ink-soft">{ergebnis.preisschutz ? 'ja' : 'nein'}</strong>
             </span>
