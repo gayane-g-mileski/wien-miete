@@ -273,10 +273,12 @@ export function evaluateMrg(input: MietobjektInput): MrgErgebnis {
     )
   }
 
-  // ---- 2) Förderung ----
-  const foe = evaluateFoerderung(input.foerderungProgramm, input.tilgungsstatus, input.eigentumswohnung)
-  if (foe) {
-    return result(foe.mietzinsArt, foe.anwendung, input, foe.gesetze, foe.begruendung, foe.hinweise)
+  // ---- 2) Förderung (beim Altbau ohne Bedeutung) ----
+  if (input.baubewilligungGebaeude !== 'vor_1945') {
+    const foe = evaluateFoerderung(input.foerderungProgramm, input.tilgungsstatus, input.eigentumswohnung)
+    if (foe) {
+      return result(foe.mietzinsArt, foe.anwendung, input, foe.gesetze, foe.begruendung, foe.hinweise)
+    }
   }
 
   // ---- 3) Sonstige Teilausnahmen ----

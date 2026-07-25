@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import type { AdressTreffer } from '../lib/geo'
-import { istGemeindebau, sucheAdressen } from '../lib/geo'
-import type { Koordinaten } from '../lib/types'
+import { baujahrAusKoordinaten, istGemeindebau, sucheAdressen } from '../lib/geo'
+import type { BaubewilligungGebaeude, Koordinaten } from '../lib/types'
 
 interface Props {
   value: string
   onChange: (text: string, bezirk: number | null, koords: Koordinaten | null) => void
   onGemeindebau?: (detected: boolean) => void
+  onBaujahr?: (periode: BaubewilligungGebaeude) => void
   onFehlerChange?: (fehler: boolean) => void
 }
 
@@ -20,7 +21,7 @@ const floatLabel =
   'peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-sm ' +
   'peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-1'
 
-export function AnschriftFeld({ value, onChange, onGemeindebau, onFehlerChange }: Props) {
+export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFehlerChange }: Props) {
   const [treffer, setTreffer] = useState<AdressTreffer[]>([])
   const [offen, setOffen] = useState(false)
   const boxRef = useRef<HTMLDivElement>(null)
@@ -64,10 +65,17 @@ export function AnschriftFeld({ value, onChange, onGemeindebau, onFehlerChange }
     onChange(t.label, t.bezirk, t.koords)
     setOffen(false)
     setTreffer([])
-    if (t.koords && onGemeindebau) {
-      istGemeindebau(t.koords).then((gb) => {
-        if (gb != null) onGemeindebau(gb)
-      })
+    if (t.koords) {
+      if (onGemeindebau) {
+        istGemeindebau(t.koords).then((gb) => {
+          if (gb != null) onGemeindebau(gb)
+        })
+      }
+      if (onBaujahr) {
+        baujahrAusKoordinaten(t.koords).then((p) => {
+          if (p != null) onBaujahr(p)
+        })
+      }
     }
   }
 

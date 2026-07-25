@@ -50,8 +50,7 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
 
         <Zeile nr={2} label="Schutz & Preisgrenze">
           <div className="flex flex-col gap-2">
-            <span className={`flex w-full items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-base font-semibold ring-1 ${style.badge}`}>
-              <span className={`h-2 w-2 rounded-full ${style.dot}`} />
+            <span className={`flex w-full items-center justify-center rounded-lg px-3 py-2 text-base font-semibold ring-1 ${style.badge}`}>
               {ergebnis.anwendungLabel}
             </span>
             <span className="text-[12px] text-ink-faint">

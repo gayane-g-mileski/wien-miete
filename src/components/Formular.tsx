@@ -60,41 +60,50 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
           ))}
         </SelectField>
 
-        {/* Bezirk links, Anschrift rechts */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-[1fr_2fr]">
-          <SelectField
-            label="Bezirk"
-            id="bezirk"
-            value={bezirkErkannt ?? value.bezirk}
-            disabled={bezirkErkannt != null}
-            onChange={(e) => set('bezirk', Number(e.target.value))}
-          >
-            {BEZIRKE.map((b) => (
-              <option key={b.nr} value={b.nr}>
-                {b.nr}. {b.name}
-              </option>
-            ))}
-          </SelectField>
-          <AnschriftFeld
-            value={value.anschrift}
-            onChange={(text, bezirk, koords) =>
-              onChange({
-                ...valueRef.current,
-                anschrift: text,
-                anschriftBezirk: bezirk,
-                anschriftKoords: koords,
-                gemeindebau: false,
-              })
-            }
-            onGemeindebau={(detected) => onChange({ ...valueRef.current, gemeindebau: detected })}
-            onFehlerChange={setAnschriftFehler}
-          />
+        {/* Bezirk links, Anschrift rechts + gemeinsamer Hinweis */}
+        <div>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-[1fr_2fr]">
+            <SelectField
+              label="Bezirk"
+              id="bezirk"
+              value={bezirkErkannt ?? value.bezirk}
+              disabled={bezirkErkannt != null}
+              onChange={(e) => set('bezirk', Number(e.target.value))}
+            >
+              {BEZIRKE.map((b) => (
+                <option key={b.nr} value={b.nr}>
+                  {b.nr}. {b.name}
+                </option>
+              ))}
+            </SelectField>
+            <AnschriftFeld
+              value={value.anschrift}
+              onChange={(text, bezirk, koords) =>
+                onChange({
+                  ...valueRef.current,
+                  anschrift: text,
+                  anschriftBezirk: bezirk,
+                  anschriftKoords: koords,
+                  gemeindebau: false,
+                })
+              }
+              onGemeindebau={(detected) => onChange({ ...valueRef.current, gemeindebau: detected })}
+              onBaujahr={(periode) => {
+                const erlaubt = foerderungenFuer(periode)
+                const prog = erlaubt.includes(valueRef.current.foerderungProgramm)
+                  ? valueRef.current.foerderungProgramm
+                  : 'keine'
+                onChange({ ...valueRef.current, baubewilligungGebaeude: periode, foerderungProgramm: prog })
+              }}
+              onFehlerChange={setAnschriftFehler}
+            />
+          </div>
+          <p className="mt-1 px-1 text-[12px] text-neutral-500">
+            {anschriftFehler
+              ? 'Adresssuche gerade nicht erreichbar – du kannst die Adresse trotzdem eintippen (mit Wiener PLZ wird die Lage erkannt).'
+              : 'Nach dem 3. Zeichen erscheinen Vorschläge. Ohne Anschrift wird die Lage nicht berücksichtigt.'}
+          </p>
         </div>
-        <p className="px-1 text-[12px] text-neutral-500">
-          {anschriftFehler
-            ? 'Adresssuche gerade nicht erreichbar – du kannst die Adresse trotzdem eintippen (mit Wiener PLZ wird die Lage erkannt).'
-            : 'Nach dem 3. Zeichen erscheinen Vorschläge. Ohne Anschrift wird die Lage nicht berücksichtigt.'}
-        </p>
 
         <NumberField
           label="Nutzfläche (m²)"
@@ -151,23 +160,30 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
 
         {zeigeFoerderung(value.objektart) ? (
           <>
-            <SelectField
-              label="Öffentliche Wohnbauförderung"
-              id="foerderung"
-              hint='Datensätze laut Unterlage „Förderungen".'
-              value={value.foerderungProgramm}
-              disabled={ma25Offen}
-              onChange={(e) => set('foerderungProgramm', e.target.value as MietobjektInput['foerderungProgramm'])}
-            >
-              {foerderungenFuer(value.baubewilligungGebaeude).map((k) => (
-                <option key={k} value={k}>
-                  {FOERDERUNG_PROGRAMM_LABEL[k]}
-                </option>
-              ))}
-            </SelectField>
+            {value.baubewilligungGebaeude === 'vor_1945' ? (
+              <p className="rounded-md bg-neutral-100 px-3 py-2 text-sm text-neutral-600">
+                Bei einem Altbau (Baubewilligung bis 8.5.1945) ist die öffentliche Förderung für die Einstufung ohne
+                Bedeutung.
+              </p>
+            ) : (
+              <>
+                <SelectField
+                  label="Öffentliche Wohnbauförderung"
+                  id="foerderung"
+                  hint='Datensätze laut Unterlage „Förderungen".'
+                  value={value.foerderungProgramm}
+                  disabled={ma25Offen}
+                  onChange={(e) => set('foerderungProgramm', e.target.value as MietobjektInput['foerderungProgramm'])}
+                >
+                  {foerderungenFuer(value.baubewilligungGebaeude).map((k) => (
+                    <option key={k} value={k}>
+                      {FOERDERUNG_PROGRAMM_LABEL[k]}
+                    </option>
+                  ))}
+                </SelectField>
 
-            {/* Stand der Rückzahlung: Dropdown sofort sichtbar (wenn relevant) */}
-            {statusRelevant(value.foerderungProgramm) && !ma25Offen && (
+                {/* Stand der Rückzahlung: Dropdown sofort sichtbar (wenn relevant) */}
+                {statusRelevant(value.foerderungProgramm) && !ma25Offen && (
               <>
                 <SelectField
                   label="Stand der Rückzahlung"
@@ -194,6 +210,8 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                     {rueckzahlungUnbekannt && <WwafHinweis anschrift={value.anschrift} />}
                   </div>
                 )}
+              </>
+            )}
               </>
             )}
 

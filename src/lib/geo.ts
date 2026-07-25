@@ -1,4 +1,4 @@
-import type { Koordinaten } from './types'
+import type { BaubewilligungGebaeude, Koordinaten } from './types'
 
 // Anbindung an offene Wiener Geodaten. Läuft im Browser der Nutzer:innen direkt
 // gegen data.wien.gv.at (öffentlich, CORS-fähig). Fällt bei Netz-/CORS-Fehlern
@@ -98,6 +98,64 @@ export async function istGemeindebau(koords: Koordinaten, signal?: AbortSignal):
       if (Array.isArray(data.features) && data.features.length > 0) return true
     }
     return false
+  } catch {
+    return null
+  }
+}
+
+interface GebaeudeFeature {
+  properties?: { BAUJAHR?: number | string }
+  geometry?: { coordinates?: unknown }
+}
+
+function periodeAusBaujahr(bj: number): BaubewilligungGebaeude {
+  if (bj <= 1945) return 'vor_1945'
+  if (bj <= 1953) return '1945_1953'
+  return 'nach_1953'
+}
+
+/**
+ * Best-effort-Ermittlung des Baujahres (und damit der MRG-Baualtersklasse)
+ * einer Adresse über den offenen Gebäudedatensatz der Stadt Wien
+ * (ogdwien:GEBAEUDEINFOOGD, Attribut BAUJAHR). Nimmt das nächstgelegene
+ * Gebäude mit gültigem Baujahr. null bei Fehler/keinem Treffer.
+ */
+export async function baujahrAusKoordinaten(
+  koords: Koordinaten,
+  signal?: AbortSignal,
+): Promise<BaubewilligungGebaeude | null> {
+  const d = 0.0006 // ~60 m
+  const { lat, lon } = koords
+  const base =
+    'https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0' +
+    '&srsName=EPSG:4326&outputFormat=json&typeName=ogdwien:GEBAEUDEINFOOGD&bbox='
+  const boxes = [
+    `${lat - d},${lon - d},${lat + d},${lon + d},EPSG:4326`,
+    `${lon - d},${lat - d},${lon + d},${lat + d},EPSG:4326`,
+  ]
+  try {
+    for (const box of boxes) {
+      const res = await fetch(base + encodeURIComponent(box), { signal })
+      if (!res.ok) continue
+      const data = (await res.json()) as { features?: GebaeudeFeature[] }
+      const feats = data.features ?? []
+      let bestBj: number | null = null
+      let bestDist = Infinity
+      for (const f of feats) {
+        const bj = Number(f.properties?.BAUJAHR)
+        if (!Number.isFinite(bj) || bj < 1000) continue
+        const c = f.geometry?.coordinates
+        const flon = Array.isArray(c) && typeof c[0] === 'number' ? (c[0] as number) : lon
+        const flat = Array.isArray(c) && typeof c[1] === 'number' ? (c[1] as number) : lat
+        const dist = (flat - lat) ** 2 + (flon - lon) ** 2
+        if (dist < bestDist) {
+          bestDist = dist
+          bestBj = bj
+        }
+      }
+      if (bestBj != null) return periodeAusBaujahr(bestBj)
+    }
+    return null
   } catch {
     return null
   }
