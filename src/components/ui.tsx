@@ -11,13 +11,13 @@ const box =
 // Label schwebt von der Mitte auf die obere Rahmenlinie (bei Fokus oder Inhalt).
 const floatLabel =
   'pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base text-ink-faint transition-all ' +
-  'peer-focus:top-0 peer-focus:text-sm peer-focus:text-accent peer-focus:bg-surface peer-focus:px-1 ' +
-  'peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-sm ' +
+  'peer-focus:top-0 peer-focus:text-xs peer-focus:text-accent peer-focus:bg-surface peer-focus:px-1 ' +
+  'peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs ' +
   'peer-[:not(:placeholder-shown)]:bg-surface peer-[:not(:placeholder-shown)]:px-1'
 
 // Label dauerhaft oben (für Select/Textarea, die immer „gefüllt“ wirken).
 const topLabel =
-  'pointer-events-none absolute left-3 top-0 -translate-y-1/2 bg-surface px-1 text-sm text-ink-soft peer-focus:text-accent'
+  'pointer-events-none absolute left-3 top-0 -translate-y-1/2 bg-surface px-1 text-xs text-ink-soft peer-focus:text-accent'
 
 function Hint({ children }: { children?: ReactNode }) {
   return children ? <p className="mt-1 px-1 text-[12px] text-ink-faint">{children}</p> : null
@@ -87,9 +87,9 @@ export function TextareaField({ label, hint, id, ...props }: FieldProps & Textar
           htmlFor={id}
           className={
             'pointer-events-none absolute left-3 top-5 text-base text-ink-faint transition-all ' +
-            'peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-sm peer-focus:bg-surface peer-focus:px-1 peer-focus:text-accent ' +
+            'peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-focus:bg-surface peer-focus:px-1 peer-focus:text-accent ' +
             'peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 ' +
-            'peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:bg-surface peer-[:not(:placeholder-shown)]:px-1'
+            'peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-surface peer-[:not(:placeholder-shown)]:px-1'
           }
         >
           {label}
@@ -127,7 +127,7 @@ export function Checkbox({
 export function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section>
-      <h3 className="mb-2 px-1 text-sm font-semibold text-ink-faint">{title}</h3>
+      <h3 className="mb-3 px-1 text-[2rem] font-semibold leading-tight tracking-tight text-ink">{title}</h3>
       <div className="space-y-7 rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">{children}</div>
     </section>
   )

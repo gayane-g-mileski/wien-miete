@@ -50,7 +50,7 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
 
   return (
     <div>
-      <h2 className="mb-1 px-1 text-2xl font-semibold text-accent">Ergebnis der Ersteinschätzung</h2>
+      <h2 className="mb-1 px-1 text-[2rem] font-semibold leading-tight tracking-tight text-accent">Ergebnis der Ersteinschätzung</h2>
       <p className="mb-2 px-1 text-sm text-ink-soft">Basierend auf den eingegebenen Objektmerkmalen.</p>
 
       <div className="rounded-2xl border border-line bg-surface-2 p-5 shadow-sm ring-1 ring-accent/15 sm:p-6">

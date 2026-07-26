@@ -33,10 +33,19 @@ function App() {
 
   return (
     <div className="min-h-screen bg-paper text-ink">
-      {/* Hero-Banner mit sonnendurchfluteter Szene */}
+      {/* Hero-Banner: echtes Foto (public/hero.jpg), sonst sonnendurchflutete CSS-Szene */}
       <header className="hero">
+        <img
+          src={`${import.meta.env.BASE_URL}hero.jpg`}
+          alt=""
+          aria-hidden="true"
+          className="hero-photo pointer-events-none absolute inset-0 z-[-2] h-full w-full select-none object-cover"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none'
+          }}
+        />
         {/* Scrim für Textlesbarkeit (links) */}
-        <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-paper via-paper/70 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 z-[-1] bg-gradient-to-r from-paper via-paper/70 to-transparent" />
 
         <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <span className="text-lg font-semibold tracking-tight text-ink">Mietzins-Check in Wien</span>

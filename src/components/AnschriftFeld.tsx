@@ -17,8 +17,8 @@ const box =
 
 const floatLabel =
   'pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base text-ink-faint transition-all ' +
-  'peer-focus:top-0 peer-focus:text-sm peer-focus:text-accent peer-focus:bg-surface peer-focus:px-1 ' +
-  'peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-sm ' +
+  'peer-focus:top-0 peer-focus:text-xs peer-focus:text-accent peer-focus:bg-surface peer-focus:px-1 ' +
+  'peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs ' +
   'peer-[:not(:placeholder-shown)]:bg-surface peer-[:not(:placeholder-shown)]:px-1'
 
 export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFehlerChange }: Props) {

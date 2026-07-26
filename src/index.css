@@ -105,7 +105,7 @@ input[type='number'] {
   content: '';
   position: absolute;
   inset: 0;
-  z-index: -2;
+  z-index: -4;
   background-image:
     var(--hero-photo, none),
     radial-gradient(120% 90% at 82% 8%, rgba(255, 236, 200, 0.95) 0%, rgba(255, 214, 165, 0.55) 26%, rgba(233, 178, 140, 0) 60%),
@@ -126,7 +126,7 @@ input[type='number'] {
   right: 0;
   bottom: 0;
   height: 34%;
-  z-index: -1;
+  z-index: -3;
   background-repeat: repeat-x;
   background-position: bottom center;
   background-size: 480px 150px;
@@ -134,9 +134,16 @@ input[type='number'] {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='150' viewBox='0 0 480 150' fill='none'%3E%3Cg fill='%236b3f28'%3E%3Cpath d='M0 150 V96 h40 v-10 h34 v20 h30 V70 l24 -16 24 16 v80 z'/%3E%3Cpath d='M170 150 V84 h56 v-14 h10 v14 h40 v66 z'/%3E%3Cpath d='M300 150 V60 h6 V44 h10 v16 h6 v90 z'/%3E%3Cpath d='M330 150 V92 h44 l16 -18 16 18 h30 v-22 h30 v52 z'/%3E%3Ccircle cx='150' cy='58' r='14'/%3E%3Crect x='148' y='40' width='4' height='16'/%3E%3C/g%3E%3C/svg%3E");
 }
 
+/* Echtes Hero-Foto: gleiche sanfte Zoom-Bewegung wie die CSS-Szene. */
+.hero-photo {
+  transform: scale(1.06);
+  animation: heroZoom 26s ease-in-out infinite alternate;
+}
+
 @media (prefers-color-scheme: dark) {
-  /* Im Dark-Mode die Szene abdunkeln, Text bleibt gut lesbar. */
-  .hero::before {
+  /* Im Dark-Mode Szene und Foto abdunkeln, Text bleibt gut lesbar. */
+  .hero::before,
+  .hero-photo {
     filter: saturate(0.85) brightness(0.62);
   }
 }
@@ -166,7 +173,8 @@ input[type='number'] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero::before {
+  .hero::before,
+  .hero-photo {
     animation: none;
     transform: none;
   }
