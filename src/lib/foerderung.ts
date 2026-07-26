@@ -33,7 +33,7 @@ export const TILGUNGSSTATUS_LABEL: Record<Tilgungsstatus, string> = {
 }
 
 export function statusRelevant(programm: FoerderungProgramm): boolean {
-  return programm === 'wwg1948' || programm === 'wfg1968'
+  return programm === 'wwg1948' || programm === 'wfg1968' || programm === 'wfg1984'
 }
 
 /**
