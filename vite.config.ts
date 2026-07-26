@@ -19,7 +19,7 @@ export default defineConfig({
         short_name: 'Mietzins-Check',
         description:
           'Schnelle Ersteinschätzung von Mietzinsart, MRG-Anwendungsbereich und Preisbandbreite für Wiener Mietobjekte.',
-        theme_color: '#c05f3c',
+        theme_color: '#607456',
         background_color: '#f5f1ea',
         display: 'standalone',
         start_url: base,
