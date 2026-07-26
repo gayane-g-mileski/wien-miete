@@ -65,7 +65,7 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
 
   return (
     <div className="space-y-5 rounded-xl border border-sage/30 bg-cream-50 p-5">
-      <p className="text-sm font-semibold uppercase tracking-wide text-sage-700">Diese Anfrage ist kostenlos</p>
+      <p className="text-sm font-semibold text-sage-700">Diese Anfrage ist kostenlos</p>
 
       <p className="text-base text-neutral-600">
         Die MA 25 kann dir das Jahr der Baubewilligung nennen. Wenn du alle Infos beisammen hast, komm einfach zurück und

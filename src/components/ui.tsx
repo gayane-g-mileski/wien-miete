@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react'
 
 // Material-Design-ähnliche Outlined-Felder mit schwebendem Label (Schwarz-Weiß).
@@ -137,8 +138,45 @@ export function Checkbox({
 export function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section>
-      <h3 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wider text-neutral-500">{title}</h3>
+      <h3 className="mb-2 px-1 text-sm font-semibold text-neutral-500">{title}</h3>
       <div className="space-y-7 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">{children}</div>
     </section>
+  )
+}
+
+/** Einklappbarer Abschnitt mit Chevron rechts (standardmäßig zugeklappt). */
+export function Collapsible({
+  title,
+  children,
+  defaultOpen = false,
+}: {
+  title: string
+  children: ReactNode
+  defaultOpen?: boolean
+}) {
+  const [offen, setOffen] = useState(defaultOpen)
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOffen((o) => !o)}
+        aria-expanded={offen}
+        className="flex w-full items-center justify-between gap-2 text-left text-sm font-semibold text-ink"
+      >
+        <span>{title}</span>
+        <svg
+          viewBox="0 0 24 24"
+          className={`h-5 w-5 shrink-0 text-sage-700 transition-transform ${offen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+      {offen && <div className="mt-3">{children}</div>}
+    </div>
   )
 }

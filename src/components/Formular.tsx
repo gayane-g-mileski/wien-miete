@@ -101,7 +101,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
           <p className="mt-1 px-1 text-[12px] text-neutral-500">
             {anschriftFehler
               ? 'Adresssuche gerade nicht erreichbar – du kannst die Adresse trotzdem eintippen (mit Wiener PLZ wird die Lage erkannt).'
-              : 'Nach dem 3. Zeichen erscheinen Vorschläge. Ohne Anschrift wird die Lage nicht berücksichtigt.'}
+              : 'Nach dem 3. Zeichen erscheinen Vorschläge für die Anschrift. Ohne Anschrift wird die Lage nicht berücksichtigt.'}
           </p>
         </div>
 
@@ -186,23 +186,30 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
 
                 {/* Stand der Rückzahlung: Dropdown sofort sichtbar (wenn relevant) */}
                 {statusRelevant(value.foerderungProgramm) && !ma25Offen && (
-              <>
-                <SelectField
-                  label="Stand der Rückzahlung"
-                  id="tilgung"
-                  value={value.tilgungsstatus}
-                  disabled={rueckzahlungUnbekannt}
-                  onChange={(e) => set('tilgungsstatus', e.target.value as MietobjektInput['tilgungsstatus'])}
-                >
-                  {(Object.keys(TILGUNGSSTATUS_LABEL) as (keyof typeof TILGUNGSSTATUS_LABEL)[]).map((k) => (
-                    <option key={k} value={k}>
-                      {TILGUNGSSTATUS_LABEL[k]}
-                    </option>
-                  ))}
-                </SelectField>
+                  <SelectField
+                    label="Stand der Rückzahlung"
+                    id="tilgung"
+                    value={value.tilgungsstatus}
+                    disabled={rueckzahlungUnbekannt}
+                    onChange={(e) => set('tilgungsstatus', e.target.value as MietobjektInput['tilgungsstatus'])}
+                  >
+                    {(Object.keys(TILGUNGSSTATUS_LABEL) as (keyof typeof TILGUNGSSTATUS_LABEL)[]).map((k) => (
+                      <option key={k} value={k}>
+                        {TILGUNGSSTATUS_LABEL[k]}
+                      </option>
+                    ))}
+                  </SelectField>
+                )}
+              </>
+            )}
 
-                {/* Nur der unbekannte Status: Anfrage beim Bundeswohnbaufonds */}
-                {value.foerderungProgramm === 'wwg1948' && (
+            {/* Anfrage-Checkboxen eng beieinander (gleicher Abstand wie oben) */}
+            <div className="space-y-2">
+              {/* Nur der unbekannte Status: Anfrage beim Bundeswohnbaufonds */}
+              {value.baubewilligungGebaeude !== 'vor_1945' &&
+                statusRelevant(value.foerderungProgramm) &&
+                !ma25Offen &&
+                value.foerderungProgramm === 'wwg1948' && (
                   <div>
                     <Checkbox
                       checked={rueckzahlungUnbekannt}
@@ -216,23 +223,20 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                     )}
                   </div>
                 )}
-              </>
-            )}
-              </>
-            )}
 
-            {/* MA25-Anfrage: Baujahr UND Förderung unbekannt */}
-            <div>
-              <Checkbox
-                checked={ma25Offen}
-                onChange={setMa25Offen}
-                label="Baujahr und öffentliche Förderung unbekannt? Kostenlos bei der MA 25 anfragen"
-              />
-              {ma25Offen && (
-                <div className="mt-5">
-                  <Ma25Anfrage anschrift={value.anschrift} />
-                </div>
-              )}
+              {/* MA25-Anfrage: Baujahr UND Förderung unbekannt */}
+              <div>
+                <Checkbox
+                  checked={ma25Offen}
+                  onChange={setMa25Offen}
+                  label="Baujahr und öffentliche Förderung unbekannt? Kostenlos bei der MA 25 anfragen"
+                />
+                {ma25Offen && (
+                  <div className="mt-5">
+                    <Ma25Anfrage anschrift={value.anschrift} />
+                  </div>
+                )}
+              </div>
             </div>
           </>
         ) : (
@@ -302,7 +306,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
 
               {MERKMAL_GRUPPEN.map((gruppe) => (
                 <div key={gruppe} className="space-y-2">
-                  <p className="text-sm font-semibold uppercase tracking-wider text-neutral-500">{gruppe}</p>
+                  <p className="text-sm font-semibold text-neutral-500">{gruppe}</p>
                   <div className="flex flex-col gap-2">
                     {MERKMAL_KATALOG.filter((m) => m.gruppe === gruppe).map((m) => (
                       <Checkbox

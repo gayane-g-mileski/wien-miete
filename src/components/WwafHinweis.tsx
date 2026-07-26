@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { TextareaField } from './ui'
+import { Collapsible, TextareaField } from './ui'
 
 // Empfänger beim Bundeswohnbaufonds – eine Adresse hinterlegt.
 const EMPFAENGER = 'gerlinde.weiss@bmdw.gv.at'
@@ -42,7 +42,6 @@ const FAELLE = [
 
 export function WwafHinweis({ anschrift }: { anschrift: string }) {
   const [text, setText] = useState(() => anfrageText(anschrift))
-  const [bedeutungOffen, setBedeutungOffen] = useState(false)
 
   const senden = () => {
     const href = `mailto:${EMPFAENGER}?subject=${encodeURIComponent('Anfrage Bundeswohnbaufonds – Stand der Rückzahlung')}&body=${encodeURIComponent(text)}`
@@ -51,18 +50,16 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
 
   return (
     <div className="space-y-5 rounded-xl border border-sage/30 bg-cream-50 p-5 text-base text-neutral-700">
-      <p className="text-sm font-semibold uppercase tracking-wide text-sage-700">Diese Anfrage ist kostenlos</p>
+      <p className="text-sm font-semibold text-sage-700">Diese Anfrage ist kostenlos</p>
 
       <div>
         <p>Diese Auskunft bekommst du über eine Anfrage an das</p>
-        <address className="my-4 border-l-2 border-sage pl-3 not-italic font-medium leading-relaxed text-sage-700">
-          Bundesministerium für Wissenschaft, Forschung und Wirtschaft
+        <address className="my-4 border-l-2 border-sage pl-3 not-italic leading-relaxed text-sage-700">
+          <span className="font-semibold">Bundesministerium für Wissenschaft, Forschung und Wirtschaft</span>
           <br />
-          Verwaltungsstelle Bundeswohnbaufonds
+          <span className="font-semibold">Verwaltungsstelle Bundeswohnbaufonds</span>
           <br />
-          Stubenring 1
-          <br />
-          1010 Wien
+          Stubenring 1, 1010 Wien
         </address>
         <p>oder mittels E-Mail.</p>
       </div>
@@ -79,28 +76,8 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
       </div>
 
       <div className="border-t border-sand-line/70 pt-4">
-        <button
-          type="button"
-          onClick={() => setBedeutungOffen((o) => !o)}
-          aria-expanded={bedeutungOffen}
-          className="flex w-full items-center justify-between gap-2 text-left text-base font-semibold text-neutral-800"
-        >
-          <span>Was die Antwort für deine Miete bedeutet</span>
-          <svg
-            viewBox="0 0 24 24"
-            className={`h-5 w-5 shrink-0 text-sage-700 transition-transform ${bedeutungOffen ? 'rotate-180' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M6 9l6 6 6-6" />
-          </svg>
-        </button>
-
-        {bedeutungOffen && (
-          <div className="mt-4 space-y-3">
+        <Collapsible title="Was die Antwort für deine Miete bedeutet">
+          <div className="space-y-3">
             {FAELLE.map((f) => (
               <div key={f.titel} className="rounded-lg border border-sand-line/70 bg-white p-3">
                 <p className="font-semibold text-neutral-800">{f.titel}</p>
@@ -116,7 +93,7 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
               <span className="font-semibold text-neutral-800">Richtwertmietzins</span>.
             </p>
           </div>
-        )}
+        </Collapsible>
       </div>
     </div>
   )
