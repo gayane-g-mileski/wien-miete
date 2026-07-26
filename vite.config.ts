@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
-const base = '/vienna-rent/'
+const base = '/wien-miete/'
 
 export default defineConfig({
   base,
