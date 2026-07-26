@@ -4,34 +4,23 @@ import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTML
 // Material-Design-ähnliche Outlined-Felder mit schwebendem Label (Schwarz-Weiß).
 
 const box =
-  'peer w-full rounded-md border border-neutral-400 bg-transparent text-base text-neutral-900 outline-none ' +
-  'transition-colors focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 ' +
+  'peer w-full rounded-lg border border-line bg-transparent text-base text-ink outline-none ' +
+  'transition-colors focus:border-accent focus:ring-1 focus:ring-accent ' +
   'disabled:cursor-not-allowed disabled:opacity-60'
 
 // Label schwebt von der Mitte auf die obere Rahmenlinie (bei Fokus oder Inhalt).
 const floatLabel =
-  'pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base text-neutral-500 transition-all ' +
-  'peer-focus:top-0 peer-focus:text-sm peer-focus:text-neutral-900 peer-focus:bg-white peer-focus:px-1 ' +
+  'pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base text-ink-faint transition-all ' +
+  'peer-focus:top-0 peer-focus:text-sm peer-focus:text-accent peer-focus:bg-surface peer-focus:px-1 ' +
   'peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-sm ' +
-  'peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-1'
+  'peer-[:not(:placeholder-shown)]:bg-surface peer-[:not(:placeholder-shown)]:px-1'
 
 // Label dauerhaft oben (für Select/Textarea, die immer „gefüllt“ wirken).
 const topLabel =
-  'pointer-events-none absolute left-3 top-0 -translate-y-1/2 bg-white px-1 text-sm text-neutral-600 peer-focus:text-neutral-900'
-
-// Eigener Chevron (24px) mit 12px Abstand rechts – native Select-Pfeile sind nicht stylbar.
-const CHEVRON =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23404040' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"
-
-const selectChevronStyle = {
-  backgroundImage: `url("${CHEVRON}")`,
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'right 12px center',
-  backgroundSize: '24px 24px',
-} as const
+  'pointer-events-none absolute left-3 top-0 -translate-y-1/2 bg-surface px-1 text-sm text-ink-soft peer-focus:text-accent'
 
 function Hint({ children }: { children?: ReactNode }) {
-  return children ? <p className="mt-1 px-1 text-[12px] text-neutral-500">{children}</p> : null
+  return children ? <p className="mt-1 px-1 text-[12px] text-ink-faint">{children}</p> : null
 }
 
 interface FieldProps {
@@ -77,7 +66,7 @@ export function SelectField({
   return (
     <div>
       <div className="relative">
-        <select id={id} {...props} style={selectChevronStyle} className={`${box} h-14 appearance-none px-3 pr-10 pt-2`}>
+        <select id={id} {...props} className={`${box} select-chevron h-14 appearance-none px-3 pr-10 pt-2`}>
           {children}
         </select>
         <label htmlFor={id} className={topLabel}>
@@ -97,10 +86,10 @@ export function TextareaField({ label, hint, id, ...props }: FieldProps & Textar
         <label
           htmlFor={id}
           className={
-            'pointer-events-none absolute left-3 top-5 text-base text-neutral-500 transition-all ' +
-            'peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-sm peer-focus:bg-white peer-focus:px-1 peer-focus:text-neutral-900 ' +
+            'pointer-events-none absolute left-3 top-5 text-base text-ink-faint transition-all ' +
+            'peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-sm peer-focus:bg-surface peer-focus:px-1 peer-focus:text-accent ' +
             'peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 ' +
-            'peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-1'
+            'peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:bg-surface peer-[:not(:placeholder-shown)]:px-1'
           }
         >
           {label}
@@ -122,12 +111,12 @@ export function Checkbox({
   label: ReactNode
 }) {
   return (
-    <label className="flex cursor-pointer items-start gap-2 text-base text-neutral-800">
+    <label className="flex cursor-pointer items-start gap-2 text-base text-ink">
       <input
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="mt-1 h-4 w-4 shrink-0 rounded border-neutral-400 bg-white text-neutral-800 accent-neutral-800 focus:ring-2 focus:ring-neutral-300"
+        className="mt-1 h-4 w-4 shrink-0 rounded border-line accent-accent focus:ring-2 focus:ring-accent/40"
       />
       <span>{label}</span>
     </label>
@@ -138,8 +127,8 @@ export function Checkbox({
 export function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section>
-      <h3 className="mb-2 px-1 text-sm font-semibold text-neutral-500">{title}</h3>
-      <div className="space-y-7 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">{children}</div>
+      <h3 className="mb-2 px-1 text-sm font-semibold text-ink-faint">{title}</h3>
+      <div className="space-y-7 rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">{children}</div>
     </section>
   )
 }
@@ -166,7 +155,7 @@ export function Collapsible({
         <span>{title}</span>
         <svg
           viewBox="0 0 24 24"
-          className={`h-5 w-5 shrink-0 text-sage-700 transition-transform ${offen ? 'rotate-180' : ''}`}
+          className={`h-5 w-5 shrink-0 text-accent transition-transform ${offen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           strokeWidth="2.2"

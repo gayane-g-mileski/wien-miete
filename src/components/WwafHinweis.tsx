@@ -49,12 +49,12 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
   }
 
   return (
-    <div className="space-y-5 rounded-xl border border-sage/30 bg-cream-50 p-5 text-base text-neutral-700">
-      <p className="text-sm font-semibold text-sage-700">Diese Anfrage ist kostenlos</p>
+    <div className="space-y-5 rounded-xl border border-accent/30 bg-surface-2 p-5 text-base text-ink-soft">
+      <p className="text-sm font-semibold text-accent">Diese Anfrage ist kostenlos</p>
 
       <div>
         <p>Diese Auskunft bekommst du über eine Anfrage an das</p>
-        <address className="my-4 border-l-2 border-sage pl-3 not-italic leading-relaxed text-sage-700">
+        <address className="my-4 border-l-2 border-accent pl-3 not-italic leading-relaxed text-accent">
           <span className="font-semibold">Bundesministerium für Wissenschaft, Forschung und Wirtschaft</span>
           <br />
           <span className="font-semibold">Verwaltungsstelle Bundeswohnbaufonds</span>
@@ -69,28 +69,28 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
         <button
           type="button"
           onClick={senden}
-          className="mt-3 w-full rounded-lg bg-sage px-4 py-2.5 text-base font-semibold text-cream-50 hover:bg-sage-600"
+          className="mt-3 w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent hover:bg-accent-strong"
         >
           Anfrage per E-Mail senden
         </button>
       </div>
 
-      <div className="border-t border-sand-line/70 pt-4">
+      <div className="border-t border-line pt-4">
         <Collapsible title="Was die Antwort für deine Miete bedeutet">
           <div className="space-y-3">
             {FAELLE.map((f) => (
-              <div key={f.titel} className="rounded-lg border border-sand-line/70 bg-white p-3">
-                <p className="font-semibold text-neutral-800">{f.titel}</p>
-                <p className="mt-1 text-sm leading-relaxed text-neutral-600">{f.text}</p>
-                <p className="mt-2 text-sm font-semibold text-sage-700">{f.ergebnis}</p>
+              <div key={f.titel} className="rounded-lg border border-line bg-surface p-3">
+                <p className="font-semibold text-ink">{f.titel}</p>
+                <p className="mt-1 text-sm leading-relaxed text-ink-soft">{f.text}</p>
+                <p className="mt-2 text-sm font-semibold text-accent">{f.ergebnis}</p>
               </div>
             ))}
-            <p className="text-sm leading-relaxed text-neutral-500">
+            <p className="text-sm leading-relaxed text-ink-faint">
               Das gilt aber nur, wenn gerade deine Wohnung mit Mitteln des Wiederaufbaufonds saniert wurde. Wurde das
               Darlehen nach dem 31.8.1952 bewilligt, genügt es, dass allgemeine Teile des Hauses wiederhergestellt wurden
               – zum Beispiel Stiegenhaus, Dach oder Außenmauern. Ist diese Voraussetzung erfüllt, gilt einer der drei
               Fälle oben. Ist sie nicht erfüllt, wird die Wohnung wie ein gewöhnlicher Altbau behandelt – dann gilt der{' '}
-              <span className="font-semibold text-neutral-800">Richtwertmietzins</span>.
+              <span className="font-semibold text-ink">Richtwertmietzins</span>.
             </p>
           </div>
         </Collapsible>

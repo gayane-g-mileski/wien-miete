@@ -1,34 +1,26 @@
 @import 'tailwindcss';
 
 /*
- * Light-only warme Palette (colorhunt 607456 / EEE0CC / BA6A4C / 7B2525).
- * Textfarben (ink) sind bewusst grün gehalten – wo früher Schwarz/Dunkelgrau
- * stand, steht jetzt ein Grünton der Palette.
+ * Reduziertes Designsystem: max. drei Farbfamilien.
+ *  1) Ink    – dunkler, warmer Neutralton für Text
+ *  2) Paper  – heller, warmer Neutralton für Flächen/Karten/Linien
+ *  3) Accent – ein einziger Akzentton (Terrakotta)
+ * Die Farb-Token werden im Dark-Mode überschrieben, dadurch passen sich alle
+ * Utilities automatisch an das Systemthema an (kein Umschalter).
  */
 @theme {
-  --color-cream: #eee0cc;
-  --color-cream-50: #f8f2e7;
-  --color-cream-100: #f3ebdb;
-  --color-cream-200: #e7d8bd;
-  --color-sand: #ddc9a6;
-  --color-sand-line: #d8c6a4;
+  --color-paper: #f5f1ea;
+  --color-surface: #ffffff;
+  --color-surface-2: #efe8dd;
+  --color-ink: #221d19;
+  --color-ink-soft: #574d45;
+  --color-ink-faint: #8a7e73;
+  --color-line: #e5ddd1;
+  --color-accent: #c05f3c;
+  --color-accent-strong: #a44e2f;
+  --color-on-accent: #ffffff;
 
-  --color-sage: #607456;
-  --color-sage-600: #55684c;
-  --color-sage-700: #47573f;
-
-  --color-terracotta: #ba6a4c;
-  --color-terracotta-600: #a85c40;
-
-  --color-wine: #7b2525;
-  --color-wine-600: #6a1f1f;
-
-  /* Textfarben in Grün statt Schwarz/Dunkelgrau */
-  --color-ink: #38472f;
-  --color-ink-soft: #4c5d43;
-  --color-ink-faint: #6a7860;
-
-  --font-sans: 'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif;
+  --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
   /* Schriftgrößen: allgemein 16px, kleinste 14px */
   --text-xs: 14px;
@@ -43,6 +35,22 @@
   color-scheme: light;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --color-paper: #17130f;
+    --color-surface: #221d18;
+    --color-surface-2: #2b241d;
+    --color-ink: #f3efe9;
+    --color-ink-soft: #cabfb2;
+    --color-ink-faint: #9a8d80;
+    --color-line: #39312a;
+    --color-accent: #e0855e;
+    --color-accent-strong: #eea582;
+    --color-on-accent: #1b1611;
+  }
+}
+
 html,
 body,
 #root {
@@ -51,9 +59,9 @@ body,
 
 body {
   margin: 0;
-  background-color: var(--color-cream);
+  background-color: var(--color-paper);
   color: var(--color-ink);
-  font-family: 'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -65,4 +73,104 @@ input[type='number']::-webkit-outer-spin-button {
 }
 input[type='number'] {
   appearance: textfield;
+}
+
+/* Eigener Select-Chevron (24px, 12px Abstand rechts), passt sich dem Thema an. */
+.select-chevron {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%238a7e73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 24px 24px;
+}
+@media (prefers-color-scheme: dark) {
+  .select-chevron {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239a8d80' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Hero-Banner
+ * Standardmäßig eine warme, sonnendurchflutete CSS-Szene mit Wiener
+ * Dächer-Silhouette. Ein echtes (hyperrealistisches) Foto lässt sich ohne
+ * Code-Änderung einsetzen: Datei unter public/hero.jpg ablegen und im
+ * Hero-Element die Variable setzen  ->  style={{ '--hero-photo': "url('hero.jpg')" }}
+ * ------------------------------------------------------------------------- */
+.hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image:
+    var(--hero-photo, none),
+    radial-gradient(120% 90% at 82% 8%, rgba(255, 236, 200, 0.95) 0%, rgba(255, 214, 165, 0.55) 26%, rgba(233, 178, 140, 0) 60%),
+    radial-gradient(90% 70% at 12% 96%, rgba(120, 82, 60, 0.28) 0%, rgba(120, 82, 60, 0) 55%),
+    linear-gradient(160deg, #f7d9b0 0%, #eec59a 34%, #d99e74 70%, #c07a54 100%);
+  background-size: cover, cover, cover, cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform: scale(1.06);
+  animation: heroZoom 26s ease-in-out infinite alternate;
+}
+
+/* Wiener Dächer-Silhouette am unteren Rand */
+.hero::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34%;
+  z-index: -1;
+  background-repeat: repeat-x;
+  background-position: bottom center;
+  background-size: 480px 150px;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='150' viewBox='0 0 480 150' fill='none'%3E%3Cg fill='%236b3f28'%3E%3Cpath d='M0 150 V96 h40 v-10 h34 v20 h30 V70 l24 -16 24 16 v80 z'/%3E%3Cpath d='M170 150 V84 h56 v-14 h10 v14 h40 v66 z'/%3E%3Cpath d='M300 150 V60 h6 V44 h10 v16 h6 v90 z'/%3E%3Cpath d='M330 150 V92 h44 l16 -18 16 18 h30 v-22 h30 v52 z'/%3E%3Ccircle cx='150' cy='58' r='14'/%3E%3Crect x='148' y='40' width='4' height='16'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Im Dark-Mode die Szene abdunkeln, Text bleibt gut lesbar. */
+  .hero::before {
+    filter: saturate(0.85) brightness(0.62);
+  }
+}
+
+@keyframes heroZoom {
+  from {
+    transform: scale(1.06);
+  }
+  to {
+    transform: scale(1.14);
+  }
+}
+
+/* Sanftes Aufblenden der Hero-Inhalte */
+@keyframes heroRise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.hero-rise {
+  animation: heroRise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero::before {
+    animation: none;
+    transform: none;
+  }
+  .hero-rise {
+    animation: none;
+  }
 }

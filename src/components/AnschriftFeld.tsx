@@ -12,14 +12,14 @@ interface Props {
 }
 
 const box =
-  'peer h-14 w-full rounded-md border border-neutral-400 bg-transparent px-3 pt-4 pb-1 text-base text-neutral-900 ' +
-  'outline-none transition-colors focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900'
+  'peer h-14 w-full rounded-lg border border-line bg-transparent px-3 pt-4 pb-1 text-base text-ink ' +
+  'outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent'
 
 const floatLabel =
-  'pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base text-neutral-500 transition-all ' +
-  'peer-focus:top-0 peer-focus:text-sm peer-focus:text-neutral-900 peer-focus:bg-white peer-focus:px-1 ' +
+  'pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base text-ink-faint transition-all ' +
+  'peer-focus:top-0 peer-focus:text-sm peer-focus:text-accent peer-focus:bg-surface peer-focus:px-1 ' +
   'peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-sm ' +
-  'peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-1'
+  'peer-[:not(:placeholder-shown)]:bg-surface peer-[:not(:placeholder-shown)]:px-1'
 
 export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFehlerChange }: Props) {
   const [treffer, setTreffer] = useState<AdressTreffer[]>([])
@@ -98,13 +98,13 @@ export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFeh
         Anschrift (optional)
       </label>
       {offen && treffer.length > 0 && (
-        <ul className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-md border border-neutral-300 bg-white py-1 shadow-lg">
+        <ul className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-lg border border-line bg-surface py-1 shadow-lg">
           {treffer.map((t) => (
             <li key={t.label}>
               <button
                 type="button"
                 onClick={() => waehle(t)}
-                className="block w-full px-3 py-2 text-left text-base text-neutral-800 hover:bg-neutral-100"
+                className="block w-full px-3 py-2 text-left text-base text-ink hover:bg-surface-2"
               >
                 {t.label}
               </button>

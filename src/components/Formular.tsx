@@ -98,7 +98,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
               onFehlerChange={setAnschriftFehler}
             />
           </div>
-          <p className="mt-1 px-1 text-[12px] text-neutral-500">
+          <p className="mt-1 px-1 text-[12px] text-ink-faint">
             {anschriftFehler
               ? 'Adresssuche gerade nicht erreichbar – du kannst die Adresse trotzdem eintippen (mit Wiener PLZ wird die Lage erkannt).'
               : 'Nach dem 3. Zeichen erscheinen Vorschläge für die Anschrift. Ohne Anschrift wird die Lage nicht berücksichtigt.'}
@@ -163,7 +163,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
         {zeigeFoerderung(value.objektart) ? (
           <>
             {value.baubewilligungGebaeude === 'vor_1945' ? (
-              <p className="rounded-md bg-neutral-100 px-3 py-2 text-sm text-neutral-600">
+              <p className="rounded-md bg-surface-2 px-3 py-2 text-sm text-ink-soft">
                 Bei einem Altbau (Baubewilligung bis 8.5.1945) ist die öffentliche Förderung für die Einstufung ohne
                 Bedeutung.
               </p>
@@ -240,7 +240,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
             </div>
           </>
         ) : (
-          <p className="text-base text-neutral-500">Bei dieser Objektart ist die Förderung für die Einstufung ohne Bedeutung.</p>
+          <p className="text-base text-ink-faint">Bei dieser Objektart ist die Förderung für die Einstufung ohne Bedeutung.</p>
         )}
       </Section>
 
@@ -263,7 +263,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
           )}
 
           {!istRichtwert && (
-            <p className="rounded-md bg-neutral-100 px-3 py-2 text-sm text-neutral-600">
+            <p className="rounded-md bg-surface-2 px-3 py-2 text-sm text-ink-soft">
               Für diese Wohnung gilt kein Richtwert – daher sind hier keine Zu- und Abschläge anzugeben. Beim freien oder
               angemessenen Mietzins zählt die Marktbandbreite je Bezirk (Ausstattung ist dort bereits im Marktpreis
               enthalten).
@@ -306,7 +306,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
 
               {MERKMAL_GRUPPEN.map((gruppe) => (
                 <div key={gruppe} className="space-y-2">
-                  <p className="text-sm font-semibold text-neutral-500">{gruppe}</p>
+                  <p className="text-sm font-semibold text-ink-faint">{gruppe}</p>
                   <div className="flex flex-col gap-2">
                     {MERKMAL_KATALOG.filter((m) => m.gruppe === gruppe).map((m) => (
                       <Checkbox

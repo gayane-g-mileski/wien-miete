@@ -61,13 +61,13 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
   }
 
   const btnUpload =
-    'inline-flex cursor-pointer items-center gap-2 rounded-lg border border-sage/50 bg-white px-3 py-2 text-base font-medium text-sage-700 hover:bg-sage/10'
+    'inline-flex cursor-pointer items-center gap-2 rounded-lg border border-accent/50 bg-surface px-3 py-2 text-base font-medium text-accent hover:bg-accent/10'
 
   return (
-    <div className="space-y-5 rounded-xl border border-sage/30 bg-cream-50 p-5">
-      <p className="text-sm font-semibold text-sage-700">Diese Anfrage ist kostenlos</p>
+    <div className="space-y-5 rounded-xl border border-accent/30 bg-surface-2 p-5">
+      <p className="text-sm font-semibold text-accent">Diese Anfrage ist kostenlos</p>
 
-      <p className="text-base text-neutral-600">
+      <p className="text-base text-ink-soft">
         Die MA 25 kann dir das Jahr der Baubewilligung nennen. Wenn du alle Infos beisammen hast, komm einfach zurück und
         lass die Miete hier neu berechnen.
       </p>
@@ -85,7 +85,7 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
       <TextareaField label="Nachricht" id="ma25-text" rows={7} value={text} onChange={(e) => setText(e.target.value)} />
 
       <div>
-        <span className="mb-1.5 block text-base font-medium text-neutral-800">
+        <span className="mb-1.5 block text-base font-medium text-ink">
           Unterlagen (Meldezettel, Eigentumsnachweis, Vollmacht …)
         </span>
         <label className={btnUpload}>
@@ -101,16 +101,16 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
             }}
           />
         </label>
-        <p className="mt-1 text-sm text-neutral-500">Mehrere möglich. PDF, JPG oder PNG, je max. {MAX_MB} MB.</p>
+        <p className="mt-1 text-sm text-ink-faint">Mehrere möglich. PDF, JPG oder PNG, je max. {MAX_MB} MB.</p>
 
         {dateien.length > 0 && (
           <ul className="mt-2 space-y-1">
             {dateien.map((f, i) => (
-              <li key={`${f.name}-${i}`} className="flex items-center justify-between gap-3 rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-base text-neutral-700">
+              <li key={`${f.name}-${i}`} className="flex items-center justify-between gap-3 rounded-md border border-line bg-surface px-3 py-1.5 text-base text-ink-soft">
                 <span className="truncate">
-                  {f.name} <span className="text-neutral-400">({(f.size / 1024 / 1024).toFixed(1)} MB)</span>
+                  {f.name} <span className="text-ink-faint">({(f.size / 1024 / 1024).toFixed(1)} MB)</span>
                 </span>
-                <button type="button" onClick={() => entferne(i)} className="shrink-0 text-neutral-400 hover:text-neutral-800" aria-label="Entfernen">
+                <button type="button" onClick={() => entferne(i)} className="shrink-0 text-ink-faint hover:text-ink" aria-label="Entfernen">
                   ✕
                 </button>
               </li>
@@ -119,18 +119,18 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
         )}
       </div>
 
-      {fehler && <p className="text-base font-medium text-red-700">{fehler}</p>}
+      {fehler && <p className="text-base font-medium text-accent-strong">{fehler}</p>}
 
       <button
         type="button"
         onClick={senden}
-        className="w-full rounded-lg bg-sage px-4 py-2.5 text-base font-semibold text-cream-50 hover:bg-sage-600"
+        className="w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent hover:bg-accent-strong"
       >
         Anfrage senden
       </button>
 
       {gesendet && (
-        <p className="text-base text-neutral-600">
+        <p className="text-base text-ink-soft">
           Deine E-Mail an die MA 25 wurde vorbereitet und in deinem E-Mail-Programm geöffnet. Bitte hänge die ausgewählten
           Dateien dort noch an und schick sie ab.
         </p>

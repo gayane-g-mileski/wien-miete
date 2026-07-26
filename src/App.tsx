@@ -32,51 +32,68 @@ function App() {
   const ergebnis = useMemo(() => evaluateMrg(input), [input])
 
   return (
-    <div className="min-h-screen bg-neutral-100 text-neutral-900">
-      {/* Farbiger Header */}
-      <header className="bg-sage text-cream-50">
-        <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-6 sm:px-6">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cream-50 text-sm font-bold text-sage">
-              MZ
-            </span>
-            <h1 className="text-[2rem] font-bold leading-tight tracking-tight">Mietzins-Check Wien</h1>
+    <div className="min-h-screen bg-paper text-ink">
+      {/* Hero-Banner mit sonnendurchfluteter Szene */}
+      <header className="hero">
+        {/* Scrim für Textlesbarkeit (links) */}
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-paper via-paper/70 to-transparent" />
+
+        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+          <span className="text-lg font-semibold tracking-tight text-ink">Mietzins-Check in Wien</span>
+          <div className="flex items-center gap-5 text-sm font-medium text-ink">
+            <a className="transition-colors hover:text-accent" href="#rechner">
+              Mietrechner
+            </a>
+            <a className="transition-colors hover:text-accent" href="#quellen">
+              Quelle
+            </a>
           </div>
-          <div className="mt-1 space-y-0.5">
-            <p className="text-xl font-semibold leading-snug text-cream-50">
-              Für Vermieter:innen und Immobilien-Anleger:innen in Wien
+        </nav>
+
+        <div className="mx-auto flex max-w-6xl flex-col justify-center px-4 pb-16 pt-10 sm:px-6 sm:pb-24 sm:pt-16">
+          <div className="hero-rise max-w-2xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">
+              Für Vermieter:innen &amp; Immobilien-Anleger:innen in Wien
             </p>
-            <p className="text-xl font-medium leading-snug text-cream-100">
+            <h1 className="mt-3 text-4xl font-bold leading-[1.1] tracking-tight text-ink sm:text-5xl">
               Ersteinschätzung von Mietzinsart, Schutzumfang und marktüblicher Preisbandbreite
+            </h1>
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-ink-soft">
+              Die Einschätzung berücksichtigt den aktuellen Stand der österreichischen Gesetzeslage samt laufenden
+              Novellen, eine aktuelle Wiener Marktanalyse und offizielle Statistiken – und wird entsprechend fortlaufend
+              aktualisiert.
             </p>
+            <a
+              href="#rechner"
+              className="mt-7 inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-base font-semibold text-on-accent shadow-sm transition-colors hover:bg-accent-strong"
+            >
+              Zum Mietrechner
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </a>
           </div>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-cream-200">
-            Die Einschätzung berücksichtigt den aktuellen Stand der österreichischen Gesetzeslage samt laufenden
-            Novellen, eine aktuelle Wiener Marktanalyse und offizielle Statistiken – und wird entsprechend fortlaufend
-            aktualisiert.
-          </p>
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <main id="rechner" className="mx-auto max-w-6xl scroll-mt-4 px-4 py-10 sm:px-6">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-          {/* Links: alle Eingaben untereinander (schwarz-weiß) */}
+          {/* Links: alle Eingaben untereinander */}
           <section>
             <Formular value={input} onChange={setInput} mietzinsArt={ergebnis.mietzinsArt} />
           </section>
 
-          {/* Rechts: Ergebnis (farbig) */}
+          {/* Rechts: Ergebnis */}
           <section className="lg:sticky lg:top-6">
             <Ergebnis ergebnis={ergebnis} />
           </section>
         </div>
       </main>
 
-      {/* Farbiger Footer */}
-      <footer className="mt-4 border-t border-sand-line bg-cream">
+      <footer id="quellen" className="mt-4 scroll-mt-4 border-t border-line bg-surface-2">
         <div className="mx-auto max-w-6xl space-y-3 px-4 py-8 text-xs leading-relaxed text-ink-soft sm:px-6">
           <p>
-            <strong className="text-wine">Kein Rechtsrat.</strong> Dieses Tool bietet eine automatisierte Ersteinschätzung
+            <strong className="text-accent">Kein Rechtsrat.</strong> Dieses Tool bietet eine automatisierte Ersteinschätzung
             auf Basis vereinfachter Regeln und grober, hinterlegter Marktmiet- und Lagezuschlag-Näherungen je Bezirk. Es
             ersetzt keine rechtliche oder immobilienwirtschaftliche Beratung im Einzelfall (z.B. Mietervereinigung,
             Rechtsanwält:in, Sachverständige).
@@ -92,7 +109,7 @@ function App() {
               <li>
                 Rechtsinformationssystem des Bundes –{' '}
                 <a
-                  className="text-sage-700 underline hover:text-sage"
+                  className="text-accent underline hover:text-accent-strong"
                   href="https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10002531"
                   target="_blank"
                   rel="noreferrer"

@@ -15,12 +15,12 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'Mietzins-Check Wien',
+        name: 'Mietzins-Check in Wien',
         short_name: 'Mietzins-Check',
         description:
           'Schnelle Ersteinschätzung von Mietzinsart, MRG-Anwendungsbereich und Preisbandbreite für Wiener Mietobjekte.',
-        theme_color: '#607456',
-        background_color: '#eee0cc',
+        theme_color: '#c05f3c',
+        background_color: '#f5f1ea',
         display: 'standalone',
         start_url: base,
         scope: base,
@@ -44,7 +44,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
       },
     }),
   ],
