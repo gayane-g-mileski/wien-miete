@@ -65,6 +65,7 @@ export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFeh
     onChange(t.label, t.bezirk, t.koords)
     setOffen(false)
     setTreffer([])
+    console.debug('[wien-miete] Adresse gewählt:', t.label, 'Koordinaten:', t.koords)
     if (t.koords) {
       if (onGemeindebau) {
         istGemeindebau(t.koords).then((gb) => {

@@ -15,6 +15,24 @@ interface OgdFeature {
   geometry?: { coordinates?: [number, number] }
 }
 
+/**
+ * Koordinaten robust auf WGS84 (lat/lon) normalisieren. Der Adressdienst kann
+ * je nach Konfiguration [lon,lat] (GeoJSON-Standard) oder [lat,lon] liefern –
+ * anhand der für Wien bekannten Wertebereiche wird die richtige Zuordnung
+ * erkannt. Projizierte Koordinaten (falscher CRS) fallen als null heraus.
+ */
+function normalisiereKoords(c: unknown): Koordinaten | null {
+  if (!Array.isArray(c) || c.length < 2) return null
+  const a = Number(c[0])
+  const b = Number(c[1])
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return null
+  const istLat = (v: number) => v > 46 && v < 49 // Wien ~48,2
+  const istLon = (v: number) => v > 14 && v < 18 // Wien ~16,37
+  if (istLat(a) && istLon(b)) return { lat: a, lon: b } // [lat, lon]
+  if (istLon(a) && istLat(b)) return { lat: b, lon: a } // [lon, lat] (Standard)
+  return null
+}
+
 function bezirkAusProps(p: Record<string, unknown>): number | null {
   const raw = p.Bezirk ?? p.bezirk ?? p.BEZIRK
   if (typeof raw === 'number' && raw >= 1 && raw <= 23) return raw
@@ -61,11 +79,10 @@ export async function sucheAdressen(query: string, signal?: AbortSignal): Promis
       .join(', ')
     if (!label || gesehen.has(label)) continue
     gesehen.add(label)
-    const c = f.geometry?.coordinates
     treffer.push({
       label,
       bezirk: bezirkAusProps(p),
-      koords: c ? { lat: c[1], lon: c[0] } : null,
+      koords: normalisiereKoords(f.geometry?.coordinates),
     })
     if (treffer.length >= 8) break
   }
@@ -104,7 +121,7 @@ export async function istGemeindebau(koords: Koordinaten, signal?: AbortSignal):
 }
 
 interface GebaeudeFeature {
-  properties?: { BAUJAHR?: number | string }
+  properties?: Record<string, unknown>
   geometry?: { coordinates?: unknown }
 }
 
@@ -114,49 +131,67 @@ function periodeAusBaujahr(bj: number): BaubewilligungGebaeude {
   return 'nach_1953'
 }
 
+/** Baujahr aus einem Feature lesen: primär BAUJAHR, sonst ein Jahr aus L_BAUJ. */
+function baujahrAusFeature(p: Record<string, unknown>): number | null {
+  const bj = Number(p.BAUJAHR)
+  if (Number.isFinite(bj) && bj >= 1000 && bj <= 2100) return bj
+  const label = String(p.L_BAUJ ?? p.BAUALTER ?? '')
+  const m = label.match(/\b(1[5-9]\d{2}|20\d{2})\b/)
+  if (m) return Number(m[1])
+  return null
+}
+
 /**
  * Best-effort-Ermittlung des Baujahres (und damit der MRG-Baualtersklasse)
  * einer Adresse über den offenen Gebäudedatensatz der Stadt Wien
- * (ogdwien:GEBAEUDEINFOOGD, Attribut BAUJAHR). Nimmt das nächstgelegene
- * Gebäude mit gültigem Baujahr. null bei Fehler/keinem Treffer.
+ * (ogdwien:GEBAEUDEINFOOGD, Attribut BAUJAHR bzw. L_BAUJ). Nimmt das
+ * nächstgelegene Gebäude mit gültigem Baujahr. null bei Fehler/keinem Treffer.
  */
 export async function baujahrAusKoordinaten(
   koords: Koordinaten,
   signal?: AbortSignal,
 ): Promise<BaubewilligungGebaeude | null> {
-  const d = 0.0006 // ~60 m
+  const d = 0.0012 // ~120 m – deckt auch größere Wohnhausanlagen ab
   const { lat, lon } = koords
   const base =
     'https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0' +
     '&srsName=EPSG:4326&outputFormat=json&typeName=ogdwien:GEBAEUDEINFOOGD&bbox='
+  // GeoServer WFS 1.1.0 nutzt bei EPSG:4326 lat,lon – zur Sicherheit beide Reihenfolgen.
   const boxes = [
     `${lat - d},${lon - d},${lat + d},${lon + d},EPSG:4326`,
     `${lon - d},${lat - d},${lon + d},${lat + d},EPSG:4326`,
   ]
   try {
     for (const box of boxes) {
-      const res = await fetch(base + encodeURIComponent(box), { signal })
-      if (!res.ok) continue
+      const url = base + encodeURIComponent(box)
+      const res = await fetch(url, { signal })
+      if (!res.ok) {
+        console.warn('[wien-miete] Gebäudeabfrage HTTP', res.status, url)
+        continue
+      }
       const data = (await res.json()) as { features?: GebaeudeFeature[] }
       const feats = data.features ?? []
       let bestBj: number | null = null
       let bestDist = Infinity
       for (const f of feats) {
-        const bj = Number(f.properties?.BAUJAHR)
-        if (!Number.isFinite(bj) || bj < 1000) continue
-        const c = f.geometry?.coordinates
-        const flon = Array.isArray(c) && typeof c[0] === 'number' ? (c[0] as number) : lon
-        const flat = Array.isArray(c) && typeof c[1] === 'number' ? (c[1] as number) : lat
-        const dist = (flat - lat) ** 2 + (flon - lon) ** 2
+        const bj = baujahrAusFeature(f.properties ?? {})
+        if (bj == null) continue
+        const fk = normalisiereKoords(f.geometry?.coordinates)
+        const dist = fk ? (fk.lat - lat) ** 2 + (fk.lon - lon) ** 2 : 0
         if (dist < bestDist) {
           bestDist = dist
           bestBj = bj
         }
       }
-      if (bestBj != null) return periodeAusBaujahr(bestBj)
+      if (bestBj != null) {
+        console.debug('[wien-miete] Baujahr erkannt:', bestBj)
+        return periodeAusBaujahr(bestBj)
+      }
     }
+    console.debug('[wien-miete] Kein Baujahr im Umkreis gefunden für', koords)
     return null
-  } catch {
+  } catch (e) {
+    console.warn('[wien-miete] Gebäudeabfrage fehlgeschlagen:', e)
     return null
   }
 }
