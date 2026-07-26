@@ -9,6 +9,7 @@ interface Props {
   onGemeindebau?: (detected: boolean) => void
   onBaujahr?: (periode: BaubewilligungGebaeude) => void
   onFehlerChange?: (fehler: boolean) => void
+  onAutoStatus?: (msg: string | null) => void
 }
 
 const box =
@@ -21,7 +22,7 @@ const floatLabel =
   'peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs ' +
   'peer-[:not(:placeholder-shown)]:bg-surface peer-[:not(:placeholder-shown)]:px-1'
 
-export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFehlerChange }: Props) {
+export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFehlerChange, onAutoStatus }: Props) {
   const [treffer, setTreffer] = useState<AdressTreffer[]>([])
   const [offen, setOffen] = useState(false)
   const boxRef = useRef<HTMLDivElement>(null)
@@ -66,18 +67,23 @@ export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFeh
     setOffen(false)
     setTreffer([])
     console.debug('[wien-miete] Adresse gewählt:', t.label, 'Koordinaten:', t.koords)
-    if (t.koords) {
-      if (onGemeindebau) {
-        istGemeindebau(t.koords).then((gb) => {
+    if (!t.koords) {
+      onAutoStatus?.('Für diese Adresse kamen keine Koordinaten – Baujahr wird nicht automatisch erkannt.')
+      return
+    }
+    onAutoStatus?.('Baujahr wird automatisch ermittelt …')
+    if (onGemeindebau) {
+      istGemeindebau(t.koords)
+        .then((gb) => {
           if (gb != null) onGemeindebau(gb)
         })
-      }
-      if (onBaujahr) {
-        baujahrAusKoordinaten(t.koords).then((p) => {
-          if (p != null) onBaujahr(p)
-        })
-      }
+        .catch(() => {})
     }
+    baujahrAusKoordinaten(t.koords, undefined, (msg) => onAutoStatus?.(msg))
+      .then((p) => {
+        if (p != null) onBaujahr?.(p)
+      })
+      .catch(() => {})
   }
 
   return (
@@ -91,6 +97,7 @@ export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFeh
         value={value}
         onChange={(e) => {
           onChange(e.target.value, null, null)
+          onAutoStatus?.(null)
           setOffen(true)
         }}
         onFocus={() => treffer.length > 0 && setOffen(true)}

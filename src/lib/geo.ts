@@ -150,6 +150,7 @@ function baujahrAusFeature(p: Record<string, unknown>): number | null {
 export async function baujahrAusKoordinaten(
   koords: Koordinaten,
   signal?: AbortSignal,
+  onDiag?: (msg: string) => void,
 ): Promise<BaubewilligungGebaeude | null> {
   const d = 0.0012 // ~120 m – deckt auch größere Wohnhausanlagen ab
   const { lat, lon } = koords
@@ -162,10 +163,12 @@ export async function baujahrAusKoordinaten(
     `${lon - d},${lat - d},${lon + d},${lat + d},EPSG:4326`,
   ]
   try {
+    let letzterStatus = 0
     for (const box of boxes) {
-      const url = base + encodeURIComponent(box)
+      const url = base + box // rohe Kommas/Doppelpunkt wie in den offiziellen Beispielen
       const res = await fetch(url, { signal })
       if (!res.ok) {
+        letzterStatus = res.status
         console.warn('[wien-miete] Gebäudeabfrage HTTP', res.status, url)
         continue
       }
@@ -185,12 +188,17 @@ export async function baujahrAusKoordinaten(
       }
       if (bestBj != null) {
         console.debug('[wien-miete] Baujahr erkannt:', bestBj)
+        onDiag?.(`Baujahr laut Gebäuderegister: ${bestBj}.`)
         return periodeAusBaujahr(bestBj)
       }
     }
+    if (letzterStatus) onDiag?.(`Gebäuderegister-Abfrage fehlgeschlagen (HTTP ${letzterStatus}).`)
+    else onDiag?.('Kein Gebäude mit Baujahr im Umkreis gefunden – bitte manuell wählen.')
     console.debug('[wien-miete] Kein Baujahr im Umkreis gefunden für', koords)
     return null
   } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Netzwerkfehler'
+    onDiag?.(`Gebäuderegister nicht erreichbar (${msg}).`)
     console.warn('[wien-miete] Gebäudeabfrage fehlgeschlagen:', e)
     return null
   }
