@@ -28,7 +28,6 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
   const [ma25Offen, setMa25Offen] = useState(false)
   const [rueckzahlungUnbekannt, setRueckzahlungUnbekannt] = useState(false)
   const [anschriftFehler, setAnschriftFehler] = useState(false)
-  const [autoStatus, setAutoStatus] = useState<string | null>(null)
   const [baujahrUnklar, setBaujahrUnklar] = useState(false)
   const valueRef = useRef(value)
   valueRef.current = value
@@ -104,7 +103,6 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                 onChange({ ...valueRef.current, baubewilligungGebaeude: periode, foerderungProgramm: prog })
               }}
               onFehlerChange={setAnschriftFehler}
-              onAutoStatus={setAutoStatus}
             />
           </div>
           <p className="mt-1 px-1 text-[12px] text-ink-faint">
@@ -112,7 +110,6 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
               ? 'Adresssuche gerade nicht erreichbar – du kannst die Adresse trotzdem eintippen (mit Wiener PLZ wird die Lage erkannt).'
               : 'Nach dem 3. Zeichen erscheinen Vorschläge für die Anschrift. Ohne Anschrift wird die Lage nicht berücksichtigt.'}
           </p>
-          {autoStatus && <p className="mt-1 px-1 text-[12px] font-medium text-accent">{autoStatus}</p>}
         </div>
 
         <NumberField
@@ -142,6 +139,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
               value={value.baubewilligungGebaeude}
               disabled={ma25Offen}
               onChange={(e) => {
+                setBaujahrUnklar(false)
                 const b = e.target.value as MietobjektInput['baubewilligungGebaeude']
                 const erlaubt = foerderungenFuer(b)
                 const prog = erlaubt.includes(value.foerderungProgramm) ? value.foerderungProgramm : 'keine'
@@ -155,9 +153,8 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
               ))}
             </SelectField>
             {baujahrUnklar && (
-              <p className="mt-1 px-1 text-[12px] text-ink-soft">
-                Aus der Anschrift ließ sich das Baujahr nicht eindeutig bestimmen – bitte wählen Sie die Baubewilligung
-                des Gebäudes selbst.
+              <p className="mt-1 px-1 text-[12px] font-medium text-coffee">
+                Baubewilligungsjahr nicht erkannt – bitte auswählen.
               </p>
             )}
           </div>

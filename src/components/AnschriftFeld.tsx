@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { AdressTreffer } from '../lib/geo'
-import { baujahrAusKoordinaten, istGemeindebau, sucheAdressen } from '../lib/geo'
+import { istGemeindebau, sucheAdressen } from '../lib/geo'
 import type { BaubewilligungGebaeude, Koordinaten } from '../lib/types'
 
 interface Props {
@@ -9,7 +9,6 @@ interface Props {
   onGemeindebau?: (detected: boolean) => void
   onBaujahr?: (periode: BaubewilligungGebaeude | null) => void
   onFehlerChange?: (fehler: boolean) => void
-  onAutoStatus?: (msg: string | null) => void
 }
 
 const box =
@@ -22,7 +21,7 @@ const floatLabel =
   'peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs ' +
   'peer-[:not(:placeholder-shown)]:bg-surface peer-[:not(:placeholder-shown)]:px-1'
 
-export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFehlerChange, onAutoStatus }: Props) {
+export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFehlerChange }: Props) {
   const [treffer, setTreffer] = useState<AdressTreffer[]>([])
   const [offen, setOffen] = useState(false)
   const boxRef = useRef<HTMLDivElement>(null)
@@ -66,23 +65,18 @@ export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFeh
     onChange(t.label, t.bezirk, t.koords)
     setOffen(false)
     setTreffer([])
-    console.debug('[wien-miete] Adresse gewählt:', t.label, 'Koordinaten:', t.koords)
-    if (!t.koords) {
-      onAutoStatus?.('Für diese Adresse kamen keine Koordinaten – Baujahr wird nicht automatisch erkannt.')
-      onBaujahr?.(null)
-      return
-    }
-    onAutoStatus?.('Baujahr wird automatisch ermittelt …')
-    if (onGemeindebau) {
+    // Gemeindebau best-effort erkennen (erzwingt ggf. Richtwert).
+    if (t.koords && onGemeindebau) {
       istGemeindebau(t.koords)
         .then((gb) => {
           if (gb != null) onGemeindebau(gb)
         })
         .catch(() => {})
     }
-    baujahrAusKoordinaten(t.koords, undefined, (msg) => onAutoStatus?.(msg))
-      .then((p) => onBaujahr?.(p))
-      .catch(() => onBaujahr?.(null))
+    // Das Baujahr lässt sich aus den offenen Daten nicht zuverlässig ermitteln –
+    // deshalb wird die Baubewilligung nicht automatisch gesetzt, sondern die
+    // Nutzer:in im Formular zur manuellen Auswahl aufgefordert.
+    onBaujahr?.(null)
   }
 
   return (
@@ -96,7 +90,6 @@ export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFeh
         value={value}
         onChange={(e) => {
           onChange(e.target.value, null, null)
-          onAutoStatus?.(null)
           setOffen(true)
         }}
         onFocus={() => treffer.length > 0 && setOffen(true)}
