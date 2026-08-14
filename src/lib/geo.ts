@@ -21,6 +21,13 @@ interface OgdFeature {
  * anhand der für Wien bekannten Wertebereiche wird die richtige Zuordnung
  * erkannt. Projizierte Koordinaten (falscher CRS) fallen als null heraus.
  */
+// Web-Mercator (EPSG:3857) -> WGS84 (Grad). Wien liegt bei x~1,82 Mio / y~6,14 Mio.
+function ausMercator(x: number, y: number): Koordinaten {
+  const lon = (x / 20037508.34) * 180
+  const lat = (Math.atan(Math.exp((y / 20037508.34) * Math.PI)) * 360) / Math.PI - 90
+  return { lat, lon }
+}
+
 function normalisiereKoords(c: unknown): Koordinaten | null {
   if (!Array.isArray(c) || c.length < 2) return null
   const a = Number(c[0])
@@ -29,7 +36,20 @@ function normalisiereKoords(c: unknown): Koordinaten | null {
   const istLat = (v: number) => v > 46 && v < 49 // Wien ~48,2
   const istLon = (v: number) => v > 14 && v < 18 // Wien ~16,37
   if (istLat(a) && istLon(b)) return { lat: a, lon: b } // [lat, lon]
-  if (istLon(a) && istLat(b)) return { lat: b, lon: a } // [lon, lat] (Standard)
+  if (istLon(a) && istLat(b)) return { lat: b, lon: a } // [lon, lat] (GeoJSON-Standard)
+  // Projizierte Koordinaten (Web Mercator) umrechnen – der Adressdienst liefert
+  // je nach crs-Parameter mitunter EPSG:3857 statt Grad.
+  const grossX = Math.abs(a) > 1000 && Math.abs(b) > 1000
+  if (grossX) {
+    // erst [x,y], dann vertauscht versuchen; nur akzeptieren, wenn Ergebnis in Wien liegt.
+    for (const [x, y] of [
+      [a, b],
+      [b, a],
+    ]) {
+      const k = ausMercator(x, y)
+      if (istLat(k.lat) && istLon(k.lon)) return k
+    }
+  }
   return null
 }
 

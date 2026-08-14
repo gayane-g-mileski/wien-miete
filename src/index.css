@@ -19,6 +19,7 @@
   --color-accent: #607456;
   --color-accent-strong: #4c5c43;
   --color-on-accent: #ffffff;
+  --color-coffee: #6f4e37;
 
   --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
@@ -48,6 +49,7 @@
     --color-accent: #9db98e;
     --color-accent-strong: #b4cda6;
     --color-on-accent: #1b1611;
+    --color-coffee: #cba37e;
   }
 }
 

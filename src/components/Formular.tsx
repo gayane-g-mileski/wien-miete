@@ -134,31 +134,33 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
 
       {/* --- Förderung (inkl. Baubewilligung + MA25) --- */}
       <Section title="Förderung">
-        {zeigeBaujahr(value.objektart) && baujahrUnklar && (
-          <p className="rounded-md bg-surface-2 px-3 py-2 text-sm text-ink-soft">
-            Aus der Anschrift ließ sich das Baujahr nicht eindeutig bestimmen – bitte wählen Sie die Baubewilligung des
-            Gebäudes unten selbst.
-          </p>
-        )}
         {zeigeBaujahr(value.objektart) && (
-          <SelectField
-            label="Baubewilligung des Gebäudes"
-            id="baubewilligung"
-            value={value.baubewilligungGebaeude}
-            disabled={ma25Offen}
-            onChange={(e) => {
-              const b = e.target.value as MietobjektInput['baubewilligungGebaeude']
-              const erlaubt = foerderungenFuer(b)
-              const prog = erlaubt.includes(value.foerderungProgramm) ? value.foerderungProgramm : 'keine'
-              onChange({ ...value, baubewilligungGebaeude: b, foerderungProgramm: prog })
-            }}
-          >
-            {(Object.keys(BAUBEWILLIGUNG_LABEL) as (keyof typeof BAUBEWILLIGUNG_LABEL)[]).map((k) => (
-              <option key={k} value={k}>
-                {BAUBEWILLIGUNG_LABEL[k]}
-              </option>
-            ))}
-          </SelectField>
+          <div>
+            <SelectField
+              label="Baubewilligung des Gebäudes"
+              id="baubewilligung"
+              value={value.baubewilligungGebaeude}
+              disabled={ma25Offen}
+              onChange={(e) => {
+                const b = e.target.value as MietobjektInput['baubewilligungGebaeude']
+                const erlaubt = foerderungenFuer(b)
+                const prog = erlaubt.includes(value.foerderungProgramm) ? value.foerderungProgramm : 'keine'
+                onChange({ ...value, baubewilligungGebaeude: b, foerderungProgramm: prog })
+              }}
+            >
+              {(Object.keys(BAUBEWILLIGUNG_LABEL) as (keyof typeof BAUBEWILLIGUNG_LABEL)[]).map((k) => (
+                <option key={k} value={k}>
+                  {BAUBEWILLIGUNG_LABEL[k]}
+                </option>
+              ))}
+            </SelectField>
+            {baujahrUnklar && (
+              <p className="mt-1 px-1 text-[12px] text-ink-soft">
+                Aus der Anschrift ließ sich das Baujahr nicht eindeutig bestimmen – bitte wählen Sie die Baubewilligung
+                des Gebäudes selbst.
+              </p>
+            )}
+          </div>
         )}
 
         {value.objektart === 'dg_ausbau' && (

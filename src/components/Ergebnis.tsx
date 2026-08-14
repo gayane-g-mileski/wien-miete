@@ -34,13 +34,13 @@ function SchutzZeile({ label, aktiv }: { label: string; aktiv: boolean }) {
   )
 }
 
-function Preiswert({ min, max }: { min: number; max: number }) {
+function Preiswert({ min, max, color = 'text-accent' }: { min: number; max: number; color?: string }) {
   return (
-    <span className="shrink-0 tabular-nums">
-      <span className="text-2xl font-bold text-accent">{formatEuro(min)}</span>
-      <span className="px-1.5 text-2xl font-light text-accent/50">—</span>
-      <span className="text-2xl font-bold text-accent">{formatEuro(max)}</span>
-      <span className="ml-1 text-2xl font-semibold text-accent">€</span>
+    <span className={`shrink-0 tabular-nums ${color}`}>
+      <span className="text-2xl font-bold">{formatEuro(min)}</span>
+      <span className="px-1.5 text-2xl font-light opacity-50">—</span>
+      <span className="text-2xl font-bold">{formatEuro(max)}</span>
+      <span className="ml-1 text-2xl font-semibold">€</span>
     </span>
   )
 }
@@ -79,7 +79,7 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
                 <div className="space-y-2 rounded-xl bg-surface px-4 py-3 ring-1 ring-line">
                   <div className="flex items-baseline justify-between gap-4">
                     <span className="text-sm text-ink-soft">Monatlich pro m², netto</span>
-                    <Preiswert min={ergebnis.preis.proM2Min} max={ergebnis.preis.proM2Max} />
+                    <Preiswert min={ergebnis.preis.proM2Min} max={ergebnis.preis.proM2Max} color="text-coffee" />
                   </div>
                   <div className="flex items-baseline justify-between gap-4">
                     <span className="text-sm text-ink-soft">Monat gesamt</span>

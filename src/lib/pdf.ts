@@ -12,6 +12,7 @@ const ACCENT: [number, number, number] = [0x60, 0x74, 0x56]
 const INK: [number, number, number] = [0x22, 0x1d, 0x19]
 const SOFT: [number, number, number] = [0x57, 0x4d, 0x45]
 const FAINT: [number, number, number] = [0x8a, 0x7e, 0x73]
+const COFFEE: [number, number, number] = [0x6f, 0x4e, 0x37]
 
 export function dateiname(adresse: string): string {
   const base = adresse.trim() || 'Mietzins-Einschaetzung'
@@ -94,17 +95,25 @@ export function ergebnisPdf(ergebnis: MrgErgebnis, adresse: string): jsPDF {
     y += h
   }
 
-  // ---- Kopf ----
+  // ---- Kopf: kleine Zeile "Mietzins-Ersteinschätzung", darunter groß die Adresse ----
   doc.setFont('helvetica', 'bold')
-  doc.setFontSize(20)
+  doc.setFontSize(11)
   setColor(ACCENT)
-  doc.text('Mietzins-Ersteinschätzung Wien', mL, y)
+  doc.text('MIETZINS-ERSTEINSCHÄTZUNG WIEN', mL, y)
   y += 8
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(21)
+  setColor(INK)
+  for (const line of doc.splitTextToSize(adresse.trim() || 'Mietobjekt ohne Anschrift', contentW)) {
+    doc.text(line, mL, y)
+    y += 9
+  }
+  y += 1
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
   setColor(FAINT)
   const datum = new Date().toLocaleDateString('de-AT', { day: '2-digit', month: 'long', year: 'numeric' })
-  doc.text(`Erstellt am ${datum}${adresse.trim() ? '  ·  ' + adresse.trim() : ''}`, mL, y)
+  doc.text(`Erstellt am ${datum}`, mL, y)
   y += 4
   doc.setDrawColor(ACCENT[0], ACCENT[1], ACCENT[2])
   doc.setLineWidth(0.4)
@@ -129,7 +138,7 @@ export function ergebnisPdf(ergebnis: MrgErgebnis, adresse: string): jsPDF {
   // ---- Preisbandbreite ----
   heading('Preisbandbreite')
   if (ergebnis.preis) {
-    value(`${euro(ergebnis.preis.proM2Min)} – ${euro(ergebnis.preis.proM2Max)} EUR / m² monatlich, netto`, 14, ACCENT)
+    value(`${euro(ergebnis.preis.proM2Min)} – ${euro(ergebnis.preis.proM2Max)} EUR / m² monatlich, netto`, 14, COFFEE)
     value(`${euro(ergebnis.preis.monatlichMin)} – ${euro(ergebnis.preis.monatlichMax)} EUR / Monat gesamt`, 12, INK)
     if (ergebnis.preis.bestandteile && ergebnis.preis.bestandteile.length > 0) {
       gap(1)
