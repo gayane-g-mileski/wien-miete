@@ -129,7 +129,7 @@ export async function istGemeindebau(koords: Koordinaten, signal?: AbortSignal):
   ]
   try {
     for (const box of boxes) {
-      const res = await fetch(base + encodeURIComponent(box), { signal })
+      const res = await fetch(base + box, { signal }) // rohe Kommas/Doppelpunkt wie in den offiziellen Beispielen
       if (!res.ok) continue
       const data = (await res.json()) as { features?: unknown[] }
       if (Array.isArray(data.features) && data.features.length > 0) return true

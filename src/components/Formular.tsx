@@ -136,7 +136,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
             <SelectField
               label="Baubewilligung des Gebäudes"
               id="baubewilligung"
-              value={value.baubewilligungGebaeude}
+              value={baujahrUnklar ? '' : value.baubewilligungGebaeude}
               disabled={ma25Offen}
               onChange={(e) => {
                 setBaujahrUnklar(false)
@@ -146,6 +146,8 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                 onChange({ ...value, baubewilligungGebaeude: b, foerderungProgramm: prog })
               }}
             >
+              {/* Leerer Platzhalter: Feld zeigt nur das Label, wenn das Baujahr nicht erkannt wurde */}
+              <option value="" hidden />
               {(Object.keys(BAUBEWILLIGUNG_LABEL) as (keyof typeof BAUBEWILLIGUNG_LABEL)[]).map((k) => (
                 <option key={k} value={k}>
                   {BAUBEWILLIGUNG_LABEL[k]}
