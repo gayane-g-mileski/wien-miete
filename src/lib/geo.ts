@@ -151,6 +151,17 @@ function periodeAusBaujahr(bj: number): BaubewilligungGebaeude {
   return 'nach_1953'
 }
 
+/** Ersten [x,y]-Zahlenpunkt aus (ggf. verschachtelter) Geometrie ziehen (Point/Polygon). */
+function ersterPunkt(c: unknown): [number, number] | null {
+  if (!Array.isArray(c)) return null
+  if (typeof c[0] === 'number' && typeof c[1] === 'number') return [c[0], c[1]]
+  for (const el of c) {
+    const p = ersterPunkt(el)
+    if (p) return p
+  }
+  return null
+}
+
 /** Baujahr aus einem Feature lesen: primär BAUJAHR, sonst ein Jahr aus L_BAUJ. */
 function baujahrAusFeature(p: Record<string, unknown>): number | null {
   const bj = Number(p.BAUJAHR)
@@ -170,56 +181,45 @@ function baujahrAusFeature(p: Record<string, unknown>): number | null {
 export async function baujahrAusKoordinaten(
   koords: Koordinaten,
   signal?: AbortSignal,
-  onDiag?: (msg: string) => void,
 ): Promise<BaubewilligungGebaeude | null> {
-  const d = 0.0012 // ~120 m – deckt auch größere Wohnhausanlagen ab
   const { lat, lon } = koords
   const base =
     'https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0' +
     '&srsName=EPSG:4326&outputFormat=json&typeName=ogdwien:GEBAEUDEINFOOGD&bbox='
-  // GeoServer WFS 1.1.0 nutzt bei EPSG:4326 lat,lon – zur Sicherheit beide Reihenfolgen.
-  const boxes = [
-    `${lat - d},${lon - d},${lat + d},${lon + d},EPSG:4326`,
-    `${lon - d},${lat - d},${lon + d},${lat + d},EPSG:4326`,
-  ]
+  // Erst eng (nur das Gebäude an der Adresse), dann weiter (große Anlagen).
+  const radien = [0.0003, 0.0009] // ~30 m, ~90 m
   try {
-    let letzterStatus = 0
-    for (const box of boxes) {
-      const url = base + box // rohe Kommas/Doppelpunkt wie in den offiziellen Beispielen
-      const res = await fetch(url, { signal })
-      if (!res.ok) {
-        letzterStatus = res.status
-        console.warn('[wien-miete] Gebäudeabfrage HTTP', res.status, url)
-        continue
-      }
-      const data = (await res.json()) as { features?: GebaeudeFeature[] }
-      const feats = data.features ?? []
-      let bestBj: number | null = null
-      let bestDist = Infinity
-      for (const f of feats) {
-        const bj = baujahrAusFeature(f.properties ?? {})
-        if (bj == null) continue
-        const fk = normalisiereKoords(f.geometry?.coordinates)
-        const dist = fk ? (fk.lat - lat) ** 2 + (fk.lon - lon) ** 2 : 0
-        if (dist < bestDist) {
-          bestDist = dist
-          bestBj = bj
+    for (const d of radien) {
+      // WFS 1.1.0 + EPSG:4326 nutzt lat,lon – zur Sicherheit auch vertauscht.
+      for (const box of [
+        `${lat - d},${lon - d},${lat + d},${lon + d},EPSG:4326`,
+        `${lon - d},${lat - d},${lon + d},${lat + d},EPSG:4326`,
+      ]) {
+        const res = await fetch(base + box, { signal }) // rohe Kommas wie in den offiziellen Beispielen
+        if (!res.ok) continue
+        const data = (await res.json()) as { features?: GebaeudeFeature[] }
+        const feats = data.features ?? []
+        let bestBj: number | null = null
+        let bestDist = Infinity
+        let ersterBj: number | null = null // Fallback, falls keine Geometrie auswertbar ist
+        for (const f of feats) {
+          const bj = baujahrAusFeature(f.properties ?? {})
+          if (bj == null) continue
+          if (ersterBj == null) ersterBj = bj
+          const fk = normalisiereKoords(ersterPunkt(f.geometry?.coordinates))
+          if (!fk) continue // ohne verwertbare Geometrie NICHT als „nächstes" werten
+          const dist = (fk.lat - lat) ** 2 + (fk.lon - lon) ** 2
+          if (dist < bestDist) {
+            bestDist = dist
+            bestBj = bj
+          }
         }
-      }
-      if (bestBj != null) {
-        console.debug('[wien-miete] Baujahr erkannt:', bestBj)
-        onDiag?.(`Baujahr laut Gebäuderegister: ${bestBj}.`)
-        return periodeAusBaujahr(bestBj)
+        const gewaehlt = bestBj ?? ersterBj
+        if (gewaehlt != null) return periodeAusBaujahr(gewaehlt)
       }
     }
-    if (letzterStatus) onDiag?.(`Gebäuderegister-Abfrage fehlgeschlagen (HTTP ${letzterStatus}).`)
-    else onDiag?.('Kein Gebäude mit Baujahr im Umkreis gefunden – bitte manuell wählen.')
-    console.debug('[wien-miete] Kein Baujahr im Umkreis gefunden für', koords)
     return null
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : 'Netzwerkfehler'
-    onDiag?.(`Gebäuderegister nicht erreichbar (${msg}).`)
-    console.warn('[wien-miete] Gebäudeabfrage fehlgeschlagen:', e)
+  } catch {
     return null
   }
 }
