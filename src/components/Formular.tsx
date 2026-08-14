@@ -29,6 +29,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
   const [rueckzahlungUnbekannt, setRueckzahlungUnbekannt] = useState(false)
   const [anschriftFehler, setAnschriftFehler] = useState(false)
   const [autoStatus, setAutoStatus] = useState<string | null>(null)
+  const [baujahrUnklar, setBaujahrUnklar] = useState(false)
   const valueRef = useRef(value)
   valueRef.current = value
 
@@ -79,7 +80,8 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
             </SelectField>
             <AnschriftFeld
               value={value.anschrift}
-              onChange={(text, bezirk, koords) =>
+              onChange={(text, bezirk, koords) => {
+                setBaujahrUnklar(false)
                 onChange({
                   ...valueRef.current,
                   anschrift: text,
@@ -87,9 +89,14 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                   anschriftKoords: koords,
                   gemeindebau: false,
                 })
-              }
+              }}
               onGemeindebau={(detected) => onChange({ ...valueRef.current, gemeindebau: detected })}
               onBaujahr={(periode) => {
+                if (periode == null) {
+                  setBaujahrUnklar(true)
+                  return
+                }
+                setBaujahrUnklar(false)
                 const erlaubt = foerderungenFuer(periode)
                 const prog = erlaubt.includes(valueRef.current.foerderungProgramm)
                   ? valueRef.current.foerderungProgramm
@@ -127,6 +134,12 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
 
       {/* --- Förderung (inkl. Baubewilligung + MA25) --- */}
       <Section title="Förderung">
+        {zeigeBaujahr(value.objektart) && baujahrUnklar && (
+          <p className="rounded-md bg-surface-2 px-3 py-2 text-sm text-ink-soft">
+            Aus der Anschrift ließ sich das Baujahr nicht eindeutig bestimmen – bitte wählen Sie die Baubewilligung des
+            Gebäudes unten selbst.
+          </p>
+        )}
         {zeigeBaujahr(value.objektart) && (
           <SelectField
             label="Baubewilligung des Gebäudes"

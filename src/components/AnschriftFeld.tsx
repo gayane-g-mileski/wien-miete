@@ -7,7 +7,7 @@ interface Props {
   value: string
   onChange: (text: string, bezirk: number | null, koords: Koordinaten | null) => void
   onGemeindebau?: (detected: boolean) => void
-  onBaujahr?: (periode: BaubewilligungGebaeude) => void
+  onBaujahr?: (periode: BaubewilligungGebaeude | null) => void
   onFehlerChange?: (fehler: boolean) => void
   onAutoStatus?: (msg: string | null) => void
 }
@@ -69,6 +69,7 @@ export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFeh
     console.debug('[wien-miete] Adresse gewählt:', t.label, 'Koordinaten:', t.koords)
     if (!t.koords) {
       onAutoStatus?.('Für diese Adresse kamen keine Koordinaten – Baujahr wird nicht automatisch erkannt.')
+      onBaujahr?.(null)
       return
     }
     onAutoStatus?.('Baujahr wird automatisch ermittelt …')
@@ -80,10 +81,8 @@ export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFeh
         .catch(() => {})
     }
     baujahrAusKoordinaten(t.koords, undefined, (msg) => onAutoStatus?.(msg))
-      .then((p) => {
-        if (p != null) onBaujahr?.(p)
-      })
-      .catch(() => {})
+      .then((p) => onBaujahr?.(p))
+      .catch(() => onBaujahr?.(null))
   }
 
   return (

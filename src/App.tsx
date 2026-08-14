@@ -1,9 +1,13 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Formular } from './components/Formular'
 import { Ergebnis } from './components/Ergebnis'
+import { Ergebnisleiste } from './components/Ergebnisleiste'
 import { evaluateMrg } from './lib/mrgEngine'
 import { leereMerkmale } from './lib/pricingData'
+import { ladeVerlauf, speichereVerlauf, type VerlaufEintrag } from './lib/verlauf'
 import type { MietobjektInput } from './lib/types'
+
+const quelleLink = 'text-accent underline hover:text-accent-strong'
 
 const initialInput: MietobjektInput = {
   objektart: 'wohnung',
@@ -30,6 +34,24 @@ const initialInput: MietobjektInput = {
 function App() {
   const [input, setInput] = useState<MietobjektInput>(initialInput)
   const ergebnis = useMemo(() => evaluateMrg(input), [input])
+  const [verlauf, setVerlauf] = useState<VerlaufEintrag[]>(() => ladeVerlauf())
+
+  // Verlauf immer aktuell halten: sobald eine echte (ausgewählte) Adresse
+  // vorliegt, den zugehörigen Eintrag mit dem aktuellen Stand anlegen/aktualisieren.
+  useEffect(() => {
+    const adr = input.anschrift.trim()
+    const ausgewaehlt = adr.length > 0 && (input.anschriftKoords != null || input.anschriftBezirk != null)
+    if (!ausgewaehlt) return
+    setVerlauf((prev) => {
+      const bestehend = prev.find((e) => e.adresse === adr)
+      const eintrag: VerlaufEintrag = { adresse: adr, input, ts: bestehend?.ts ?? Date.now() }
+      return [eintrag, ...prev.filter((e) => e.adresse !== adr)]
+    })
+  }, [input])
+
+  useEffect(() => {
+    speichereVerlauf(verlauf)
+  }, [verlauf])
 
   return (
     <div className="min-h-screen bg-paper text-ink">
@@ -92,15 +114,23 @@ function App() {
             <Formular value={input} onChange={setInput} mietzinsArt={ergebnis.mietzinsArt} />
           </section>
 
-          {/* Rechts: Ergebnis */}
+          {/* Rechts: Ergebnis + Aktionen (Export, Verlauf) */}
           <section className="lg:sticky lg:top-6">
             <Ergebnis ergebnis={ergebnis} />
+            <Ergebnisleiste
+              ergebnis={ergebnis}
+              adresse={input.anschrift}
+              verlauf={verlauf}
+              onSelect={(e) => setInput(e.input)}
+              onClear={() => setVerlauf([])}
+            />
           </section>
         </div>
       </main>
 
       <footer id="quellen" className="mt-4 scroll-mt-4 border-t border-line bg-surface-2">
         <div className="mx-auto max-w-6xl space-y-3 px-4 py-8 text-xs leading-relaxed text-ink-soft sm:px-6">
+          <p>Richtwert Wien seit 1.4.2026: 6,74 €/m².</p>
           <p>
             <strong className="text-accent">Kein Rechtsrat.</strong> Dieses Tool bietet eine automatisierte Ersteinschätzung
             auf Basis vereinfachter Regeln und grober, hinterlegter Marktmiet- und Lagezuschlag-Näherungen je Bezirk. Es
@@ -110,26 +140,56 @@ function App() {
           <div>
             <p className="mb-1 font-semibold text-ink">Genutzte Schnittstellen (APIs) &amp; Datenquellen</p>
             <ul className="list-inside list-disc space-y-0.5">
-              <li>Adressdienst der Stadt Wien – OGDAddressService (data.wien.gv.at)</li>
-              <li>Gebäudedaten Wien – WFS-Layer GEBAEUDEINFOOGD, Baujahr (data.wien.gv.at)</li>
-              <li>Gemeindebauten Wien – WFS-Layer GEMBAUTENFLOGD (data.wien.gv.at)</li>
-              <li>Flächenwidmungs- und Bebauungsplan Wien (wien.gv.at)</li>
-              <li>Lärmkarte Wien (laerminfo.at)</li>
               <li>
-                Rechtsinformationssystem des Bundes –{' '}
-                <a
-                  className="text-accent underline hover:text-accent-strong"
-                  href="https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10002531"
-                  target="_blank"
-                  rel="noreferrer"
-                >
+                Adressdienst der Stadt Wien – OGDAddressService:{' '}
+                <a className={quelleLink} href="https://www.data.gv.at/katalog/dataset/c223b93a-2634-4f06-ac73-8709b9e16888" target="_blank" rel="noreferrer">
+                  data.gv.at
+                </a>
+              </li>
+              <li>
+                Gebäudedaten Wien – GEBAEUDEINFOOGD (Baujahr):{' '}
+                <a className={quelleLink} href="https://www.wien.gv.at/kultur/kulturgut-gebaeudedaten" target="_blank" rel="noreferrer">
+                  wien.gv.at
+                </a>
+              </li>
+              <li>
+                Bauperioden Wien:{' '}
+                <a className={quelleLink} href="https://www.wien.gv.at/kultur/kulturgut-bauperioden" target="_blank" rel="noreferrer">
+                  wien.gv.at
+                </a>
+              </li>
+              <li>
+                Gemeindebauten Wien (Wiener Wohnen):{' '}
+                <a className={quelleLink} href="https://www.wienerwohnen.at/" target="_blank" rel="noreferrer">
+                  wienerwohnen.at
+                </a>
+              </li>
+              <li>
+                Flächenwidmungs- und Bebauungsplan Wien:{' '}
+                <a className={quelleLink} href="https://www.wien.gv.at/flaechenwidmung/public/" target="_blank" rel="noreferrer">
+                  wien.gv.at
+                </a>
+              </li>
+              <li>
+                Lärmkarte Wien:{' '}
+                <a className={quelleLink} href="https://www.laerminfo.at/" target="_blank" rel="noreferrer">
+                  laerminfo.at
+                </a>
+              </li>
+              <li>
+                Rechtsinformationssystem des Bundes – MRG:{' '}
+                <a className={quelleLink} href="https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10002531" target="_blank" rel="noreferrer">
                   RIS (MRG)
                 </a>
               </li>
-              <li>Marktmiet- und Zuschlagswerte: mietervereinigung.at</li>
+              <li>
+                Marktmiet- und Zuschlagswerte:{' '}
+                <a className={quelleLink} href="https://mietervereinigung.at/" target="_blank" rel="noreferrer">
+                  mietervereinigung.at
+                </a>
+              </li>
             </ul>
           </div>
-          <p>Richtwert Wien seit 1.4.2026: 6,74 €/m².</p>
         </div>
       </footer>
     </div>
