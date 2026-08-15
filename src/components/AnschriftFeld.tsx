@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { AdressTreffer } from '../lib/geo'
-import { baujahrAusKoordinaten, istGemeindebau, sucheAdressen } from '../lib/geo'
+import { istGemeindebau, sucheAdressen } from '../lib/geo'
 import type { BaubewilligungGebaeude, Koordinaten } from '../lib/types'
 
 interface Props {
@@ -65,22 +65,18 @@ export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFeh
     onChange(t.label, t.bezirk, t.koords)
     setOffen(false)
     setTreffer([])
-    if (!t.koords) {
-      onBaujahr?.(null)
-      return
-    }
-    // Gemeindebau erkennen (erzwingt ggf. Richtwert).
-    if (onGemeindebau) {
+    // Das Baujahr wird bewusst NICHT automatisch gesetzt: Die offene
+    // Gebäude-Abfrage lieferte in der Praxis das falsche Haus. Lieber offen
+    // lassen und auswählen, als einen falschen Wert übernehmen.
+    onBaujahr?.(null)
+    // Gemeindebau wird vorgeschlagen, bleibt aber im Formular korrigierbar.
+    if (t.koords && onGemeindebau) {
       istGemeindebau(t.koords)
         .then((gb) => {
           if (gb != null) onGemeindebau(gb)
         })
         .catch(() => {})
     }
-    // Baujahr aus dem Gebäudedatensatz; ohne Treffer bleibt das Feld offen.
-    baujahrAusKoordinaten(t.koords)
-      .then((p) => onBaujahr?.(p))
-      .catch(() => onBaujahr?.(null))
   }
 
   return (

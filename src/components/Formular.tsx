@@ -126,6 +126,11 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
         />
 
         <div className="space-y-2">
+          <Checkbox
+            checked={value.gemeindebau}
+            onChange={(v) => set('gemeindebau', v)}
+            label="Gemeindebau der Stadt Wien (Wiener Wohnen)"
+          />
           <Checkbox checked={value.eigentumswohnung} onChange={(v) => set('eigentumswohnung', v)} label="Eigentumswohnung" />
           {istRichtwert && (
             <Checkbox checked={value.befristet} onChange={(v) => set('befristet', v)} label="Befristeter Mietvertrag" />
