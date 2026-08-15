@@ -135,7 +135,9 @@ export async function sucheAdressen(query: string, signal?: AbortSignal): Promis
  */
 export async function istGemeindebau(koords: Koordinaten, signal?: AbortSignal): Promise<boolean | null> {
   await ladeProj4()
-  const d = 0.0009 // ~90 m
+  // Eng um die Adresse: ein größerer Radius würde benachbarte Wohnhausanlagen
+  // mitfangen und fälschlich einen Gemeindebau melden.
+  const d = 0.00018 // ~20 m
   const { lat, lon } = koords
   const base =
     'https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0' +
@@ -260,17 +262,19 @@ export async function baujahrAusKoordinaten(
       const kopf = csvZeile(zeilen[0]).map((h) => h.trim().toUpperCase())
       const iBj = kopf.findIndex((h) => h === 'BAUJAHR')
       const iLabel = kopf.findIndex((h) => h === 'L_BAUJ' || h === 'BAUALTER')
-      const iGeom = kopf.findIndex((h) => h.includes('GEOM') || h === 'SHAPE')
       if (iBj < 0 && iLabel < 0) continue
+      // Geometriespalte am Inhalt erkennen (der Spaltenname variiert je nach
+      // Dienst) – nur so lässt sich das nächstgelegene Gebäude bestimmen.
+      const ersteDaten = csvZeile(zeilen[1])
+      const iGeom = ersteDaten.findIndex((w) => /POINT|POLYGON|LINESTRING|MULTI/i.test(w))
+      if (iGeom < 0) continue // ohne Geometrie lieber nichts setzen als das falsche Haus
       let bestJahr: number | null = null
       let bestDist = Infinity
-      let ersterJahr: number | null = null
       for (const zeile of zeilen.slice(1)) {
         const f = csvZeile(zeile)
         const jahr = (iBj >= 0 ? jahrAus(f[iBj] ?? '') : null) ?? (iLabel >= 0 ? jahrAus(f[iLabel] ?? '') : null)
         if (jahr == null) continue
-        if (ersterJahr == null) ersterJahr = jahr
-        const g = iGeom >= 0 ? wktPunkt(f[iGeom] ?? '') : null
+        const g = wktPunkt(f[iGeom] ?? '')
         if (!g) continue
         const dist = (g.lat - lat) ** 2 + (g.lon - lon) ** 2
         if (dist < bestDist) {
@@ -278,8 +282,7 @@ export async function baujahrAusKoordinaten(
           bestJahr = jahr
         }
       }
-      const jahr = bestJahr ?? ersterJahr
-      if (jahr != null) return periodeAusBaujahr(jahr)
+      if (bestJahr != null) return periodeAusBaujahr(bestJahr)
     } catch {
       /* nächste Variante versuchen */
     }
