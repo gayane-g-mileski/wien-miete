@@ -134,6 +134,11 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
       <Section title="Förderung">
         {zeigeBaujahr(value.objektart) && (
           <div>
+            {baujahrUnklar && (
+              <p className="mb-1 px-1 text-[12px] font-medium text-coffee">
+                Baubewilligungsjahr nicht erkannt – bitte auswählen.
+              </p>
+            )}
             <SelectField
               label="Baubewilligung des Gebäudes"
               id="baubewilligung"
@@ -155,11 +160,6 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                 </option>
               ))}
             </SelectField>
-            {baujahrUnklar && (
-              <p className="mt-1 px-1 text-[12px] font-medium text-coffee">
-                Baubewilligungsjahr nicht erkannt – bitte auswählen.
-              </p>
-            )}
           </div>
         )}
 
@@ -180,7 +180,8 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
 
         {zeigeFoerderung(value.objektart) ? (
           <>
-            {value.baubewilligungGebaeude === 'vor_1945' ? (
+            {/* Solange das Baujahr offen ist, keine baualtersabhängigen Angaben zeigen. */}
+            {baujahrUnklar ? null : value.baubewilligungGebaeude === 'vor_1945' ? (
               <p className="rounded-md bg-surface-2 px-3 py-2 text-sm text-ink-soft">
                 Bei einem Altbau (Baubewilligung bis 8.5.1945) ist die öffentliche Förderung für die Einstufung ohne
                 Bedeutung.

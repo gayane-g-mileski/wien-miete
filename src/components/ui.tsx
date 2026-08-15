@@ -63,13 +63,23 @@ export function SelectField({
   children,
   ...props
 }: FieldProps & SelectHTMLAttributes<HTMLSelectElement>) {
+  // Ohne Auswahl steht das Label im Feld (wie ein Platzhalter); sobald etwas
+  // gewählt ist, rutscht es auf die obere Rahmenlinie.
+  const leer = props.value === '' || props.value == null
   return (
     <div>
       <div className="relative">
         <select id={id} {...props} className={`${box} select-chevron h-14 appearance-none px-3 pr-10 pt-2`}>
           {children}
         </select>
-        <label htmlFor={id} className={topLabel}>
+        <label
+          htmlFor={id}
+          className={
+            leer
+              ? 'pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base text-ink-faint'
+              : topLabel
+          }
+        >
           {label}
         </label>
       </div>
