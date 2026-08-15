@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import type { MerkmalKey, MietobjektInput, MietzinsArt } from '../lib/types'
 import {
   BAUBEWILLIGUNG_LABEL,
@@ -20,7 +21,9 @@ import { WwafHinweis } from './WwafHinweis'
 
 interface Props {
   value: MietobjektInput
-  onChange: (next: MietobjektInput) => void
+  // Nimmt auch Updater-Funktionen an – nötig, damit die zwei parallelen
+  // Adress-Abfragen (Gemeindebau, Baujahr) sich nicht gegenseitig überschreiben.
+  onChange: Dispatch<SetStateAction<MietobjektInput>>
   mietzinsArt: MietzinsArt
 }
 
@@ -29,8 +32,6 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
   const [rueckzahlungUnbekannt, setRueckzahlungUnbekannt] = useState(false)
   const [anschriftFehler, setAnschriftFehler] = useState(false)
   const [baujahrUnklar, setBaujahrUnklar] = useState(false)
-  const valueRef = useRef(value)
-  valueRef.current = value
 
   const istRichtwert = mietzinsArt === 'richtwert'
   const zeigeKat = istRichtwert || mietzinsArt === 'kategorie_d'
@@ -81,26 +82,26 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
               value={value.anschrift}
               onChange={(text, bezirk, koords) => {
                 setBaujahrUnklar(false)
-                onChange({
-                  ...valueRef.current,
+                onChange((prev) => ({
+                  ...prev,
                   anschrift: text,
                   anschriftBezirk: bezirk,
                   anschriftKoords: koords,
                   gemeindebau: false,
-                })
+                }))
               }}
-              onGemeindebau={(detected) => onChange({ ...valueRef.current, gemeindebau: detected })}
+              onGemeindebau={(detected) => onChange((prev) => ({ ...prev, gemeindebau: detected }))}
               onBaujahr={(periode) => {
                 if (periode == null) {
                   setBaujahrUnklar(true)
                   return
                 }
                 setBaujahrUnklar(false)
-                const erlaubt = foerderungenFuer(periode)
-                const prog = erlaubt.includes(valueRef.current.foerderungProgramm)
-                  ? valueRef.current.foerderungProgramm
-                  : 'keine'
-                onChange({ ...valueRef.current, baubewilligungGebaeude: periode, foerderungProgramm: prog })
+                onChange((prev) => {
+                  const erlaubt = foerderungenFuer(periode)
+                  const prog = erlaubt.includes(prev.foerderungProgramm) ? prev.foerderungProgramm : 'keine'
+                  return { ...prev, baubewilligungGebaeude: periode, foerderungProgramm: prog }
+                })
               }}
               onFehlerChange={setAnschriftFehler}
             />

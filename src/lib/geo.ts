@@ -21,11 +21,26 @@ interface OgdFeature {
  * anhand der für Wien bekannten Wertebereiche wird die richtige Zuordnung
  * erkannt. Projizierte Koordinaten (falscher CRS) fallen als null heraus.
  */
-// Web-Mercator (EPSG:3857) -> WGS84 (Grad). Wien liegt bei x~1,82 Mio / y~6,14 Mio.
-function ausMercator(x: number, y: number): Koordinaten {
-  const lon = (x / 20037508.34) * 180
-  const lat = (Math.atan(Math.exp((y / 20037508.34) * Math.PI)) * 360) / Math.PI - 90
-  return { lat, lon }
+// Der Wiener Adressdienst liefert je nach crs-Parameter Grad (EPSG:4326),
+// Wiener Gauß-Krüger (EPSG:31256, Standard – z.B. [3051, 341122]) oder
+// Web-Mercator (EPSG:3857). Alle drei werden hier auf WGS84 gebracht.
+const GK_OST =
+  '+proj=tmerc +lat_0=0 +lon_0=16.3333333333333 +k=1 +x_0=0 +y_0=-5000000 +ellps=bessel ' +
+  '+towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs'
+
+const istLat = (v: number) => v > 46 && v < 49 // Wien ~48,2
+const istLon = (v: number) => v > 14 && v < 18 // Wien ~16,37
+
+// proj4 nur bei Bedarf nachladen (hält das Startpaket klein).
+type Proj4 = (from: string, to: string, coords: number[]) => number[]
+let proj4Ref: Proj4 | null = null
+async function ladeProj4(): Promise<void> {
+  if (proj4Ref) return
+  try {
+    proj4Ref = (await import('proj4')).default as unknown as Proj4
+  } catch {
+    /* ohne proj4 bleiben projizierte Koordinaten unlesbar */
+  }
 }
 
 function normalisiereKoords(c: unknown): Koordinaten | null {
@@ -33,21 +48,23 @@ function normalisiereKoords(c: unknown): Koordinaten | null {
   const a = Number(c[0])
   const b = Number(c[1])
   if (!Number.isFinite(a) || !Number.isFinite(b)) return null
-  const istLat = (v: number) => v > 46 && v < 49 // Wien ~48,2
-  const istLon = (v: number) => v > 14 && v < 18 // Wien ~16,37
   if (istLat(a) && istLon(b)) return { lat: a, lon: b } // [lat, lon]
   if (istLon(a) && istLat(b)) return { lat: b, lon: a } // [lon, lat] (GeoJSON-Standard)
-  // Projizierte Koordinaten (Web Mercator) umrechnen – der Adressdienst liefert
-  // je nach crs-Parameter mitunter EPSG:3857 statt Grad.
-  const grossX = Math.abs(a) > 1000 && Math.abs(b) > 1000
-  if (grossX) {
-    // erst [x,y], dann vertauscht versuchen; nur akzeptieren, wenn Ergebnis in Wien liegt.
+  // Projizierte Koordinaten: beide Systeme und beide Achsreihenfolgen testen;
+  // gültig ist das Ergebnis, das tatsächlich in Wien liegt.
+  const proj4 = proj4Ref
+  if (!proj4) return null
+  for (const proj of [GK_OST, 'EPSG:3857']) {
     for (const [x, y] of [
       [a, b],
       [b, a],
     ]) {
-      const k = ausMercator(x, y)
-      if (istLat(k.lat) && istLon(k.lon)) return k
+      try {
+        const [lon, lat] = proj4(proj, 'EPSG:4326', [x, y]) as [number, number]
+        if (istLat(lat) && istLon(lon)) return { lat, lon }
+      } catch {
+        /* nächste Kombination versuchen */
+      }
     }
   }
   return null
@@ -77,6 +94,7 @@ function bezirkAusProps(p: Record<string, unknown>): number | null {
 export async function sucheAdressen(query: string, signal?: AbortSignal): Promise<AdressTreffer[]> {
   const q = query.trim()
   if (q.length < 3) return []
+  await ladeProj4() // für ggf. projizierte Koordinaten (EPSG:31256/3857)
   const url =
     'https://data.wien.gv.at/daten/OGDAddressService.svc/GetAddressInfo' +
     `?Address=${encodeURIComponent(q)}&crs=EPSG:4326`
@@ -182,6 +200,7 @@ export async function baujahrAusKoordinaten(
   koords: Koordinaten,
   signal?: AbortSignal,
 ): Promise<BaubewilligungGebaeude | null> {
+  await ladeProj4()
   const { lat, lon } = koords
   const base =
     'https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0' +
