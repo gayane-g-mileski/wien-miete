@@ -16,7 +16,7 @@ function formatEuro(n: number): string {
 
 function Zeile({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-1.5 py-3">
+    <div className="flex flex-col gap-1.5 py-4">
       <span className="text-xs font-semibold text-ink-faint">{label}</span>
       <div>{children}</div>
     </div>
@@ -114,7 +114,7 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
           </Zeile>
         </div>
 
-        <div className="mt-5 space-y-6 rounded-xl bg-surface p-4 text-sm ring-1 ring-line">
+        <div className="mt-6 space-y-8 rounded-xl bg-surface p-5 text-sm ring-1 ring-line">
           <Collapsible title="Was bedeutet das?">
             <ul className="space-y-1 text-ink-soft">
               {ergebnis.begruendung.map((b) => (

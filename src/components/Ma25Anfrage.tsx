@@ -64,7 +64,7 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
     'inline-flex cursor-pointer items-center gap-2 rounded-lg border border-accent/50 bg-surface px-3 py-2 text-base font-medium text-accent hover:bg-accent/10'
 
   return (
-    <div className="space-y-6 rounded-xl border border-accent/30 bg-surface-2 p-5">
+    <div className="space-y-8 rounded-xl border border-accent/30 bg-surface-2 p-6">
       <p className="text-sm font-semibold text-accent">Diese Anfrage ist kostenlos</p>
 
       <p className="text-base text-ink-soft">

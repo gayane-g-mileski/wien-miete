@@ -96,7 +96,7 @@ export function Ergebnisleiste({ ergebnis, adresse, verlauf, onSelect, onClear }
   // Ohne Verlauf: allgemeines Export-Icon für das aktuelle Ergebnis.
   if (verlauf.length === 0) {
     return (
-      <div className="mt-9 rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">
+      <div className="mt-9 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6">
         <div className="flex items-center justify-between gap-4">
           <span className="text-sm font-semibold text-ink">Als PDF speichern</span>
           <button
@@ -117,7 +117,7 @@ export function Ergebnisleiste({ ergebnis, adresse, verlauf, onSelect, onClear }
     <section className="mt-9">
       {/* Titel außerhalb der Karte, 20px Abstand zur Karte */}
       <h3 className="mb-5 px-1 text-sm font-semibold text-ink-faint">Verlauf</h3>
-      <div className="rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">
+      <div className="rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6">
         <div>
           <ul className="space-y-6">
             {verlauf.map((e) => (
