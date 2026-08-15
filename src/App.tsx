@@ -63,7 +63,9 @@ function App() {
           style={{ '--hero-photo': `url("${import.meta.env.BASE_URL}hero.jpg")` } as React.CSSProperties}
         />
         {/* Scrim für Textlesbarkeit (links) */}
-        <div className="pointer-events-none absolute inset-0 z-[-1] bg-gradient-to-r from-paper via-paper/70 to-transparent" />
+        {/* Auf schmalen Displays deckt der Verlauf mehr ab, damit der Text
+            über dem hellen Foto lesbar bleibt. */}
+        <div className="pointer-events-none absolute inset-0 z-[-1] bg-gradient-to-r from-paper via-paper/90 to-paper/55 sm:via-paper/70 sm:to-transparent" />
 
         <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <span className="text-lg font-semibold tracking-tight text-ink">Mietzins-Check in Wien</span>
