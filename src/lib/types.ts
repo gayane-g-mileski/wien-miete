@@ -59,6 +59,7 @@ export type MerkmalKey =
   | 'strassenlaerm'
   | 'dunkel'
   | 'schlechterGrundriss'
+  | 'starkeDachschraege'
   | 'lift'
   | 'gegensprechanlage'
   | 'concierge'

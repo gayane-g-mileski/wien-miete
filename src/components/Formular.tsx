@@ -136,13 +136,13 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
           <div>
             {baujahrUnklar && (
               <p className="mb-1 px-1 text-[12px] font-medium text-coffee">
-                Baubewilligungsjahr nicht erkannt – bitte auswählen.
+                Baubewilligungsjahr nicht automatisch erkannt – Vorauswahl Altbau, bitte prüfen.
               </p>
             )}
             <SelectField
               label="Baubewilligung des Gebäudes"
               id="baubewilligung"
-              value={baujahrUnklar ? '' : value.baubewilligungGebaeude}
+              value={value.baubewilligungGebaeude}
               disabled={ma25Offen}
               onChange={(e) => {
                 setBaujahrUnklar(false)
@@ -180,8 +180,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
 
         {zeigeFoerderung(value.objektart) ? (
           <>
-            {/* Solange das Baujahr offen ist, keine baualtersabhängigen Angaben zeigen. */}
-            {baujahrUnklar ? null : value.baubewilligungGebaeude === 'vor_1945' ? (
+            {value.baubewilligungGebaeude === 'vor_1945' ? (
               <p className="rounded-md bg-surface-2 px-3 py-2 text-sm text-ink-soft">
                 Bei einem Altbau (Baubewilligung bis 8.5.1945) ist die öffentliche Förderung für die Einstufung ohne
                 Bedeutung.
@@ -263,10 +262,11 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
         )}
       </Section>
 
-      {/* --- Ausstattung, Zustand & Zu-/Abschläge --- */}
-      {zeigeAusstattung(value.objektart) && (
+      {/* --- Ausstattung, Zustand & Zu-/Abschläge – nur wenn ein Richtwert
+             (bzw. die Kategorie) die Miethöhe bestimmt --- */}
+      {zeigeAusstattung(value.objektart) && zeigeKat && (
         <Section title="Ausstattung, Zustand & Zu-/Abschläge">
-          {zeigeKategorie(value.objektart) && zeigeKat && (
+          {zeigeKategorie(value.objektart) && (
             <SelectField
               label="Ausstattungskategorie"
               id="kategorie"
@@ -279,14 +279,6 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                 </option>
               ))}
             </SelectField>
-          )}
-
-          {!istRichtwert && (
-            <p className="rounded-md bg-surface-2 px-3 py-2 text-sm text-ink-soft">
-              Für diese Wohnung gilt kein Richtwert – daher sind hier keine Zu- und Abschläge anzugeben. Beim freien oder
-              angemessenen Mietzins zählt die Marktbandbreite je Bezirk (Ausstattung ist dort bereits im Marktpreis
-              enthalten).
-            </p>
           )}
 
           {istRichtwert && (

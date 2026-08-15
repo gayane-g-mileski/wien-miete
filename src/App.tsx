@@ -94,15 +94,6 @@ function App() {
               Novellen, eine aktuelle Wiener Marktanalyse und offizielle Statistiken – und wird entsprechend fortlaufend
               aktualisiert.
             </p>
-            <a
-              href="#rechner"
-              className="mt-7 inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-base font-semibold text-on-accent shadow-sm transition-colors hover:bg-accent-strong"
-            >
-              Zum Mietrechner
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14M13 6l6 6-6 6" />
-              </svg>
-            </a>
           </div>
         </div>
       </header>
@@ -131,12 +122,12 @@ function App() {
       <footer id="quellen" className="mt-4 scroll-mt-4 border-t border-line bg-surface-2">
         <div className="mx-auto max-w-6xl space-y-3 px-4 py-8 text-xs leading-relaxed text-ink-soft sm:px-6">
           <p>Richtwert Wien seit 1.4.2026: 6,74 €/m².</p>
-          <p>
-            <strong className="text-accent">Kein Rechtsrat.</strong> Dieses Tool bietet eine automatisierte Ersteinschätzung
-            auf Basis vereinfachter Regeln und grober, hinterlegter Marktmiet- und Lagezuschlag-Näherungen je Bezirk. Es
-            ersetzt keine rechtliche oder immobilienwirtschaftliche Beratung im Einzelfall (z.B. Mietervereinigung,
-            Rechtsanwält:in, Sachverständige).
-          </p>
+          <div className="rounded-xl border border-danger/30 bg-danger/5 p-4 text-sm leading-relaxed text-ink-soft">
+            <strong className="text-base font-bold text-danger">Kein Rechtsrat.</strong> Dieses Tool bietet eine
+            automatisierte Ersteinschätzung auf Basis vereinfachter Regeln und grober, hinterlegter Marktmiet- und
+            Lagezuschlag-Näherungen je Bezirk. Es ersetzt keine rechtliche oder immobilienwirtschaftliche Beratung im
+            Einzelfall (z.B. Mietervereinigung, Rechtsanwält:in, Sachverständige).
+          </div>
           <div>
             <p className="mb-1 font-semibold text-ink">Genutzte Schnittstellen (APIs) &amp; Datenquellen</p>
             <ul className="list-inside list-disc space-y-0.5">
@@ -147,13 +138,7 @@ function App() {
                 </a>
               </li>
               <li>
-                Gebäudedaten Wien – GEBAEUDEINFOOGD (Baujahr):{' '}
-                <a className={quelleLink} href="https://www.wien.gv.at/kultur/kulturgut-gebaeudedaten" target="_blank" rel="noreferrer">
-                  wien.gv.at
-                </a>
-              </li>
-              <li>
-                Bauperioden Wien:{' '}
+                Baujahr/Bauperioden zum Nachschlagen (nicht automatisiert):{' '}
                 <a className={quelleLink} href="https://www.wien.gv.at/kultur/kulturgut-bauperioden" target="_blank" rel="noreferrer">
                   wien.gv.at
                 </a>

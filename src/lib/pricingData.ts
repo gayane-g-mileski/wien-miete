@@ -74,6 +74,7 @@ export const MERKMAL_KATALOG: MerkmalDef[] = [
   { key: 'strassenlaerm', label: 'Straßenlärm / laute Lage', wert: -0.4, gruppe: 'Lage & Grundriss' },
   { key: 'dunkel', label: 'Dunkel / Nordlage', wert: -0.2, gruppe: 'Lage & Grundriss' },
   { key: 'schlechterGrundriss', label: 'Schlechter Grundriss / Durchgangszimmer', wert: -0.25, gruppe: 'Lage & Grundriss' },
+  { key: 'starkeDachschraege', label: 'Starke Dachschräge', wert: -0.3, gruppe: 'Lage & Grundriss' },
   // Gebäude & Allgemeinflächen
   { key: 'lift', label: 'Lift im Haus', wert: 0.3, gruppe: 'Gebäude & Allgemeinflächen' },
   { key: 'gegensprechanlage', label: 'Gegensprech-/Videoanlage', wert: 0.1, gruppe: 'Gebäude & Allgemeinflächen' },
