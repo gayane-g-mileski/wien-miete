@@ -291,14 +291,12 @@ export async function baujahrAusKoordinaten(
 }
 
 /**
- * Link auf „Wien Kulturgut“ (Themenstadtplan) mit der Ebene Bauperioden,
- * zentriert auf die eingegebene Adresse. Dort lässt sich das Baujahr des
- * Hauses ablesen – die Daten sind nicht über eine Schnittstelle abfragbar.
+ * Link auf die Wiener Gebäudedaten („Wien Kulturgut“). Dort lässt sich das
+ * Baujahr eines Hauses nachschlagen – über eine Schnittstelle sind die Daten
+ * nicht zuverlässig abfragbar.
  */
-export function bauperiodenLink(koords: Koordinaten | null, adresse = ''): string {
-  const q = adresse.trim() ? `&q=${encodeURIComponent(adresse.trim())}` : ''
-  if (koords) return `https://www.wien.gv.at/kulturportal/public/#c=${koords.lon},${koords.lat}&z=18${q}`
-  return 'https://www.wien.gv.at/kultur/kulturgut-bauperioden'
+export function bauperiodenLink(): string {
+  return 'https://www.wien.gv.at/kultur/kulturgut-gebaeudedaten'
 }
 
 /**

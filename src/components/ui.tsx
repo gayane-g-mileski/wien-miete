@@ -133,11 +133,11 @@ export function Checkbox({
   )
 }
 
-/** Abschnitts-Container – Titel steht außerhalb, oberhalb des Rahmens (24px Abstand). */
+/** Abschnitts-Container – Titel steht außerhalb, oberhalb des Rahmens (20px Abstand). */
 export function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section>
-      <h3 className="mb-6 px-1 text-sm font-semibold text-ink-faint">{title}</h3>
+      <h3 className="mb-5 px-1 text-sm font-semibold text-ink-faint">{title}</h3>
       <div className="space-y-7 rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">{children}</div>
     </section>
   )
@@ -148,7 +148,7 @@ export function SpaltenTitel({ titel, unterzeile }: { titel: string; unterzeile:
   return (
     <div>
       <h2 className="mb-1 px-1 text-[2rem] font-semibold leading-tight tracking-tight text-ink">{titel}</h2>
-      <p className="mb-6 px-1 text-sm font-semibold text-ink-faint">{unterzeile}</p>
+      <p className="mb-5 px-1 text-sm font-semibold text-ink-faint">{unterzeile}</p>
     </div>
   )
 }

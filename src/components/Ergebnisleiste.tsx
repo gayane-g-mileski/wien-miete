@@ -115,8 +115,8 @@ export function Ergebnisleiste({ ergebnis, adresse, verlauf, onSelect, onClear }
 
   return (
     <section className="mt-9">
-      {/* Titel außerhalb der Karte, 24px Abstand zur Karte */}
-      <h3 className="mb-6 px-1 text-sm font-semibold text-ink-faint">Verlauf</h3>
+      {/* Titel außerhalb der Karte, 20px Abstand zur Karte */}
+      <h3 className="mb-5 px-1 text-sm font-semibold text-ink-faint">Verlauf</h3>
       <div className="rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">
         <div>
           <ul className="space-y-6">

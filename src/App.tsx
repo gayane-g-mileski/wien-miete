@@ -121,14 +121,14 @@ function App() {
 
       <footer id="quellen" className="mt-4 scroll-mt-4 border-t border-line bg-surface-2">
         <div className="mx-auto max-w-6xl space-y-3 px-4 py-8 text-xs leading-relaxed text-ink-soft sm:px-6">
-          <p>Richtwert Wien seit 1.4.2026: 6,74 €/m².</p>
           <div className="rounded-xl border border-danger/30 bg-danger/5 p-4 text-sm leading-relaxed text-ink-soft">
             <strong className="text-base font-bold text-danger">Kein Rechtsrat.</strong> Dieses Tool bietet eine
             automatisierte Ersteinschätzung auf Basis vereinfachter Regeln und grober, hinterlegter Marktmiet- und
             Lagezuschlag-Näherungen je Bezirk. Es ersetzt keine rechtliche oder immobilienwirtschaftliche Beratung im
             Einzelfall (z.B. Mietervereinigung, Rechtsanwält:in, Sachverständige).
           </div>
-          <div>
+          {/* 36px Abstand zum Disclaimer (24px Padding + 12px space-y) */}
+          <div className="pt-6">
             <p className="mb-1 font-semibold text-ink">Genutzte Schnittstellen (APIs) &amp; Datenquellen</p>
             <ul className="list-inside list-disc space-y-0.5">
               <li>
@@ -138,8 +138,8 @@ function App() {
                 </a>
               </li>
               <li>
-                Baujahr/Bauperioden zum Nachschlagen (nicht automatisiert):{' '}
-                <a className={quelleLink} href="https://www.wien.gv.at/kultur/kulturgut-bauperioden" target="_blank" rel="noreferrer">
+                Gebäudedaten Wien (Baujahr, zum Nachschlagen):{' '}
+                <a className={quelleLink} href="https://www.wien.gv.at/kultur/kulturgut-gebaeudedaten" target="_blank" rel="noreferrer">
                   wien.gv.at
                 </a>
               </li>

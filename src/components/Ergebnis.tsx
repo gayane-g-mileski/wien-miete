@@ -1,6 +1,7 @@
 import type { LageStatus, MrgErgebnis } from '../lib/types'
 import { flaechenwidmungLink, laerminfoLink } from '../lib/geo'
 import { Collapsible } from './ui'
+import { RICHTWERT_WIEN } from '../lib/pricingData'
 
 const LAGE_STYLE: Record<LageStatus, string> = {
   unbekannt: 'text-ink-soft',
@@ -51,12 +52,17 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
   return (
     <div>
       <h2 className="mb-1 px-1 text-[2rem] font-semibold leading-tight tracking-tight text-accent">Ergebnis</h2>
-      <p className="mb-6 px-1 text-sm font-semibold text-ink-faint">Ersteinschätzung nach den eingegebenen Angaben</p>
+      <p className="mb-5 px-1 text-sm font-semibold text-ink-faint">Ersteinschätzung nach den eingegebenen Angaben</p>
 
       <div className="rounded-2xl border border-line bg-surface-2 p-5 shadow-sm ring-1 ring-accent/15 sm:p-6">
         <div className="space-y-1">
           <Zeile label="Mietzinsart">
             <span className="text-2xl font-semibold text-ink">{ergebnis.mietzinsArtLabel}</span>
+            {ergebnis.mietzinsArt === 'richtwert' && (
+              <p className="mt-1 text-sm text-ink-soft">
+                Richtwert Wien seit 1.4.2026: {RICHTWERT_WIEN.toLocaleString('de-AT', { minimumFractionDigits: 2 })} €/m².
+              </p>
+            )}
           </Zeile>
 
           <Zeile label="Schutz & Preisgrenze">

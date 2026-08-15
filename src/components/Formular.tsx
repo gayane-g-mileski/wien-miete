@@ -40,6 +40,11 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
   const zeigeKat = istRichtwert || mietzinsArt === 'kategorie_d'
   // Große Altbauwohnung der Kategorie A/B: Der Richtwert entfällt. Die Kategorie
   // bleibt trotzdem wählbar, weil sie über diese Ausnahme mitentscheidet.
+  // Die Eigentumswohnung wirkt sich nur bei laufendem Förderungsdarlehen
+  // der WFG 1968 bzw. 1984 auf das Ergebnis aus.
+  const eigentumswohnungRelevant =
+    (value.foerderungProgramm === 'wfg1968' || value.foerderungProgramm === 'wfg1984') &&
+    value.tilgungsstatus === 'offen'
   const ueber130 =
     value.baubewilligungGebaeude === 'vor_1945' &&
     value.flaeche > 130 &&
@@ -135,7 +140,6 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
         />
 
         <div className="space-y-2">
-          <Checkbox checked={value.eigentumswohnung} onChange={(v) => set('eigentumswohnung', v)} label="Eigentumswohnung" />
           {istRichtwert && (
             <Checkbox checked={value.befristet} onChange={(v) => set('befristet', v)} label="Befristeter Mietvertrag" />
           )}
@@ -177,11 +181,11 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
               <p className="mt-1 px-1 text-[12px] text-ink-faint">
                 <a
                   className="text-accent underline hover:text-accent-strong"
-                  href={bauperiodenLink(value.anschriftKoords, value.anschrift)}
+                  href={bauperiodenLink()}
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Baujahr dieser Adresse nachsehen (Wien Kulturgut, Bauperioden)
+                  Baujahr dieser Adresse nachsehen (Wien Kulturgut, Gebäudedaten)
                 </a>
               </p>
             )}
@@ -243,6 +247,16 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                       </option>
                     ))}
                   </SelectField>
+                )}
+
+                {/* Nur bei laufender Förderung 1968/1984 ändert die
+                    Eigentumswohnung das Ergebnis – sonst ausgeblendet. */}
+                {eigentumswohnungRelevant && !ma25Offen && (
+                  <Checkbox
+                    checked={value.eigentumswohnung}
+                    onChange={(v) => set('eigentumswohnung', v)}
+                    label="Eigentumswohnung"
+                  />
                 )}
               </>
             )}
