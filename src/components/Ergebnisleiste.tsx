@@ -93,11 +93,10 @@ export function Ergebnisleiste({ ergebnis, adresse, verlauf, onSelect, onClear }
     }
   }
 
-  return (
-    <div className="mt-4 rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">
-      {/* Ohne Verlauf: allgemeines Export-Icon für das aktuelle Ergebnis.
-          Sobald gesucht wurde, sitzt je ein Icon neben jeder Adresse. */}
-      {verlauf.length === 0 && (
+  // Ohne Verlauf: allgemeines Export-Icon für das aktuelle Ergebnis.
+  if (verlauf.length === 0) {
+    return (
+      <div className="mt-9 rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">
         <div className="flex items-center justify-between gap-4">
           <span className="text-sm font-semibold text-ink">Als PDF speichern</span>
           <button
@@ -110,12 +109,17 @@ export function Ergebnisleiste({ ergebnis, adresse, verlauf, onSelect, onClear }
             <DokumentIcon />
           </button>
         </div>
-      )}
+      </div>
+    )
+  }
 
-      {verlauf.length > 0 && (
+  return (
+    <section className="mt-9">
+      {/* Titel außerhalb der Karte, 24px Abstand zur Karte */}
+      <h3 className="mb-6 px-1 text-sm font-semibold text-ink-faint">Verlauf</h3>
+      <div className="rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">
         <div>
-          <p className="text-xs font-semibold text-ink-faint">Verlauf</p>
-          <ul className="mt-1.5 space-y-1">
+          <ul className="space-y-6">
             {verlauf.map((e) => (
               <li key={e.adresse} className="flex min-w-0 items-center justify-between gap-3">
                 <button
@@ -140,7 +144,7 @@ export function Ergebnisleiste({ ergebnis, adresse, verlauf, onSelect, onClear }
           </ul>
 
           {/* Eigene Zeile unter der Liste: links leeren, rechts alles exportieren */}
-          <div className="mt-3 flex items-center justify-between gap-3">
+          <div className="mt-9 flex items-center justify-between gap-3">
             <button
               type="button"
               onClick={onClear}
@@ -157,7 +161,7 @@ export function Ergebnisleiste({ ergebnis, adresse, verlauf, onSelect, onClear }
             )}
           </div>
         </div>
-      )}
-    </div>
+      </div>
+    </section>
   )
 }

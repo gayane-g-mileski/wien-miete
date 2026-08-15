@@ -15,7 +15,7 @@ import {
 import { FOERDERUNG_PROGRAMM_LABEL, TILGUNGSSTATUS_LABEL, foerderungenFuer, statusRelevant } from '../lib/foerderung'
 import { BEZIRKE, MERKMAL_GRUPPEN, MERKMAL_KATALOG, bezirkAusAnschrift } from '../lib/pricingData'
 import { bauperiodenLink } from '../lib/geo'
-import { Checkbox, NumberField, Section, SelectField } from './ui'
+import { Checkbox, NumberField, Section, SelectField, SpaltenTitel } from './ui'
 import { AnschriftFeld } from './AnschriftFeld'
 import { Ma25Anfrage } from './Ma25Anfrage'
 import { WwafHinweis } from './WwafHinweis'
@@ -52,9 +52,11 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
   const setMerkmal = (key: MerkmalKey, v: boolean) => onChange({ ...value, merkmale: { ...value.merkmale, [key]: v } })
 
   return (
-    <div className="flex flex-col gap-5">
-      {/* --- Angaben zum Mietobjekt --- */}
-      <Section title="Angaben zum Mietobjekt">
+    <div className="flex flex-col gap-9">
+      {/* --- Mietobjekt / Angaben --- */}
+      <section>
+        <SpaltenTitel titel="Mietobjekt" unterzeile="Angaben" />
+        <div className="space-y-7 rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">
         <SelectField
           label="Art des Mietgegenstands"
           id="objektart"
@@ -137,8 +139,9 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
           {istRichtwert && (
             <Checkbox checked={value.befristet} onChange={(v) => set('befristet', v)} label="Befristeter Mietvertrag" />
           )}
+          </div>
         </div>
-      </Section>
+      </section>
 
       {/* --- Förderung (inkl. Baubewilligung + MA25) --- */}
       <Section title="Förderung">

@@ -175,6 +175,9 @@ function App() {
               </li>
             </ul>
           </div>
+          <p className="border-t border-line pt-4 text-ink-faint">
+            © 2026 Gayane G. Mileski. All rights reserved. Built with the help of Claude (Anthropic) · 1000+ iterations
+          </p>
         </div>
       </footer>
     </div>
