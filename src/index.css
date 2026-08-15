@@ -105,8 +105,16 @@ input[type='number'] {
   isolation: isolate;
 }
 
-/* Echtes Hero-Foto: sanfte Zoom-Bewegung. */
+/* Hintergrundbild: füllt den Hero, wird nicht gekachelt. Fehlt die Datei,
+   bleibt schlicht der Flächenhintergrund stehen. */
 .hero-photo {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image: var(--hero-photo);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
   transform: scale(1.06);
   animation: heroZoom 26s ease-in-out infinite alternate;
 }

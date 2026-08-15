@@ -49,7 +49,7 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
   }
 
   return (
-    <div className="space-y-5 rounded-xl border border-accent/30 bg-surface-2 p-5 text-base text-ink-soft">
+    <div className="space-y-6 rounded-xl border border-accent/30 bg-surface-2 p-5 text-base text-ink-soft">
       <p className="text-sm font-semibold text-accent">Diese Anfrage ist kostenlos</p>
 
       <div>

@@ -138,7 +138,7 @@ export function Section({ title, children }: { title: string; children: ReactNod
   return (
     <section>
       <h3 className="mb-5 px-1 text-sm font-semibold text-ink-faint">{title}</h3>
-      <div className="space-y-7 rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">{children}</div>
+      <div className="space-y-6 rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">{children}</div>
     </section>
   )
 }

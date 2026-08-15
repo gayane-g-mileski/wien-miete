@@ -64,7 +64,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
       {/* --- Mietobjekt / Angaben --- */}
       <section>
         <SpaltenTitel titel="Mietobjekt" unterzeile="Angaben" />
-        <div className="space-y-7 rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">
+        <div className="space-y-6 rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">
         <SelectField
           label="Art des Mietgegenstands"
           id="objektart"
