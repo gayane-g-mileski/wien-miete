@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { AdressTreffer } from '../lib/geo'
-import { istGemeindebau, sucheAdressen } from '../lib/geo'
+import { baujahrAusKoordinaten, istGemeindebau, sucheAdressen } from '../lib/geo'
 import type { BaubewilligungGebaeude, Koordinaten } from '../lib/types'
 
 interface Props {
@@ -65,18 +65,22 @@ export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFeh
     onChange(t.label, t.bezirk, t.koords)
     setOffen(false)
     setTreffer([])
+    if (!t.koords) {
+      onBaujahr?.(null)
+      return
+    }
     // Gemeindebau erkennen (erzwingt ggf. Richtwert).
-    if (t.koords && onGemeindebau) {
+    if (onGemeindebau) {
       istGemeindebau(t.koords)
         .then((gb) => {
           if (gb != null) onGemeindebau(gb)
         })
         .catch(() => {})
     }
-    // Das Baujahr ist in den offenen Wiener Daten nicht über eine Schnittstelle
-    // abfragbar (der Gebäudedatensatz liegt nur als Download vor). Deshalb wird
-    // im Formular zur manuellen Auswahl aufgefordert.
-    onBaujahr?.(null)
+    // Baujahr aus dem Gebäudedatensatz; ohne Treffer bleibt das Feld offen.
+    baujahrAusKoordinaten(t.koords)
+      .then((p) => onBaujahr?.(p))
+      .catch(() => onBaujahr?.(null))
   }
 
   return (

@@ -64,6 +64,11 @@ export function Ergebnisleiste({ ergebnis, adresse, verlauf, onSelect, onClear }
     ergebnisPdf(ergebnis, adresse).save(`${dateiname(adresse)}.pdf`)
   }
 
+  const exportEintrag = async (e: VerlaufEintrag) => {
+    const { ergebnisPdf, dateiname } = await import('../lib/pdf')
+    ergebnisPdf(evaluateMrg(e.input), e.adresse).save(`${dateiname(e.adresse)}.pdf`)
+  }
+
   const exportAlle = async () => {
     setZipLaeuft(true)
     try {
@@ -90,33 +95,45 @@ export function Ergebnisleiste({ ergebnis, adresse, verlauf, onSelect, onClear }
 
   return (
     <div className="mt-4 rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">
-      {/* Export des aktuellen Ergebnisses – Icon rechtsbündig wie die Häkchen oben */}
-      <div className="flex items-center justify-between gap-4">
-        <span className="text-sm font-semibold text-ink">Als PDF speichern</span>
-        <button
-          type="button"
-          onClick={exportEinzel}
-          title="Als PDF speichern"
-          aria-label="Als PDF speichern"
-          className="shrink-0 text-accent transition-colors hover:text-accent-strong"
-        >
-          <DokumentIcon />
-        </button>
-      </div>
+      {/* Ohne Verlauf: allgemeines Export-Icon für das aktuelle Ergebnis.
+          Sobald gesucht wurde, sitzt je ein Icon neben jeder Adresse. */}
+      {verlauf.length === 0 && (
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-sm font-semibold text-ink">Als PDF speichern</span>
+          <button
+            type="button"
+            onClick={exportEinzel}
+            title="Als PDF speichern"
+            aria-label="Als PDF speichern"
+            className="shrink-0 text-accent transition-colors hover:text-accent-strong"
+          >
+            <DokumentIcon />
+          </button>
+        </div>
+      )}
 
       {verlauf.length > 0 && (
-        <div className="mt-4 border-t border-line pt-3">
+        <div>
           <p className="text-xs font-semibold text-ink-faint">Verlauf</p>
           <ul className="mt-1.5 space-y-1">
             {verlauf.map((e) => (
-              <li key={e.adresse} className="min-w-0">
+              <li key={e.adresse} className="flex min-w-0 items-center justify-between gap-3">
                 <button
                   type="button"
                   onClick={() => onSelect(e)}
                   title={`Ergebnis für ${e.adresse} erneut anzeigen`}
-                  className="block max-w-full truncate text-left text-sm text-accent underline hover:text-accent-strong"
+                  className="min-w-0 flex-1 truncate text-left text-sm text-accent underline hover:text-accent-strong"
                 >
                   {e.adresse}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => exportEintrag(e)}
+                  title={`${e.adresse} als PDF speichern`}
+                  aria-label={`${e.adresse} als PDF speichern`}
+                  className="shrink-0 text-accent transition-colors hover:text-accent-strong"
+                >
+                  <DokumentIcon />
                 </button>
               </li>
             ))}

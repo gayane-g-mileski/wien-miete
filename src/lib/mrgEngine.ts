@@ -347,6 +347,20 @@ export function evaluateMrg(input: MietobjektInput): MrgErgebnis {
         ['Es ist eine einfach ausgestattete Wohnung (Kategorie D) in einem alten Haus. Dafür gibt es eine niedrige, gesetzlich fixe Obergrenze.'],
       )
     }
+    // Große Wohnungen der Kategorie A/B über 130 m²: kein Richtwert, sondern
+    // angemessener Mietzins (§ 16 Abs 1 Z 4 MRG).
+    if (input.flaeche > 130 && (input.kategorie === 'A' || input.kategorie === 'B')) {
+      return result(
+        'angemessen',
+        'voll',
+        input,
+        [GESETZ.mrg()],
+        [
+          'Die Wohnung ist gut ausgestattet (Kategorie A oder B) und größer als 130 m². In diesem Fall gilt kein Richtwert – die Miete darf so hoch sein wie bei vergleichbaren Wohnungen üblich ("angemessen").',
+        ],
+        ['Voraussetzung ist, dass die Wohnung innerhalb von sechs Monaten nach Räumung neu vermietet wird.'],
+      )
+    }
     return result(
       'richtwert',
       'voll',

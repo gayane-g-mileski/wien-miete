@@ -1,4 +1,4 @@
-import type { Koordinaten } from './types'
+import type { BaubewilligungGebaeude, Koordinaten } from './types'
 
 // Anbindung an offene Wiener Geodaten. Läuft im Browser der Nutzer:innen direkt
 // gegen data.wien.gv.at (öffentlich, CORS-fähig). Fällt bei Netz-/CORS-Fehlern
@@ -175,6 +175,116 @@ export function laerminfoLink(koords: Koordinaten | null, adresse = ''): string 
   const adr = adresse.trim() ? `a-${encodeURIComponent(adresse.trim())}` : 'a-'
   if (koords) return `https://maps.laerminfo.at/#/cstrasse22_24h/bgrau/${adr}/@${koords.lat},${koords.lon},17z`
   return 'https://maps.laerminfo.at/'
+}
+
+/** Eine CSV-Zeile in Felder zerlegen (mit Anführungszeichen-Behandlung). */
+function csvZeile(zeile: string): string[] {
+  const felder: string[] = []
+  let feld = ''
+  let inAnf = false
+  for (let i = 0; i < zeile.length; i++) {
+    const c = zeile[i]
+    if (inAnf) {
+      if (c === '"') {
+        if (zeile[i + 1] === '"') {
+          feld += '"'
+          i++
+        } else inAnf = false
+      } else feld += c
+    } else if (c === '"') inAnf = true
+    else if (c === ',') {
+      felder.push(feld)
+      feld = ''
+    } else feld += c
+  }
+  felder.push(feld)
+  return felder
+}
+
+/** Erste Koordinate aus einer WKT-Geometrie (POINT/POLYGON …) lesen. */
+function wktPunkt(wkt: string): Koordinaten | null {
+  const m = wkt.match(/(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/)
+  if (!m) return null
+  return normalisiereKoords([Number(m[1]), Number(m[2])])
+}
+
+function periodeAusBaujahr(bj: number): BaubewilligungGebaeude {
+  if (bj <= 1945) return 'vor_1945'
+  if (bj <= 1953) return '1945_1953'
+  return 'nach_1953'
+}
+
+/** Jahreszahl aus einem Feldwert lesen (direkt oder aus einem Label wie „1919-1945“). */
+function jahrAus(text: string): number | null {
+  const direkt = Number(text)
+  if (Number.isFinite(direkt) && direkt >= 1000 && direkt <= 2100) return direkt
+  const m = text.match(/\b(1[0-9]{3}|20[0-9]{2})\b/)
+  return m ? Number(m[1]) : null
+}
+
+/**
+ * Baujahr (und damit die MRG-Baualtersklasse) einer Adresse über den offenen
+ * Gebäudedatensatz der Stadt Wien ermitteln (ogdwien:GEBAEUDEINFOOGD).
+ * Der Datensatz wird als CSV abgefragt – dieses Ausgabeformat ist für den
+ * Layer dokumentiert; JSON dient nur als Rückfallebene.
+ * null, wenn nichts Belastbares gefunden wird (dann wählt die Nutzer:in selbst).
+ */
+export async function baujahrAusKoordinaten(
+  koords: Koordinaten,
+  signal?: AbortSignal,
+): Promise<BaubewilligungGebaeude | null> {
+  await ladeProj4()
+  const { lat, lon } = koords
+  const basis =
+    'https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0' +
+    '&srsName=EPSG:4326&typeName=ogdwien:GEBAEUDEINFOOGD'
+  // Erst eng um die Adresse, dann etwas weiter; beide Achsreihenfolgen.
+  const varianten: string[] = []
+  for (const d of [0.0004, 0.0012]) {
+    for (const box of [
+      `${lon - d},${lat - d},${lon + d},${lat + d},EPSG:4326`,
+      `${lat - d},${lon - d},${lat + d},${lon + d},EPSG:4326`,
+    ]) {
+      varianten.push(`${basis}&outputFormat=csv&bbox=${box}`)
+    }
+  }
+  for (const url of varianten) {
+    // Pro Anfrage abfangen: ein Fehlversuch darf die nächsten nicht verhindern.
+    try {
+      const res = await fetch(url, { signal })
+      if (!res.ok) continue
+      const text = await res.text()
+      if (!text || text.trimStart().startsWith('<')) continue // XML-Fehler
+      const zeilen = text.split(/\r?\n/).filter((z) => z.trim())
+      if (zeilen.length < 2) continue
+      const kopf = csvZeile(zeilen[0]).map((h) => h.trim().toUpperCase())
+      const iBj = kopf.findIndex((h) => h === 'BAUJAHR')
+      const iLabel = kopf.findIndex((h) => h === 'L_BAUJ' || h === 'BAUALTER')
+      const iGeom = kopf.findIndex((h) => h.includes('GEOM') || h === 'SHAPE')
+      if (iBj < 0 && iLabel < 0) continue
+      let bestJahr: number | null = null
+      let bestDist = Infinity
+      let ersterJahr: number | null = null
+      for (const zeile of zeilen.slice(1)) {
+        const f = csvZeile(zeile)
+        const jahr = (iBj >= 0 ? jahrAus(f[iBj] ?? '') : null) ?? (iLabel >= 0 ? jahrAus(f[iLabel] ?? '') : null)
+        if (jahr == null) continue
+        if (ersterJahr == null) ersterJahr = jahr
+        const g = iGeom >= 0 ? wktPunkt(f[iGeom] ?? '') : null
+        if (!g) continue
+        const dist = (g.lat - lat) ** 2 + (g.lon - lon) ** 2
+        if (dist < bestDist) {
+          bestDist = dist
+          bestJahr = jahr
+        }
+      }
+      const jahr = bestJahr ?? ersterJahr
+      if (jahr != null) return periodeAusBaujahr(jahr)
+    } catch {
+      /* nächste Variante versuchen */
+    }
+  }
+  return null
 }
 
 /**
