@@ -178,6 +178,17 @@ export function laerminfoLink(koords: Koordinaten | null, adresse = ''): string 
 }
 
 /**
+ * Link auf „Wien Kulturgut“ (Themenstadtplan) mit der Ebene Bauperioden,
+ * zentriert auf die eingegebene Adresse. Dort lässt sich das Baujahr des
+ * Hauses ablesen – die Daten sind nicht über eine Schnittstelle abfragbar.
+ */
+export function bauperiodenLink(koords: Koordinaten | null, adresse = ''): string {
+  const q = adresse.trim() ? `&q=${encodeURIComponent(adresse.trim())}` : ''
+  if (koords) return `https://www.wien.gv.at/kulturportal/public/#c=${koords.lon},${koords.lat}&z=18${q}`
+  return 'https://www.wien.gv.at/kultur/kulturgut-bauperioden'
+}
+
+/**
  * Link auf den Wiener Flächenwidmungsplan, zentriert auf die eingegebene
  * Adresse und mit der Adresse im Suchfeld. ViennaGIS-Hash-Format:
  * #c=<lon>,<lat>&z=<zoom>&q=<adresse>.

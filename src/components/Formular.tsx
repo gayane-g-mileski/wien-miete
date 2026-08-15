@@ -14,6 +14,7 @@ import {
 } from '../lib/labels'
 import { FOERDERUNG_PROGRAMM_LABEL, TILGUNGSSTATUS_LABEL, foerderungenFuer, statusRelevant } from '../lib/foerderung'
 import { BEZIRKE, MERKMAL_GRUPPEN, MERKMAL_KATALOG, bezirkAusAnschrift } from '../lib/pricingData'
+import { bauperiodenLink } from '../lib/geo'
 import { Checkbox, NumberField, Section, SelectField } from './ui'
 import { AnschriftFeld } from './AnschriftFeld'
 import { Ma25Anfrage } from './Ma25Anfrage'
@@ -31,7 +32,9 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
   const [ma25Offen, setMa25Offen] = useState(false)
   const [rueckzahlungUnbekannt, setRueckzahlungUnbekannt] = useState(false)
   const [anschriftFehler, setAnschriftFehler] = useState(false)
-  const [baujahrUnklar, setBaujahrUnklar] = useState(false)
+  // Keine Vorauswahl: Das Baujahr gilt erst als gesetzt, wenn es gewählt
+  // (oder ausnahmsweise automatisch erkannt) wurde.
+  const [baujahrOffen, setBaujahrOffen] = useState(true)
 
   const istRichtwert = mietzinsArt === 'richtwert'
   const zeigeKat = istRichtwert || mietzinsArt === 'kategorie_d'
@@ -81,7 +84,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
             <AnschriftFeld
               value={value.anschrift}
               onChange={(text, bezirk, koords) => {
-                setBaujahrUnklar(false)
+                setBaujahrOffen(true)
                 onChange((prev) => ({
                   ...prev,
                   anschrift: text,
@@ -93,10 +96,10 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
               onGemeindebau={(detected) => onChange((prev) => ({ ...prev, gemeindebau: detected }))}
               onBaujahr={(periode) => {
                 if (periode == null) {
-                  setBaujahrUnklar(true)
+                  setBaujahrOffen(true)
                   return
                 }
-                setBaujahrUnklar(false)
+                setBaujahrOffen(false)
                 onChange((prev) => {
                   const erlaubt = foerderungenFuer(periode)
                   const prog = erlaubt.includes(prev.foerderungProgramm) ? prev.foerderungProgramm : 'keine'
@@ -134,18 +137,18 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
       <Section title="Förderung">
         {zeigeBaujahr(value.objektart) && (
           <div>
-            {baujahrUnklar && (
+            {baujahrOffen && (
               <p className="mb-1 px-1 text-[12px] font-medium text-coffee">
-                Baubewilligungsjahr nicht automatisch erkannt – Vorauswahl Altbau, bitte prüfen.
+                Baubewilligungsjahr nicht automatisch erkannt, bitte auswählen.
               </p>
             )}
             <SelectField
               label="Baubewilligung des Gebäudes"
               id="baubewilligung"
-              value={value.baubewilligungGebaeude}
+              value={baujahrOffen ? '' : value.baubewilligungGebaeude}
               disabled={ma25Offen}
               onChange={(e) => {
-                setBaujahrUnklar(false)
+                setBaujahrOffen(false)
                 const b = e.target.value as MietobjektInput['baubewilligungGebaeude']
                 const erlaubt = foerderungenFuer(b)
                 const prog = erlaubt.includes(value.foerderungProgramm) ? value.foerderungProgramm : 'keine'
@@ -160,6 +163,18 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                 </option>
               ))}
             </SelectField>
+            {baujahrOffen && (
+              <p className="mt-1 px-1 text-[12px] text-ink-faint">
+                <a
+                  className="text-accent underline hover:text-accent-strong"
+                  href={bauperiodenLink(value.anschriftKoords, value.anschrift)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Baujahr dieser Adresse nachsehen (Wien Kulturgut, Bauperioden)
+                </a>
+              </p>
+            )}
           </div>
         )}
 
@@ -180,7 +195,8 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
 
         {zeigeFoerderung(value.objektart) ? (
           <>
-            {value.baubewilligungGebaeude === 'vor_1945' ? (
+            {/* Solange das Baujahr offen ist, keine baualtersabhängigen Angaben zeigen. */}
+            {baujahrOffen ? null : value.baubewilligungGebaeude === 'vor_1945' ? (
               <p className="rounded-md bg-surface-2 px-3 py-2 text-sm text-ink-soft">
                 Bei einem Altbau (Baubewilligung bis 8.5.1945) ist die öffentliche Förderung für die Einstufung ohne
                 Bedeutung.
