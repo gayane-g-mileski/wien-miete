@@ -216,24 +216,50 @@ export function periodeAusBaujahr(bj: number): BaubewilligungGebaeude {
   return 'nach_1953'
 }
 
-/** Jahreszahl aus einem Feldwert lesen (direkt oder aus einem Label wie „1919-1945“). */
-function jahrAus(text: string): number | null {
-  const direkt = Number(text)
-  if (Number.isFinite(direkt) && direkt >= 1000 && direkt <= 2100) return direkt
-  const m = text.match(/\b(1[0-9]{3}|20[0-9]{2})\b/)
-  return m ? Number(m[1]) : null
+/** Was die Gebäudedaten zum Baujahr hergeben. */
+export interface BaujahrInfo {
+  /** Anzeigetext, z.B. „1899“ oder „nach 1945“. */
+  text: string
+  /** Eindeutig zuordenbare Bauperiode – null, wenn die Angabe offenlässt, welche. */
+  periode: BaubewilligungGebaeude | null
+}
+
+/**
+ * Baujahr-Angabe deuten. Der Datensatz nennt bei jüngeren Häusern häufig kein
+ * exaktes Jahr, sondern „nach 1945“ – daraus darf keine Jahreszahl 1945 (und
+ * damit fälschlich „Altbau“) werden. Bei einer Spanne zählt das Endjahr.
+ */
+function baujahrDeuten(text: string): BaujahrInfo | null {
+  const t = text.trim()
+  if (!t) return null
+  // „nach 1945“, „ab 1945“, „nach 1918“ …
+  const nach = t.match(/\b(?:nach|ab)\s*(1[0-9]{3}|20[0-9]{2})\b/i)
+  if (nach) {
+    const jahr = Number(nach[1])
+    // Nach 1945 gebaut: sicher kein Altbau, aber 1945–1953 vs. später bleibt offen.
+    return { text: `nach ${jahr}`, periode: jahr >= 1953 ? 'nach_1953' : null }
+  }
+  const direkt = Number(t)
+  if (Number.isFinite(direkt) && direkt >= 1000 && direkt <= 2100) {
+    return { text: String(direkt), periode: periodeAusBaujahr(direkt) }
+  }
+  // Spanne „1919-1945“ oder Einzeljahr im Text: das späteste Jahr ist maßgeblich.
+  const jahre = [...t.matchAll(/\b(1[0-9]{3}|20[0-9]{2})\b/g)].map((m) => Number(m[1]))
+  if (jahre.length === 0) return null
+  const ende = Math.max(...jahre)
+  return { text: t, periode: periodeAusBaujahr(ende) }
 }
 
 /**
  * Baujahr einer Adresse aus den Wiener Gebäudedaten lesen
  * (ogdwien:GEBAEUDEINFOOGD – dieselbe Quelle wie „Wien Kulturgut,
  * Gebäudedaten"). Abgefragt wird CSV; dieses Ausgabeformat ist für den Layer
- * dokumentiert. Rückgabe: das Baujahr des nächstgelegenen Gebäudes, sonst null.
+ * dokumentiert. Rückgabe: die Baujahr-Angabe des nächstgelegenen Gebäudes.
  */
 export async function baujahrAusKoordinaten(
   koords: Koordinaten,
   signal?: AbortSignal,
-): Promise<number | null> {
+): Promise<BaujahrInfo | null> {
   await ladeProj4()
   const { lat, lon } = koords
   const basis =
@@ -267,21 +293,24 @@ export async function baujahrAusKoordinaten(
       const ersteDaten = csvZeile(zeilen[1])
       const iGeom = ersteDaten.findIndex((w) => /POINT|POLYGON|LINESTRING|MULTI/i.test(w))
       if (iGeom < 0) continue // ohne Geometrie lieber nichts setzen als das falsche Haus
-      let bestJahr: number | null = null
+      let bestInfo: BaujahrInfo | null = null
       let bestDist = Infinity
       for (const zeile of zeilen.slice(1)) {
         const f = csvZeile(zeile)
-        const jahr = (iBj >= 0 ? jahrAus(f[iBj] ?? '') : null) ?? (iLabel >= 0 ? jahrAus(f[iLabel] ?? '') : null)
-        if (jahr == null) continue
+        // Das Label (z.B. „nach 1945") ist aussagekräftiger als eine leere
+        // oder auf 1945 gerundete Jahresspalte – deshalb zuerst prüfen.
+        const info =
+          (iLabel >= 0 ? baujahrDeuten(f[iLabel] ?? '') : null) ?? (iBj >= 0 ? baujahrDeuten(f[iBj] ?? '') : null)
+        if (!info) continue
         const g = wktPunkt(f[iGeom] ?? '')
         if (!g) continue
         const dist = (g.lat - lat) ** 2 + (g.lon - lon) ** 2
         if (dist < bestDist) {
           bestDist = dist
-          bestJahr = jahr
+          bestInfo = info
         }
       }
-      if (bestJahr != null) return bestJahr
+      if (bestInfo != null) return bestInfo
     } catch {
       /* nächste Variante versuchen */
     }

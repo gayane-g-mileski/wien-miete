@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { AdressTreffer } from '../lib/geo'
 import { baujahrAusKoordinaten, istGemeindebau, sucheAdressen } from '../lib/geo'
+import type { BaujahrInfo } from '../lib/geo'
 import type { BaubewilligungGebaeude, Koordinaten } from '../lib/types'
 
 interface Props {
@@ -9,7 +10,7 @@ interface Props {
   onGemeindebau?: (detected: boolean) => void
   onBaujahr?: (periode: BaubewilligungGebaeude | null) => void
   /** Baujahr laut Wiener Gebäudedaten – nur zur Anzeige, setzt nichts. */
-  onBaujahrGefunden?: (jahr: number | null) => void
+  onBaujahrGefunden?: (info: BaujahrInfo | null) => void
   onFehlerChange?: (fehler: boolean) => void
 }
 
@@ -88,7 +89,7 @@ export function AnschriftFeld({
     }
     if (onBaujahrGefunden) {
       baujahrAusKoordinaten(t.koords)
-        .then((jahr) => onBaujahrGefunden(jahr))
+        .then((info) => onBaujahrGefunden(info))
         .catch(() => onBaujahrGefunden(null))
     }
   }

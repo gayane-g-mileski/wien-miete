@@ -14,7 +14,8 @@ import {
 } from '../lib/labels'
 import { FOERDERUNG_PROGRAMM_LABEL, TILGUNGSSTATUS_LABEL, foerderungenFuer, statusRelevant } from '../lib/foerderung'
 import { BEZIRKE, MERKMAL_GRUPPEN, MERKMAL_KATALOG, bezirkAusAnschrift } from '../lib/pricingData'
-import { bauperiodenLink, periodeAusBaujahr } from '../lib/geo'
+import { bauperiodenLink } from '../lib/geo'
+import type { BaujahrInfo } from '../lib/geo'
 import { Checkbox, NumberField, Section, SelectField, SpaltenTitel } from './ui'
 import { AnschriftFeld } from './AnschriftFeld'
 import { Ma25Anfrage } from './Ma25Anfrage'
@@ -36,7 +37,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
   // (oder ausnahmsweise automatisch erkannt) wurde.
   const [baujahrOffen, setBaujahrOffen] = useState(true)
   // Baujahr laut Wiener Gebäudedaten – reine Information zur Adresse.
-  const [baujahrQuelle, setBaujahrQuelle] = useState<number | null>(null)
+  const [baujahrQuelle, setBaujahrQuelle] = useState<BaujahrInfo | null>(null)
 
   const istRichtwert = mietzinsArt === 'richtwert'
   const zeigeKat = istRichtwert || mietzinsArt === 'kategorie_d'
@@ -162,6 +163,17 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                   : 'Baubewilligungsjahr nicht automatisch erkannt, bitte auswählen.'}
               </p>
             )}
+            {/* Nachschlage-Link steht vor dem Feld */}
+            <p className="mb-2 px-1 text-[12px] text-ink-faint">
+              <a
+                className="text-accent underline hover:text-accent-strong"
+                href={bauperiodenLink()}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Baujahr dieser Adresse nachsehen (Wien Kulturgut, Gebäudedaten)
+              </a>
+            </p>
             <SelectField
               label="Baubewilligung des Gebäudes"
               id="baubewilligung"
@@ -175,7 +187,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                 onChange({ ...value, baubewilligungGebaeude: b, foerderungProgramm: prog })
               }}
             >
-              {/* Leerer Platzhalter: Feld zeigt nur das Label, wenn das Baujahr nicht erkannt wurde */}
+              {/* Leerer Platzhalter: Feld zeigt nur das Label, wenn nichts gewählt ist */}
               <option value="" hidden />
               {(Object.keys(BAUBEWILLIGUNG_LABEL) as (keyof typeof BAUBEWILLIGUNG_LABEL)[]).map((k) => (
                 <option key={k} value={k}>
@@ -183,26 +195,20 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                 </option>
               ))}
             </SelectField>
-            {baujahrQuelle != null ? (
+            {/* Gefundene Angabe steht unter dem Feld */}
+            {baujahrQuelle != null && (
               <p className="mt-1 px-1 text-[12px] text-ink-faint">
-                Baujahr laut{' '}
-                <a
-                  className="text-accent underline hover:text-accent-strong"
-                  href={bauperiodenLink()}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Gebäudedaten der Stadt Wien
-                </a>
-                : <strong className="text-ink">{baujahrQuelle}</strong>
-                {baujahrOffen && (
+                Baujahr laut Gebäudedaten der Stadt Wien:{' '}
+                <strong className="text-ink">{baujahrQuelle.text}</strong>
+                {baujahrOffen && baujahrQuelle.periode != null && (
                   <>
                     {' – '}
                     <button
                       type="button"
                       className="text-accent underline hover:text-accent-strong"
                       onClick={() => {
-                        const periode = periodeAusBaujahr(baujahrQuelle)
+                        const periode = baujahrQuelle.periode
+                        if (!periode) return
                         setBaujahrOffen(false)
                         onChange((prev) => {
                           const erlaubt = foerderungenFuer(periode)
@@ -216,19 +222,6 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                   </>
                 )}
               </p>
-            ) : (
-              baujahrOffen && (
-                <p className="mt-1 px-1 text-[12px] text-ink-faint">
-                  <a
-                    className="text-accent underline hover:text-accent-strong"
-                    href={bauperiodenLink()}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Baujahr dieser Adresse nachsehen (Wien Kulturgut, Gebäudedaten)
-                  </a>
-                </p>
-              )
             )}
           </div>
         )}
