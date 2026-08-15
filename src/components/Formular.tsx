@@ -38,6 +38,13 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
 
   const istRichtwert = mietzinsArt === 'richtwert'
   const zeigeKat = istRichtwert || mietzinsArt === 'kategorie_d'
+  // Große Altbauwohnung der Kategorie A/B: Der Richtwert entfällt. Die Kategorie
+  // bleibt trotzdem wählbar, weil sie über diese Ausnahme mitentscheidet.
+  const ueber130 =
+    value.baubewilligungGebaeude === 'vor_1945' &&
+    value.flaeche > 130 &&
+    (value.kategorie === 'A' || value.kategorie === 'B') &&
+    mietzinsArt === 'angemessen'
   // Bezirk aus der Anschrift (gewählte Adresse oder erkannte PLZ)
   const bezirkErkannt = value.anschriftBezirk ?? bezirkAusAnschrift(value.anschrift)
 
@@ -126,11 +133,6 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
         />
 
         <div className="space-y-2">
-          <Checkbox
-            checked={value.gemeindebau}
-            onChange={(v) => set('gemeindebau', v)}
-            label="Gemeindebau der Stadt Wien (Wiener Wohnen)"
-          />
           <Checkbox checked={value.eigentumswohnung} onChange={(v) => set('eigentumswohnung', v)} label="Eigentumswohnung" />
           {istRichtwert && (
             <Checkbox checked={value.befristet} onChange={(v) => set('befristet', v)} label="Befristeter Mietvertrag" />
@@ -285,8 +287,16 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
 
       {/* --- Ausstattung, Zustand & Zu-/Abschläge – nur wenn ein Richtwert
              (bzw. die Kategorie) die Miethöhe bestimmt --- */}
-      {zeigeAusstattung(value.objektart) && zeigeKat && (
+      {zeigeAusstattung(value.objektart) && (zeigeKat || ueber130) && (
         <Section title="Ausstattung, Zustand & Zu-/Abschläge">
+          {ueber130 && (
+            <p className="rounded-md bg-surface-2 px-3 py-2 text-sm text-ink-soft">
+              Für diese Wohnung gilt <strong className="text-ink">kein Richtwert</strong>: Sie liegt in einem Altbau, ist
+              gut ausgestattet (Kategorie A oder B) und mit über 130 m² größer als die gesetzliche Grenze. In diesem Fall
+              erlaubt das Gesetz den angemessenen Mietzins – also die ortsübliche Miete vergleichbarer Wohnungen. Zu- und
+              Abschläge sind deshalb hier nicht anzugeben; sie stecken bereits im Marktpreis.
+            </p>
+          )}
           {zeigeKategorie(value.objektart) && (
             <SelectField
               label="Ausstattungskategorie"
