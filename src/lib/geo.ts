@@ -210,7 +210,7 @@ function wktPunkt(wkt: string): Koordinaten | null {
   return normalisiereKoords([Number(m[1]), Number(m[2])])
 }
 
-function periodeAusBaujahr(bj: number): BaubewilligungGebaeude {
+export function periodeAusBaujahr(bj: number): BaubewilligungGebaeude {
   if (bj <= 1945) return 'vor_1945'
   if (bj <= 1953) return '1945_1953'
   return 'nach_1953'
@@ -225,16 +225,15 @@ function jahrAus(text: string): number | null {
 }
 
 /**
- * Baujahr (und damit die MRG-Baualtersklasse) einer Adresse über den offenen
- * Gebäudedatensatz der Stadt Wien ermitteln (ogdwien:GEBAEUDEINFOOGD).
- * Der Datensatz wird als CSV abgefragt – dieses Ausgabeformat ist für den
- * Layer dokumentiert; JSON dient nur als Rückfallebene.
- * null, wenn nichts Belastbares gefunden wird (dann wählt die Nutzer:in selbst).
+ * Baujahr einer Adresse aus den Wiener Gebäudedaten lesen
+ * (ogdwien:GEBAEUDEINFOOGD – dieselbe Quelle wie „Wien Kulturgut,
+ * Gebäudedaten"). Abgefragt wird CSV; dieses Ausgabeformat ist für den Layer
+ * dokumentiert. Rückgabe: das Baujahr des nächstgelegenen Gebäudes, sonst null.
  */
 export async function baujahrAusKoordinaten(
   koords: Koordinaten,
   signal?: AbortSignal,
-): Promise<BaubewilligungGebaeude | null> {
+): Promise<number | null> {
   await ladeProj4()
   const { lat, lon } = koords
   const basis =
@@ -282,7 +281,7 @@ export async function baujahrAusKoordinaten(
           bestJahr = jahr
         }
       }
-      if (bestJahr != null) return periodeAusBaujahr(bestJahr)
+      if (bestJahr != null) return bestJahr
     } catch {
       /* nächste Variante versuchen */
     }

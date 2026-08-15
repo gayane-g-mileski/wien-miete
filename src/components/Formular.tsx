@@ -14,7 +14,7 @@ import {
 } from '../lib/labels'
 import { FOERDERUNG_PROGRAMM_LABEL, TILGUNGSSTATUS_LABEL, foerderungenFuer, statusRelevant } from '../lib/foerderung'
 import { BEZIRKE, MERKMAL_GRUPPEN, MERKMAL_KATALOG, bezirkAusAnschrift } from '../lib/pricingData'
-import { bauperiodenLink } from '../lib/geo'
+import { bauperiodenLink, periodeAusBaujahr } from '../lib/geo'
 import { Checkbox, NumberField, Section, SelectField, SpaltenTitel } from './ui'
 import { AnschriftFeld } from './AnschriftFeld'
 import { Ma25Anfrage } from './Ma25Anfrage'
@@ -35,6 +35,8 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
   // Keine Vorauswahl: Das Baujahr gilt erst als gesetzt, wenn es gewählt
   // (oder ausnahmsweise automatisch erkannt) wurde.
   const [baujahrOffen, setBaujahrOffen] = useState(true)
+  // Baujahr laut Wiener Gebäudedaten – reine Information zur Adresse.
+  const [baujahrQuelle, setBaujahrQuelle] = useState<number | null>(null)
 
   const istRichtwert = mietzinsArt === 'richtwert'
   const zeigeKat = istRichtwert || mietzinsArt === 'kategorie_d'
@@ -97,8 +99,10 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
             </SelectField>
             <AnschriftFeld
               value={value.anschrift}
+              onBaujahrGefunden={setBaujahrQuelle}
               onChange={(text, bezirk, koords) => {
                 setBaujahrOffen(true)
+                setBaujahrQuelle(null)
                 onChange((prev) => ({
                   ...prev,
                   anschrift: text,
@@ -153,7 +157,9 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
           <div>
             {baujahrOffen && (
               <p className="mb-1 px-1 text-[12px] font-medium text-coffee">
-                Baubewilligungsjahr nicht automatisch erkannt, bitte auswählen.
+                {baujahrQuelle != null
+                  ? 'Bitte Baubewilligung auswählen.'
+                  : 'Baubewilligungsjahr nicht automatisch erkannt, bitte auswählen.'}
               </p>
             )}
             <SelectField
@@ -177,17 +183,52 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                 </option>
               ))}
             </SelectField>
-            {baujahrOffen && (
+            {baujahrQuelle != null ? (
               <p className="mt-1 px-1 text-[12px] text-ink-faint">
+                Baujahr laut{' '}
                 <a
                   className="text-accent underline hover:text-accent-strong"
                   href={bauperiodenLink()}
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Baujahr dieser Adresse nachsehen (Wien Kulturgut, Gebäudedaten)
+                  Gebäudedaten der Stadt Wien
                 </a>
+                : <strong className="text-ink">{baujahrQuelle}</strong>
+                {baujahrOffen && (
+                  <>
+                    {' – '}
+                    <button
+                      type="button"
+                      className="text-accent underline hover:text-accent-strong"
+                      onClick={() => {
+                        const periode = periodeAusBaujahr(baujahrQuelle)
+                        setBaujahrOffen(false)
+                        onChange((prev) => {
+                          const erlaubt = foerderungenFuer(periode)
+                          const prog = erlaubt.includes(prev.foerderungProgramm) ? prev.foerderungProgramm : 'keine'
+                          return { ...prev, baubewilligungGebaeude: periode, foerderungProgramm: prog }
+                        })
+                      }}
+                    >
+                      übernehmen
+                    </button>
+                  </>
+                )}
               </p>
+            ) : (
+              baujahrOffen && (
+                <p className="mt-1 px-1 text-[12px] text-ink-faint">
+                  <a
+                    className="text-accent underline hover:text-accent-strong"
+                    href={bauperiodenLink()}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Baujahr dieser Adresse nachsehen (Wien Kulturgut, Gebäudedaten)
+                  </a>
+                </p>
+              )
             )}
           </div>
         )}

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { AdressTreffer } from '../lib/geo'
-import { istGemeindebau, sucheAdressen } from '../lib/geo'
+import { baujahrAusKoordinaten, istGemeindebau, sucheAdressen } from '../lib/geo'
 import type { BaubewilligungGebaeude, Koordinaten } from '../lib/types'
 
 interface Props {
@@ -8,6 +8,8 @@ interface Props {
   onChange: (text: string, bezirk: number | null, koords: Koordinaten | null) => void
   onGemeindebau?: (detected: boolean) => void
   onBaujahr?: (periode: BaubewilligungGebaeude | null) => void
+  /** Baujahr laut Wiener Gebäudedaten – nur zur Anzeige, setzt nichts. */
+  onBaujahrGefunden?: (jahr: number | null) => void
   onFehlerChange?: (fehler: boolean) => void
 }
 
@@ -21,7 +23,14 @@ const floatLabel =
   'peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs ' +
   'peer-[:not(:placeholder-shown)]:bg-surface peer-[:not(:placeholder-shown)]:px-1'
 
-export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFehlerChange }: Props) {
+export function AnschriftFeld({
+  value,
+  onChange,
+  onGemeindebau,
+  onBaujahr,
+  onBaujahrGefunden,
+  onFehlerChange,
+}: Props) {
   const [treffer, setTreffer] = useState<AdressTreffer[]>([])
   const [offen, setOffen] = useState(false)
   const boxRef = useRef<HTMLDivElement>(null)
@@ -65,17 +74,22 @@ export function AnschriftFeld({ value, onChange, onGemeindebau, onBaujahr, onFeh
     onChange(t.label, t.bezirk, t.koords)
     setOffen(false)
     setTreffer([])
-    // Das Baujahr wird bewusst NICHT automatisch gesetzt: Die offene
-    // Gebäude-Abfrage lieferte in der Praxis das falsche Haus. Lieber offen
-    // lassen und auswählen, als einen falschen Wert übernehmen.
+    // Die Auswahl wird bewusst NICHT automatisch gesetzt – das Baujahr aus den
+    // Gebäudedaten wird nur zur Information angezeigt.
     onBaujahr?.(null)
-    // Gemeindebau wird vorgeschlagen, bleibt aber im Formular korrigierbar.
-    if (t.koords && onGemeindebau) {
+    onBaujahrGefunden?.(null)
+    if (!t.koords) return
+    if (onGemeindebau) {
       istGemeindebau(t.koords)
         .then((gb) => {
           if (gb != null) onGemeindebau(gb)
         })
         .catch(() => {})
+    }
+    if (onBaujahrGefunden) {
+      baujahrAusKoordinaten(t.koords)
+        .then((jahr) => onBaujahrGefunden(jahr))
+        .catch(() => onBaujahrGefunden(null))
     }
   }
 
