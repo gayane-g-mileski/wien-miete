@@ -17,7 +17,7 @@ const floatLabel =
 
 // Label dauerhaft oben (für Select/Textarea, die immer „gefüllt“ wirken).
 const topLabel =
-  'pointer-events-none absolute left-3 top-0 -translate-y-1/2 bg-surface px-1 text-xs text-ink-soft peer-focus:text-accent'
+  'pointer-events-none absolute left-3 top-0 -translate-y-1/2 bg-surface px-1 text-xs text-ink-faint peer-focus:text-accent'
 
 function Hint({ children }: { children?: ReactNode }) {
   return children ? <p className="mt-1 px-1 text-[12px] text-ink-faint">{children}</p> : null

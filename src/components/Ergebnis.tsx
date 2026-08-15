@@ -26,7 +26,7 @@ function Zeile({ label, children }: { label: string; children: React.ReactNode }
 function SchutzZeile({ label, aktiv }: { label: string; aktiv: boolean }) {
   if (!aktiv) return null
   return (
-    <span className="flex items-center justify-between gap-3 text-base text-ink-soft">
+    <span className="flex items-center justify-between gap-3 text-base text-ink-faint">
       {label}
       <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-accent" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M5 13l4 4L19 7" />
@@ -84,11 +84,11 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
               <div className="space-y-3">
                 <div className="space-y-2 rounded-xl bg-surface px-4 py-3 ring-1 ring-line">
                   <div className="flex items-baseline justify-between gap-4">
-                    <span className="text-sm text-ink-soft">Monatlich pro m², netto</span>
+                    <span className="text-sm text-ink-faint">Monatlich pro m², netto</span>
                     <Preiswert min={ergebnis.preis.proM2Min} max={ergebnis.preis.proM2Max} color="text-coffee" />
                   </div>
                   <div className="flex items-baseline justify-between gap-4">
-                    <span className="text-sm text-ink-soft">Monat gesamt</span>
+                    <span className="text-sm text-ink-faint">Monat gesamt</span>
                     <Preiswert min={ergebnis.preis.monatlichMin} max={ergebnis.preis.monatlichMax} />
                   </div>
                 </div>
