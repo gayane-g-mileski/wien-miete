@@ -1,4 +1,4 @@
-import type { BaubewilligungGebaeude, Koordinaten } from './types'
+import type { Koordinaten } from './types'
 
 // Anbindung an offene Wiener Geodaten. Läuft im Browser der Nutzer:innen direkt
 // gegen data.wien.gv.at (öffentlich, CORS-fähig). Fällt bei Netz-/CORS-Fehlern
@@ -134,113 +134,35 @@ export async function sucheAdressen(query: string, signal?: AbortSignal): Promis
  * wird null zurückgegeben (dann entscheidet die manuelle Auswahl).
  */
 export async function istGemeindebau(koords: Koordinaten, signal?: AbortSignal): Promise<boolean | null> {
+  await ladeProj4()
   const d = 0.0009 // ~90 m
   const { lat, lon } = koords
   const base =
     'https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0' +
     '&srsName=EPSG:4326&outputFormat=json&typeName=ogdwien:GEMBAUTENFLOGD&bbox='
-  // GeoServer WFS 1.1.0 nutzt bei EPSG:4326 die Achsreihenfolge lat,lon –
-  // zur Sicherheit wird auch die vertauschte Reihenfolge versucht.
+  // Zuerst lon,lat (so nutzen es funktionierende Wiener WFS-Beispiele),
+  // danach lat,lon als Absicherung.
   const boxes = [
-    `${lat - d},${lon - d},${lat + d},${lon + d},EPSG:4326`,
     `${lon - d},${lat - d},${lon + d},${lat + d},EPSG:4326`,
+    `${lat - d},${lon - d},${lat + d},${lon + d},EPSG:4326`,
   ]
-  try {
-    for (const box of boxes) {
-      const res = await fetch(base + box, { signal }) // rohe Kommas/Doppelpunkt wie in den offiziellen Beispielen
-      if (!res.ok) continue
+  let fehler = 0
+  for (const box of boxes) {
+    // Wichtig: pro Anfrage abfangen. Liefert eine Variante einen XML-Fehler,
+    // darf das die andere Variante nicht verhindern.
+    try {
+      const res = await fetch(base + box, { signal })
+      if (!res.ok) {
+        fehler++
+        continue
+      }
       const data = (await res.json()) as { features?: unknown[] }
       if (Array.isArray(data.features) && data.features.length > 0) return true
+    } catch {
+      fehler++
     }
-    return false
-  } catch {
-    return null
   }
-}
-
-interface GebaeudeFeature {
-  properties?: Record<string, unknown>
-  geometry?: { coordinates?: unknown }
-}
-
-function periodeAusBaujahr(bj: number): BaubewilligungGebaeude {
-  if (bj <= 1945) return 'vor_1945'
-  if (bj <= 1953) return '1945_1953'
-  return 'nach_1953'
-}
-
-/** Ersten [x,y]-Zahlenpunkt aus (ggf. verschachtelter) Geometrie ziehen (Point/Polygon). */
-function ersterPunkt(c: unknown): [number, number] | null {
-  if (!Array.isArray(c)) return null
-  if (typeof c[0] === 'number' && typeof c[1] === 'number') return [c[0], c[1]]
-  for (const el of c) {
-    const p = ersterPunkt(el)
-    if (p) return p
-  }
-  return null
-}
-
-/** Baujahr aus einem Feature lesen: primär BAUJAHR, sonst ein Jahr aus L_BAUJ. */
-function baujahrAusFeature(p: Record<string, unknown>): number | null {
-  const bj = Number(p.BAUJAHR)
-  if (Number.isFinite(bj) && bj >= 1000 && bj <= 2100) return bj
-  const label = String(p.L_BAUJ ?? p.BAUALTER ?? '')
-  const m = label.match(/\b(1[5-9]\d{2}|20\d{2})\b/)
-  if (m) return Number(m[1])
-  return null
-}
-
-/**
- * Best-effort-Ermittlung des Baujahres (und damit der MRG-Baualtersklasse)
- * einer Adresse über den offenen Gebäudedatensatz der Stadt Wien
- * (ogdwien:GEBAEUDEINFOOGD, Attribut BAUJAHR bzw. L_BAUJ). Nimmt das
- * nächstgelegene Gebäude mit gültigem Baujahr. null bei Fehler/keinem Treffer.
- */
-export async function baujahrAusKoordinaten(
-  koords: Koordinaten,
-  signal?: AbortSignal,
-): Promise<BaubewilligungGebaeude | null> {
-  await ladeProj4()
-  const { lat, lon } = koords
-  const base =
-    'https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0' +
-    '&srsName=EPSG:4326&outputFormat=json&typeName=ogdwien:GEBAEUDEINFOOGD&bbox='
-  // Erst eng (nur das Gebäude an der Adresse), dann weiter (große Anlagen).
-  const radien = [0.0003, 0.0009] // ~30 m, ~90 m
-  try {
-    for (const d of radien) {
-      // WFS 1.1.0 + EPSG:4326 nutzt lat,lon – zur Sicherheit auch vertauscht.
-      for (const box of [
-        `${lat - d},${lon - d},${lat + d},${lon + d},EPSG:4326`,
-        `${lon - d},${lat - d},${lon + d},${lat + d},EPSG:4326`,
-      ]) {
-        const res = await fetch(base + box, { signal }) // rohe Kommas wie in den offiziellen Beispielen
-        if (!res.ok) continue
-        const data = (await res.json()) as { features?: GebaeudeFeature[] }
-        const feats = data.features ?? []
-        let bestBj: number | null = null
-        let bestDist = Infinity
-        let ersterBj: number | null = null // Fallback, falls keine Geometrie auswertbar ist
-        for (const f of feats) {
-          const bj = baujahrAusFeature(f.properties ?? {})
-          if (bj == null) continue
-          if (ersterBj == null) ersterBj = bj
-          const fk = normalisiereKoords(ersterPunkt(f.geometry?.coordinates))
-          if (!fk) continue // ohne verwertbare Geometrie NICHT als „nächstes" werten
-          const dist = (fk.lat - lat) ** 2 + (fk.lon - lon) ** 2
-          if (dist < bestDist) {
-            bestDist = dist
-            bestBj = bj
-          }
-        }
-        const gewaehlt = bestBj ?? ersterBj
-        if (gewaehlt != null) return periodeAusBaujahr(gewaehlt)
-      }
-    }
-    return null
-  } catch {
-    return null
-  }
+  return fehler === boxes.length ? null : false
 }
 
 /**
