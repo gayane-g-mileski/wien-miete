@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Formular } from './components/Formular'
 import { Ergebnis } from './components/Ergebnis'
 import { Ergebnisleiste } from './components/Ergebnisleiste'
-import { SprachHinweis } from './components/SprachHinweis'
+import { SprachSchalter } from './components/SprachSchalter'
 import { evaluateMrg } from './lib/mrgEngine'
 import { leereMerkmale } from './lib/pricingData'
 import { ladeVerlauf, speichereVerlauf, type VerlaufEintrag } from './lib/verlauf'
@@ -77,7 +77,7 @@ function App() {
             <a className="transition-colors hover:text-accent" href="#quellen">
               Quelle
             </a>
-            <SprachHinweis />
+            <SprachSchalter />
           </div>
         </nav>
 
