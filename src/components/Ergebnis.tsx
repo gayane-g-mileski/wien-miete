@@ -156,7 +156,8 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
 
           {/* Direkt unter dem Schutz-Abschnitt */}
           <Zeile label="Gesetze zum Nachlesen">
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            {/* Gesetzestitel bleiben im Original */}
+            <div translate="no" className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
               {ergebnis.gesetze.map((g) => (
                 <a key={g.url} className="text-accent underline hover:text-accent-strong" href={g.url} target="_blank" rel="noreferrer">
                   {g.label}

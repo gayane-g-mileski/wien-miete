@@ -66,7 +66,7 @@ export function RueckzahlungAnfrage({ anschrift, programm }: { anschrift: string
 
       <div>
         <p>Das Förderungsdarlehen des Landes Wien verwaltet die</p>
-        <address className="my-4 border-l-2 border-accent pl-3 not-italic leading-relaxed text-accent">
+        <address translate="no" className="my-4 border-l-2 border-accent pl-3 not-italic leading-relaxed text-accent">
           <span className="font-semibold">Stadt Wien – Magistratsabteilung 50</span>
           <br />
           <span className="font-semibold">Wohnbauförderung</span>

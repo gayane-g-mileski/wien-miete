@@ -3,6 +3,8 @@ import { Formular } from './components/Formular'
 import { Ergebnis } from './components/Ergebnis'
 import { Ergebnisleiste } from './components/Ergebnisleiste'
 import { SprachSchalter } from './components/SprachSchalter'
+import { Kontakt } from './components/Kontakt'
+import { ThemaSchalter } from './components/ThemaSchalter'
 import { evaluateMrg } from './lib/mrgEngine'
 import { leereMerkmale } from './lib/pricingData'
 import { ladeVerlauf, speichereVerlauf, type VerlaufEintrag } from './lib/verlauf'
@@ -71,13 +73,15 @@ function App() {
         <nav className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
           <span className="text-base font-semibold tracking-tight text-ink sm:text-lg">Mietzins-Check in Wien</span>
           <div className="flex shrink-0 items-center gap-3 text-sm font-medium text-ink sm:gap-5">
-            <a className="transition-colors hover:text-accent" href="#rechner">
+            {/* Auf dem Handy bleibt oben nur das Sprach-Icon */}
+            <a className="hidden transition-colors hover:text-accent sm:inline" href="#rechner">
               Mietrechner
             </a>
-            <a className="transition-colors hover:text-accent" href="#quellen">
+            <a className="hidden transition-colors hover:text-accent sm:inline" href="#quellen">
               Quelle
             </a>
             <SprachSchalter />
+            <ThemaSchalter />
           </div>
         </nav>
 
@@ -119,7 +123,9 @@ function App() {
         </div>
       </main>
 
-      <footer id="quellen" className="mt-4 scroll-mt-4 border-t border-line bg-surface-2">
+      <Kontakt />
+
+      <footer id="quellen" className="scroll-mt-4 border-t border-line bg-surface-2">
         <div className="mx-auto max-w-6xl space-y-3 px-4 py-8 text-xs leading-relaxed text-ink-soft sm:px-6">
           <div className="rounded-xl border border-danger/30 bg-danger/5 p-4 text-sm leading-relaxed text-ink-soft">
             <strong className="text-base font-bold text-danger">Kein Rechtsrat.</strong> Dieses Tool bietet eine

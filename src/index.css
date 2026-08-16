@@ -39,8 +39,10 @@
   color-scheme: light;
 }
 
+/* Dunkles Thema: folgt dem System, außer der Schalter oben hat etwas anderes
+   gesetzt (data-theme am <html>). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     color-scheme: dark;
     --color-paper: #17130f;
     --color-surface: #221d18;
@@ -55,6 +57,26 @@
     --color-coffee: #cba37e;
     --color-danger: #f2a49d;
   }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-paper: #17130f;
+  --color-surface: #221d18;
+  --color-surface-2: #2b241d;
+  --color-ink: #f3efe9;
+  --color-ink-soft: #cabfb2;
+  --color-ink-faint: #b39b86;
+  --color-line: #39312a;
+  --color-accent: #9db98e;
+  --color-accent-strong: #b4cda6;
+  --color-on-accent: #1b1611;
+  --color-coffee: #cba37e;
+  --color-danger: #f2a49d;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
 }
 
 html,
@@ -89,9 +111,12 @@ input[type='number'] {
   background-size: 24px 24px;
 }
 @media (prefers-color-scheme: dark) {
-  .select-chevron {
+  :root:not([data-theme='light']) .select-chevron {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23b39b86' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   }
+}
+:root[data-theme='dark'] .select-chevron {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23b39b86' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
 }
 
 /* ---------------------------------------------------------------------------
@@ -119,11 +144,17 @@ input[type='number'] {
   animation: heroZoom 26s ease-in-out infinite alternate;
 }
 
+/* Im Dark-Mode das Foto abdunkeln, Text bleibt gut lesbar. */
 @media (prefers-color-scheme: dark) {
-  /* Im Dark-Mode das Foto abdunkeln, Text bleibt gut lesbar. */
-  .hero-photo {
+  :root:not([data-theme='light']) .hero-photo {
     filter: saturate(0.85) brightness(0.62);
   }
+}
+:root[data-theme='dark'] .hero-photo {
+  filter: saturate(0.85) brightness(0.62);
+}
+:root[data-theme='light'] .hero-photo {
+  filter: none;
 }
 
 @keyframes heroZoom {

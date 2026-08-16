@@ -9,6 +9,13 @@
     <meta name="theme-color" content="#17130f" media="(prefers-color-scheme: dark)" />
     <meta name="description" content="Mietzins-Check in Wien: Ersteinschätzung von Mietzinsart, MRG-Anwendungsbereich und marktüblicher Preisbandbreite für Vermieter:innen und Immobilien-Anleger:innen." />
     <title>Mietzins-Check in Wien</title>
+    <script>
+      // Gespeicherte Design-Wahl schon vor dem ersten Zeichnen setzen.
+      try {
+        var t = localStorage.getItem('wien-miete:thema')
+        if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

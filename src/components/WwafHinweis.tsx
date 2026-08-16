@@ -54,7 +54,7 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
 
       <div>
         <p>Diese Auskunft bekommst du über eine Anfrage an das</p>
-        <address className="my-4 border-l-2 border-accent pl-3 not-italic leading-relaxed text-accent">
+        <address translate="no" className="my-4 border-l-2 border-accent pl-3 not-italic leading-relaxed text-accent">
           <span className="font-semibold">Bundesministerium für Wissenschaft, Forschung und Wirtschaft</span>
           <br />
           <span className="font-semibold">Verwaltungsstelle Bundeswohnbaufonds</span>
