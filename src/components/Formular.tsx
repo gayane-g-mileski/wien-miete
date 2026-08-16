@@ -20,6 +20,7 @@ import { Checkbox, NumberField, Section, SelectField, SpaltenTitel } from './ui'
 import { AnschriftFeld } from './AnschriftFeld'
 import { Ma25Anfrage } from './Ma25Anfrage'
 import { WwafHinweis } from './WwafHinweis'
+import { RueckzahlungAnfrage } from './RueckzahlungAnfrage'
 
 interface Props {
   value: MietobjektInput
@@ -144,7 +145,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
           onChange={(e) => set('flaeche', Math.max(0, Number(e.target.value)))}
         />
 
-        <div className="space-y-2">
+        <div className="space-y-6">
           {istRichtwert && (
             <Checkbox checked={value.befristet} onChange={(v) => set('befristet', v)} label="Befristeter Mietvertrag" />
           )}
@@ -163,8 +164,8 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                   : 'Baubewilligungsjahr nicht automatisch erkannt, bitte auswählen.'}
               </p>
             )}
-            {/* Nachschlage-Link steht vor dem Feld */}
-            <p className="mb-2 px-1 text-[12px] text-ink-faint">
+            {/* Nachschlage-Link steht vor dem Feld (24px Abstand) */}
+            <p className="mb-6 px-1 text-[12px] text-ink-faint">
               <a
                 className="text-accent underline hover:text-accent-strong"
                 href={bauperiodenLink()}
@@ -295,24 +296,33 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
               </>
             )}
 
-            {/* Anfrage-Checkboxen eng beieinander (gleicher Abstand wie oben) */}
-            <div className="space-y-2">
-              {/* Nur der unbekannte Status: Anfrage beim Bundeswohnbaufonds */}
+            {/* Anfrage-Checkboxen, 24px Abstand */}
+            <div className="space-y-6">
+              {/* Unbekannter Rückzahlungsstand: Anfrage bei der zuständigen Stelle.
+                  WWG 1948 → Bundeswohnbaufonds, Landesförderung → MA 50. */}
               {value.baubewilligungGebaeude !== 'vor_1945' &&
                 statusRelevant(value.foerderungProgramm) &&
-                !ma25Offen &&
-                value.foerderungProgramm === 'wwg1948' && (
+                !ma25Offen && (
                   <div>
                     <Checkbox
                       checked={rueckzahlungUnbekannt}
                       onChange={setRueckzahlungUnbekannt}
-                      label="Stand der Rückzahlung unbekannt? Beim Bundeswohnbaufonds anfragen"
+                      label={
+                        value.foerderungProgramm === 'wwg1948'
+                          ? 'Stand der Rückzahlung unbekannt? Beim Bundeswohnbaufonds anfragen'
+                          : 'Stand der Rückzahlung unbekannt? Bei der MA 50 anfragen'
+                      }
                     />
-                    {rueckzahlungUnbekannt && (
-                      <div className="mt-5">
-                        <WwafHinweis anschrift={value.anschrift} />
-                      </div>
-                    )}
+                    {rueckzahlungUnbekannt &&
+                      (value.foerderungProgramm === 'wwg1948' ? (
+                        <div className="mt-6">
+                          <WwafHinweis anschrift={value.anschrift} />
+                        </div>
+                      ) : (
+                        <div className="mt-6">
+                          <RueckzahlungAnfrage anschrift={value.anschrift} programm={value.foerderungProgramm} />
+                        </div>
+                      ))}
                   </div>
                 )}
 
@@ -324,7 +334,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                   label="Baujahr und öffentliche Förderung unbekannt? Kostenlos bei der MA 25 anfragen"
                 />
                 {ma25Offen && (
-                  <div className="mt-5">
+                  <div className="mt-6">
                     <Ma25Anfrage anschrift={value.anschrift} />
                   </div>
                 )}

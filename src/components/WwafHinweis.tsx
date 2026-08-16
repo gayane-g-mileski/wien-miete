@@ -49,7 +49,7 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
   }
 
   return (
-    <div className="space-y-8 rounded-xl border border-accent/30 bg-surface-2 p-6 text-base text-ink-soft">
+    <div className="space-y-10 rounded-xl border border-accent/30 bg-surface p-6 text-base text-ink-soft shadow-sm sm:p-8">
       <p className="text-sm font-semibold text-accent">Diese Anfrage ist kostenlos</p>
 
       <div>
@@ -81,7 +81,7 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
         <Collapsible title="Was die Antwort für deine Miete bedeutet">
           <div className="space-y-3">
             {FAELLE.map((f) => (
-              <div key={f.titel} className="rounded-lg border border-line bg-surface p-3">
+              <div key={f.titel} className="rounded-lg border border-line bg-surface-2 p-3">
                 <p className="font-semibold text-ink">{f.titel}</p>
                 <p className="mt-1 text-sm leading-relaxed text-ink-soft">{f.text}</p>
                 <p className="mt-2 text-sm font-semibold text-accent">{f.ergebnis}</p>

@@ -64,7 +64,7 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
     'inline-flex cursor-pointer items-center gap-2 rounded-lg border border-accent/50 bg-surface px-3 py-2 text-base font-medium text-accent hover:bg-accent/10'
 
   return (
-    <div className="space-y-8 rounded-xl border border-accent/30 bg-surface-2 p-6">
+    <div className="space-y-10 rounded-xl border border-accent/30 bg-surface p-6 shadow-sm sm:p-8">
       <p className="text-sm font-semibold text-accent">Diese Anfrage ist kostenlos</p>
 
       <p className="text-base text-ink-soft">
@@ -108,7 +108,7 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
         {dateien.length > 0 && (
           <ul className="mt-2 space-y-1">
             {dateien.map((f, i) => (
-              <li key={`${f.name}-${i}`} className="flex items-center justify-between gap-3 rounded-md border border-line bg-surface px-3 py-1.5 text-base text-ink-soft">
+              <li key={`${f.name}-${i}`} className="flex items-center justify-between gap-3 rounded-md border border-line bg-surface-2 px-3 py-1.5 text-base text-ink-soft">
                 <span className="truncate">
                   {f.name} <span className="text-ink-faint">({(f.size / 1024 / 1024).toFixed(1)} MB)</span>
                 </span>
@@ -121,7 +121,11 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
         )}
       </div>
 
-      {fehler && <p className="text-base font-medium text-accent-strong">{fehler}</p>}
+      {fehler && (
+        <p role="alert" className="rounded-lg border border-danger/40 bg-danger/5 px-3 py-2 text-base font-medium text-danger">
+          {fehler}
+        </p>
+      )}
 
       <button
         type="button"

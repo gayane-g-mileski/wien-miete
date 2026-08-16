@@ -97,44 +97,43 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
           </Zeile>
 
           <Zeile label="Mietzinsart">
-            <span className="text-2xl font-semibold text-ink">{ergebnis.mietzinsArtLabel}</span>
-            {/* Erklärung: nur ein Chevron, rechts auf Höhe der Richtwert-Zeile */}
-            {ergebnis.begruendung.length > 0 && (
-              <>
-                <div className="mt-1 flex items-center justify-between gap-3">
-                  <span className="text-sm text-ink-soft">
-                    {ergebnis.mietzinsArt === 'richtwert'
-                      ? `Richtwert Wien seit 1.4.2026: ${RICHTWERT_WIEN.toLocaleString('de-AT', { minimumFractionDigits: 2 })} €/m².`
-                      : ''}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setErklaerungOffen((o) => !o)}
-                    aria-expanded={erklaerungOffen}
-                    aria-label={erklaerungOffen ? 'Erklärung ausblenden' : 'Erklärung anzeigen'}
-                    className="shrink-0 text-accent transition-colors hover:text-accent-strong"
+            {/* Das Chevron sitzt direkt neben dem Wert und klappt die Erklärung auf */}
+            <div className="flex items-start justify-between gap-3">
+              <span className="text-2xl font-semibold text-ink">{ergebnis.mietzinsArtLabel}</span>
+              {ergebnis.begruendung.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setErklaerungOffen((o) => !o)}
+                  aria-expanded={erklaerungOffen}
+                  aria-label={erklaerungOffen ? 'Erklärung ausblenden' : 'Erklärung anzeigen'}
+                  className="mt-1 shrink-0 text-accent transition-colors hover:text-accent-strong"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    className={`h-5 w-5 transition-transform ${erklaerungOffen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      className={`h-5 w-5 transition-transform ${erklaerungOffen ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M6 9l6 6 6-6" />
-                    </svg>
-                  </button>
-                </div>
-                {erklaerungOffen && (
-                  <ul className="mt-2 space-y-1 text-sm text-ink-soft">
-                    {ergebnis.begruendung.map((b) => (
-                      <li key={b}>{b}</li>
-                    ))}
-                  </ul>
-                )}
-              </>
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            {ergebnis.mietzinsArt === 'richtwert' && (
+              <p className="mt-1 text-sm text-ink-soft">
+                Richtwert Wien seit 1.4.2026: {RICHTWERT_WIEN.toLocaleString('de-AT', { minimumFractionDigits: 2 })}{' '}
+                €/m².
+              </p>
+            )}
+            {erklaerungOffen && ergebnis.begruendung.length > 0 && (
+              <ul className="mt-2 space-y-1 text-sm text-ink-soft">
+                {ergebnis.begruendung.map((b) => (
+                  <li key={b}>{b}</li>
+                ))}
+              </ul>
             )}
           </Zeile>
 
