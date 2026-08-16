@@ -142,6 +142,12 @@ function App() {
                 </a>
               </li>
               <li>
+                Grundstücksgrenzen und Katastralgemeinden (BEV-Kataster):{' '}
+                <a className={quelleLink} href="https://kataster.bev.gv.at/#/center/13.35,47.77/zoom/7.6/vermv/0.6" target="_blank" rel="noreferrer">
+                  kataster.bev.gv.at
+                </a>
+              </li>
+              <li>
                 Gemeindebauten Wien (Wiener Wohnen):{' '}
                 <a className={quelleLink} href="https://www.wienerwohnen.at/" target="_blank" rel="noreferrer">
                   wienerwohnen.at

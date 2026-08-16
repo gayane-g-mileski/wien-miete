@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { LageStatus, MrgErgebnis } from '../lib/types'
 import { flaechenwidmungLink, laerminfoLink } from '../lib/geo'
 import { Collapsible } from './ui'
@@ -48,6 +49,9 @@ function Preiswert({ min, max, color = 'text-accent' }: { min: number; max: numb
 
 export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
   const { lage } = ergebnis
+  const [erklaerungOffen, setErklaerungOffen] = useState(false)
+  // Lage nur zeigen, wenn tatsächlich eine Anschrift eingegeben wurde.
+  const zeigeLage = lage.adresse.trim().length > 0
 
   return (
     <div>
@@ -56,40 +60,6 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
 
       <div className="rounded-2xl border border-line bg-surface-2 p-5 shadow-sm ring-1 ring-accent/15 sm:p-6">
         <div className="space-y-1">
-          <Zeile label="Mietzinsart">
-            <span className="text-2xl font-semibold text-ink">{ergebnis.mietzinsArtLabel}</span>
-            {ergebnis.mietzinsArt === 'richtwert' && (
-              <p className="mt-1 text-sm text-ink-soft">
-                Richtwert Wien seit 1.4.2026: {RICHTWERT_WIEN.toLocaleString('de-AT', { minimumFractionDigits: 2 })} €/m².
-              </p>
-            )}
-            {ergebnis.begruendung.length > 0 && (
-              <div className="mt-3">
-                <Collapsible title="Was bedeutet das?">
-                  <ul className="space-y-1 text-sm text-ink-soft">
-                    {ergebnis.begruendung.map((b) => (
-                      <li key={b}>{b}</li>
-                    ))}
-                  </ul>
-                </Collapsible>
-              </div>
-            )}
-          </Zeile>
-
-          <Zeile label="Schutz & Preisgrenze">
-            <div className="flex flex-col gap-2">
-              <span className="text-2xl font-semibold text-accent">{ergebnis.anwendungLabel}</span>
-              {ergebnis.kuendigungsschutz || ergebnis.preisschutz ? (
-                <div className="flex flex-col gap-1">
-                  <SchutzZeile label="Kündigungsschutz" aktiv={ergebnis.kuendigungsschutz} />
-                  <SchutzZeile label="Gesetzliche Preisgrenze" aktiv={ergebnis.preisschutz} />
-                </div>
-              ) : (
-                <span className="text-base text-ink-faint">Kein Kündigungsschutz, keine gesetzliche Preisgrenze</span>
-              )}
-            </div>
-          </Zeile>
-
           <Zeile label="Preisbandbreite">
             {ergebnis.preis ? (
               <div className="space-y-3">
@@ -123,46 +93,104 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
               <span className="text-sm text-ink-faint">Keine Preisschätzung verfügbar.</span>
             )}
           </Zeile>
-        </div>
 
-        <div className="mt-6 space-y-8 rounded-xl bg-surface p-5 text-sm ring-1 ring-line">
-          <div>
-            <p className="mb-1 font-semibold text-ink">Lage</p>
-            <p className={LAGE_STYLE[lage.status]}>{lage.text}</p>
-            {lage.bezirk != null && (
-              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-                <a className="text-accent underline hover:text-accent-strong" href={laerminfoLink(lage.koords, lage.adresse)} target="_blank" rel="noreferrer">
-                  Lärm an dieser Adresse prüfen (laerminfo.at)
-                </a>
-                <a className="text-accent underline hover:text-accent-strong" href={flaechenwidmungLink(lage.koords, lage.adresse)} target="_blank" rel="noreferrer">
-                  Flächenwidmung ansehen (Stadt Wien)
-                </a>
-              </div>
+          <Zeile label="Mietzinsart">
+            <span className="text-2xl font-semibold text-ink">{ergebnis.mietzinsArtLabel}</span>
+            {/* Erklärung: nur ein Chevron, rechts auf Höhe der Richtwert-Zeile */}
+            {ergebnis.begruendung.length > 0 && (
+              <>
+                <div className="mt-1 flex items-center justify-between gap-3">
+                  <span className="text-sm text-ink-soft">
+                    {ergebnis.mietzinsArt === 'richtwert'
+                      ? `Richtwert Wien seit 1.4.2026: ${RICHTWERT_WIEN.toLocaleString('de-AT', { minimumFractionDigits: 2 })} €/m².`
+                      : ''}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setErklaerungOffen((o) => !o)}
+                    aria-expanded={erklaerungOffen}
+                    aria-label={erklaerungOffen ? 'Erklärung ausblenden' : 'Erklärung anzeigen'}
+                    className="shrink-0 text-accent transition-colors hover:text-accent-strong"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      className={`h-5 w-5 transition-transform ${erklaerungOffen ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </button>
+                </div>
+                {erklaerungOffen && (
+                  <ul className="mt-2 space-y-1 text-sm text-ink-soft">
+                    {ergebnis.begruendung.map((b) => (
+                      <li key={b}>{b}</li>
+                    ))}
+                  </ul>
+                )}
+              </>
             )}
-          </div>
+          </Zeile>
 
-          {ergebnis.hinweise.length > 0 && (
-            <div>
-              <p className="mb-1 font-semibold text-accent">Zu beachten</p>
-              <ul className="list-inside list-disc space-y-1 text-ink-soft">
-                {ergebnis.hinweise.map((h) => (
-                  <li key={h}>{h}</li>
-                ))}
-              </ul>
+          <Zeile label="Schutz & Preisgrenze">
+            <div className="flex flex-col gap-2">
+              <span className="text-2xl font-semibold text-accent">{ergebnis.anwendungLabel}</span>
+              {ergebnis.kuendigungsschutz || ergebnis.preisschutz ? (
+                <div className="flex flex-col gap-1">
+                  <SchutzZeile label="Kündigungsschutz" aktiv={ergebnis.kuendigungsschutz} />
+                  <SchutzZeile label="Gesetzliche Preisgrenze" aktiv={ergebnis.preisschutz} />
+                </div>
+              ) : (
+                <span className="text-base text-ink-faint">Kein Kündigungsschutz, keine gesetzliche Preisgrenze</span>
+              )}
             </div>
-          )}
+          </Zeile>
 
-          <div>
-            <p className="mb-1 font-semibold text-ink">Gesetze zum Nachlesen</p>
-            <div className="flex flex-wrap gap-x-4 gap-y-1">
+          {/* Direkt unter dem Schutz-Abschnitt */}
+          <Zeile label="Gesetze zum Nachlesen">
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
               {ergebnis.gesetze.map((g) => (
                 <a key={g.url} className="text-accent underline hover:text-accent-strong" href={g.url} target="_blank" rel="noreferrer">
                   {g.label}
                 </a>
               ))}
             </div>
-          </div>
+          </Zeile>
         </div>
+
+        {(zeigeLage || ergebnis.hinweise.length > 0) && (
+          <div className="mt-6 space-y-8 rounded-xl bg-surface p-5 text-sm ring-1 ring-line">
+            {zeigeLage && (
+              <div>
+                <p className="mb-1 font-semibold text-ink">Lage</p>
+                <p className={LAGE_STYLE[lage.status]}>{lage.text}</p>
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                  <a className="text-accent underline hover:text-accent-strong" href={laerminfoLink(lage.koords, lage.adresse)} target="_blank" rel="noreferrer">
+                    Lärm an dieser Adresse prüfen (laerminfo.at)
+                  </a>
+                  <a className="text-accent underline hover:text-accent-strong" href={flaechenwidmungLink(lage.koords, lage.adresse)} target="_blank" rel="noreferrer">
+                    Flächenwidmung ansehen (Stadt Wien)
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {ergebnis.hinweise.length > 0 && (
+              <div>
+                <p className="mb-1 font-semibold text-accent">Zu beachten</p>
+                <ul className="list-inside list-disc space-y-1 text-ink-soft">
+                  {ergebnis.hinweise.map((h) => (
+                    <li key={h}>{h}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
