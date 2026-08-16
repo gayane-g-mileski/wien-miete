@@ -3,15 +3,21 @@ import { TextField, TextareaField } from './ui'
 
 // Empfänger der Nachrichten aus dem Kontaktformular.
 const KONTAKT_EMAIL = 'gayane.mileski@gmail.com'
+// Die Seite läuft ohne eigenen Server (GitHub Pages). Der Versand geht daher
+// über den Formular-Dienst FormSubmit, der die Nachricht per E-Mail zustellt –
+// ohne dass sich beim Absender ein E-Mail-Programm öffnet.
+const VERSAND_URL = `https://formsubmit.co/ajax/${KONTAKT_EMAIL}`
+
+type Status = 'bereit' | 'sendet' | 'ok'
 
 export function Kontakt() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [nachricht, setNachricht] = useState('')
   const [fehler, setFehler] = useState<string | null>(null)
-  const [gesendet, setGesendet] = useState(false)
+  const [status, setStatus] = useState<Status>('bereit')
 
-  const senden = () => {
+  const senden = async () => {
     if (!name.trim() || !email.trim() || !nachricht.trim()) {
       setFehler('Bitte fülle alle drei Felder aus.')
       return
@@ -21,9 +27,29 @@ export function Kontakt() {
       return
     }
     setFehler(null)
-    const body = `${nachricht}\n\n---\nName: ${name}\nE-Mail: ${email}`
-    window.location.href = `mailto:${KONTAKT_EMAIL}?subject=${encodeURIComponent('Nachricht über den Mietzins-Check')}&body=${encodeURIComponent(body)}`
-    setGesendet(true)
+    setStatus('sendet')
+    try {
+      const antwort = await fetch(VERSAND_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          message: nachricht.trim(),
+          _subject: 'Nachricht über den Mietzins-Check',
+          _template: 'table',
+          _captcha: 'false',
+        }),
+      })
+      if (!antwort.ok) throw new Error(String(antwort.status))
+      setStatus('ok')
+      setName('')
+      setEmail('')
+      setNachricht('')
+    } catch {
+      setStatus('bereit')
+      setFehler(`Senden hat gerade nicht geklappt. Bitte versuch es später noch einmal oder schreib an ${KONTAKT_EMAIL}.`)
+    }
   }
 
   return (
@@ -58,16 +84,13 @@ export function Kontakt() {
           <button
             type="button"
             onClick={senden}
-            className="w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent hover:bg-accent-strong"
+            disabled={status === 'sendet'}
+            className="w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Senden
+            {status === 'sendet' ? 'Wird gesendet …' : 'Senden'}
           </button>
 
-          {gesendet && (
-            <p className="text-base text-ink-soft">
-              Deine Nachricht wurde in deinem E-Mail-Programm geöffnet – bitte dort noch abschicken.
-            </p>
-          )}
+          {status === 'ok' && <p className="text-base font-medium text-accent">Danke, deine Nachricht ist angekommen.</p>}
         </div>
       </div>
     </section>
