@@ -63,12 +63,13 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
           <Zeile label="Preisbandbreite">
             {ergebnis.preis ? (
               <div className="space-y-3">
-                <div className="space-y-2 rounded-xl bg-surface px-4 py-3 ring-1 ring-line">
-                  <div className="flex items-baseline justify-between gap-4">
+                <div className="space-y-4 rounded-xl bg-surface px-4 py-3 ring-1 ring-line sm:space-y-2">
+                  {/* Auf dem Handy steht der Wert unter dem Label, ab sm nebeneinander */}
+                  <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
                     <span className="text-sm text-ink-faint">Monatlich pro m², netto</span>
                     <Preiswert min={ergebnis.preis.proM2Min} max={ergebnis.preis.proM2Max} color="text-coffee" />
                   </div>
-                  <div className="flex items-baseline justify-between gap-4">
+                  <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
                     <span className="text-sm text-ink-faint">Monat gesamt</span>
                     <Preiswert min={ergebnis.preis.monatlichMin} max={ergebnis.preis.monatlichMax} />
                   </div>
@@ -124,8 +125,10 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
             </div>
             {ergebnis.mietzinsArt === 'richtwert' && (
               <p className="mt-1 text-sm text-ink-soft">
-                Richtwert Wien seit 1.4.2026: {RICHTWERT_WIEN.toLocaleString('de-AT', { minimumFractionDigits: 2 })}{' '}
-                €/m².
+                Richtwert Wien seit 1.4.2026:{' '}
+                <span className="font-semibold text-ink">
+                  {RICHTWERT_WIEN.toLocaleString('de-AT', { minimumFractionDigits: 2 })} €/m²
+                </span>
               </p>
             )}
             {erklaerungOffen && ergebnis.begruendung.length > 0 && (
