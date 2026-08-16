@@ -3,10 +3,14 @@ import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTML
 
 // Material-Design-ähnliche Outlined-Felder mit schwebendem Label (Schwarz-Weiß).
 
-const box =
-  'peer w-full rounded-lg border border-line bg-transparent text-base text-ink outline-none ' +
-  'transition-colors focus:border-accent focus:ring-1 focus:ring-accent ' +
-  'disabled:cursor-not-allowed disabled:opacity-60'
+const boxBasis =
+  'peer w-full rounded-lg border bg-transparent text-base text-ink outline-none ' +
+  'transition-colors focus:ring-1 disabled:cursor-not-allowed disabled:opacity-60'
+
+// Fehlerhafte Felder bekommen einen roten Rahmen (wie in Material Design),
+// der Hinweistext darunter wird zur Fehlermeldung.
+const box = (fehler?: string) =>
+  `${boxBasis} ${fehler ? 'border-danger focus:border-danger focus:ring-danger' : 'border-line focus:border-accent focus:ring-accent'}`
 
 // Label schwebt von der Mitte auf die obere Rahmenlinie (bei Fokus oder Inhalt).
 const floatLabel =
@@ -19,39 +23,57 @@ const floatLabel =
 const topLabel =
   'pointer-events-none absolute left-3 top-0 -translate-y-1/2 bg-surface px-1 text-xs text-ink-faint peer-focus:text-accent'
 
-function Hint({ children }: { children?: ReactNode }) {
+function Hint({ children, fehler, id }: { children?: ReactNode; fehler?: string; id?: string }) {
+  if (fehler) {
+    return (
+      <p id={id} role="alert" className="mt-1 px-1 text-[12px] text-danger">
+        {fehler}
+      </p>
+    )
+  }
   return children ? <p className="mt-1 px-1 text-[12px] text-ink-faint">{children}</p> : null
 }
 
 interface FieldProps {
   label: string
   hint?: ReactNode
+  /** Fehlermeldung – erscheint direkt unter dem Feld. */
+  fehler?: string
 }
 
-export function TextField({ label, hint, id, ...props }: FieldProps & InputHTMLAttributes<HTMLInputElement>) {
+export function TextField({ label, hint, fehler, id, ...props }: FieldProps & InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div>
       <div className="relative">
-        <input id={id} placeholder=" " {...props} className={`${box} h-14 px-3 pt-4 pb-1`} />
+        <input
+          id={id}
+          placeholder=" "
+          aria-invalid={fehler ? true : undefined}
+          aria-describedby={fehler && id ? `${id}-fehler` : undefined}
+          {...props}
+          className={`${box(fehler)} h-14 px-3 pt-4 pb-1`}
+        />
         <label htmlFor={id} className={floatLabel}>
           {label}
         </label>
       </div>
-      <Hint>{hint}</Hint>
+      <Hint fehler={fehler} id={id ? `${id}-fehler` : undefined}>
+        {hint}
+      </Hint>
     </div>
   )
 }
 
-export function NumberField({ label, hint, id, ...props }: FieldProps & InputHTMLAttributes<HTMLInputElement>) {
+export function NumberField({ label, hint, fehler, id, ...props }: FieldProps & InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div>
       <div className="relative">
-        <input id={id} type="number" placeholder=" " {...props} className={`${box} h-14 px-3 pt-4 pb-1`} />
+        <input id={id} type="number" placeholder=" " {...props} className={`${box(fehler)} h-14 px-3 pt-4 pb-1`} />
         <label htmlFor={id} className={floatLabel}>
           {label}
         </label>
       </div>
-      <Hint>{hint}</Hint>
+      <Hint fehler={fehler}>{hint}</Hint>
     </div>
   )
 }
@@ -59,6 +81,7 @@ export function NumberField({ label, hint, id, ...props }: FieldProps & InputHTM
 export function SelectField({
   label,
   hint,
+  fehler,
   id,
   children,
   ...props
@@ -69,7 +92,7 @@ export function SelectField({
   return (
     <div>
       <div className="relative">
-        <select id={id} {...props} className={`${box} select-chevron h-14 appearance-none px-3 pr-10 pt-2`}>
+        <select id={id} {...props} className={`${box(fehler)} select-chevron h-14 appearance-none px-3 pr-10 pt-2`}>
           {children}
         </select>
         <label
@@ -83,16 +106,29 @@ export function SelectField({
           {label}
         </label>
       </div>
-      <Hint>{hint}</Hint>
+      <Hint fehler={fehler}>{hint}</Hint>
     </div>
   )
 }
 
-export function TextareaField({ label, hint, id, ...props }: FieldProps & TextareaHTMLAttributes<HTMLTextAreaElement>) {
+export function TextareaField({
+  label,
+  hint,
+  fehler,
+  id,
+  ...props
+}: FieldProps & TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <div>
       <div className="relative">
-        <textarea id={id} placeholder=" " {...props} className={`${box} px-3 pb-2 pt-5`} />
+        <textarea
+          id={id}
+          placeholder=" "
+          aria-invalid={fehler ? true : undefined}
+          aria-describedby={fehler && id ? `${id}-fehler` : undefined}
+          {...props}
+          className={`${box(fehler)} px-3 pb-2 pt-5`}
+        />
         <label
           htmlFor={id}
           className={
@@ -105,7 +141,9 @@ export function TextareaField({ label, hint, id, ...props }: FieldProps & Textar
           {label}
         </label>
       </div>
-      <Hint>{hint}</Hint>
+      <Hint fehler={fehler} id={id ? `${id}-fehler` : undefined}>
+        {hint}
+      </Hint>
     </div>
   )
 }

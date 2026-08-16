@@ -23,6 +23,9 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
   const [email, setEmail] = useState('')
   const [text, setText] = useState(() => standardText(anschrift))
   const [dateien, setDateien] = useState<File[]>([])
+  // Jede Meldung steht bei dem Feld, zu dem sie gehört.
+  const [nameFehler, setNameFehler] = useState<string | undefined>()
+  const [emailFehler, setEmailFehler] = useState<string | undefined>()
   const [fehler, setFehler] = useState<string | null>(null)
   const [gesendet, setGesendet] = useState(false)
 
@@ -49,10 +52,11 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
   const entferne = (i: number) => setDateien((d) => d.filter((_, idx) => idx !== i))
 
   const senden = () => {
-    if (!name.trim() || !email.trim()) {
-      setFehler('Bitte gib deinen Namen und deine E-Mail-Adresse an.')
-      return
-    }
+    const ohneName = !name.trim()
+    const ohneMail = !email.trim()
+    setNameFehler(ohneName ? 'Bitte gib deinen Namen an.' : undefined)
+    setEmailFehler(ohneMail ? 'Bitte gib deine E-Mail-Adresse an.' : undefined)
+    if (ohneName || ohneMail) return
     setFehler(null)
     const body = `${text}\n\n---\nName: ${name}\nE-Mail: ${email}`
     const href = `mailto:${MA25_EMAIL}?subject=${encodeURIComponent('Anfrage: Jahr der Baubewilligung')}&body=${encodeURIComponent(body)}`
@@ -72,13 +76,20 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
         lass die Miete hier neu berechnen.
       </p>
 
-      <TextField label="Name" id="ma25-name" value={name} onChange={(e) => setName(e.target.value)} />
+      <TextField
+        label="Name"
+        id="ma25-name"
+        value={name}
+        fehler={nameFehler}
+        onChange={(e) => setName(e.target.value)}
+      />
 
       <TextField
         label="E-Mail-Adresse"
         id="ma25-email"
         type="email"
         value={email}
+        fehler={emailFehler}
         onChange={(e) => setEmail(e.target.value)}
       />
 
@@ -105,6 +116,13 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
         </label>
         <p className="mt-6 text-sm text-ink-faint">Mehrere möglich. PDF, JPG oder PNG, je max. {MAX_MB} MB.</p>
 
+        {/* Meldung zur Datei steht direkt beim Datei-Feld */}
+        {fehler && (
+          <p role="alert" className="mt-1 text-[12px] text-danger">
+            {fehler}
+          </p>
+        )}
+
         {dateien.length > 0 && (
           <ul className="mt-2 space-y-1">
             {dateien.map((f, i) => (
@@ -120,12 +138,6 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
           </ul>
         )}
       </div>
-
-      {fehler && (
-        <p role="alert" className="rounded-lg border border-danger/40 bg-danger/5 px-3 py-2 text-base font-medium text-danger">
-          {fehler}
-        </p>
-      )}
 
       <button
         type="button"
