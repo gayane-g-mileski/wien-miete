@@ -145,7 +145,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
           onChange={(e) => set('flaeche', Math.max(0, Number(e.target.value)))}
         />
 
-        <div className="space-y-6">
+        <div className="space-y-5">
           {istRichtwert && (
             <Checkbox checked={value.befristet} onChange={(v) => set('befristet', v)} label="Befristeter Mietvertrag" />
           )}
@@ -297,7 +297,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
             )}
 
             {/* Anfrage-Checkboxen, 24px Abstand */}
-            <div className="space-y-6">
+            <div className="space-y-5">
               {/* Unbekannter Rückzahlungsstand: Anfrage bei der zuständigen Stelle.
                   WWG 1948 → Bundeswohnbaufonds, Landesförderung → MA 50. */}
               {value.baubewilligungGebaeude !== 'vor_1945' &&

@@ -87,7 +87,7 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
       </div>
 
       <div>
-        <span className="mb-1.5 block text-base font-medium text-ink">
+        <span className="mb-6 block text-base font-medium text-ink">
           Unterlagen (Meldezettel, Eigentumsnachweis, Vollmacht …)
         </span>
         <label className={btnUpload}>
@@ -103,7 +103,7 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
             }}
           />
         </label>
-        <p className="mt-1 text-sm text-ink-faint">Mehrere möglich. PDF, JPG oder PNG, je max. {MAX_MB} MB.</p>
+        <p className="mt-6 text-sm text-ink-faint">Mehrere möglich. PDF, JPG oder PNG, je max. {MAX_MB} MB.</p>
 
         {dateien.length > 0 && (
           <ul className="mt-2 space-y-1">
