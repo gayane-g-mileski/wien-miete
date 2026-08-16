@@ -145,7 +145,7 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
           onChange={(e) => set('flaeche', Math.max(0, Number(e.target.value)))}
         />
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           {istRichtwert && (
             <Checkbox checked={value.befristet} onChange={(v) => set('befristet', v)} label="Befristeter Mietvertrag" />
           )}
@@ -284,20 +284,21 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                   </SelectField>
                 )}
 
-                {/* Nur bei laufender Förderung 1968/1984 ändert die
-                    Eigentumswohnung das Ergebnis – sonst ausgeblendet. */}
-                {eigentumswohnungRelevant && !ma25Offen && (
-                  <Checkbox
-                    checked={value.eigentumswohnung}
-                    onChange={(v) => set('eigentumswohnung', v)}
-                    label="Eigentumswohnung"
-                  />
-                )}
               </>
             )}
 
-            {/* Anfrage-Checkboxen, 24px Abstand */}
-            <div className="space-y-5">
+            {/* Alle Checkboxen dieses Abschnitts in einer Gruppe: 16px Abstand */}
+            <div className="space-y-4">
+              {/* Nur bei laufender Förderung 1968/1984 ändert die
+                  Eigentumswohnung das Ergebnis – sonst ausgeblendet. */}
+              {!baujahrOffen && value.baubewilligungGebaeude !== 'vor_1945' && eigentumswohnungRelevant && !ma25Offen && (
+                <Checkbox
+                  checked={value.eigentumswohnung}
+                  onChange={(v) => set('eigentumswohnung', v)}
+                  label="Eigentumswohnung"
+                />
+              )}
+
               {/* Unbekannter Rückzahlungsstand: Anfrage bei der zuständigen Stelle.
                   WWG 1948 → Bundeswohnbaufonds, Landesförderung → MA 50. */}
               {value.baubewilligungGebaeude !== 'vor_1945' &&
