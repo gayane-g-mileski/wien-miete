@@ -63,7 +63,13 @@ function App() {
         <div
           aria-hidden="true"
           className="hero-photo pointer-events-none"
-          style={{ '--hero-photo': `url("${import.meta.env.BASE_URL}hero.jpg")` } as React.CSSProperties}
+          // Absolute URL, weil relative Pfade in einer CSS-Variablen sonst
+          // gegen die Stylesheet-Adresse aufgelöst werden (im App-Build falsch).
+          style={
+            {
+              '--hero-photo': `url("${new URL(`${import.meta.env.BASE_URL}hero.jpg`, document.baseURI).href}")`,
+            } as React.CSSProperties
+          }
         />
         {/* Scrim für Textlesbarkeit (links) */}
         {/* Auf schmalen Displays deckt der Verlauf mehr ab, damit der Text
@@ -182,6 +188,10 @@ function App() {
             </ul>
           </div>
           <p className="border-t border-line pt-4 text-ink-faint">
+            <a className={quelleLink} href={`${import.meta.env.BASE_URL}datenschutz.html`} target="_blank" rel="noreferrer">
+              Datenschutz
+            </a>
+            <br />
             © 2026 Gayane G. Mileski. All rights reserved. Built with the help of Claude (Anthropic) · 1000+ iterations
           </p>
         </div>

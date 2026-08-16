@@ -190,3 +190,18 @@ input[type='number'] {
     animation: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * App-Builds (iOS/Android): Inhalte nicht unter Notch, Statusleiste oder
+ * Home-Indikator schieben. Im Browser sind die env()-Werte 0.
+ * ------------------------------------------------------------------------- */
+.hero nav {
+  padding-top: calc(1rem + env(safe-area-inset-top));
+}
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+footer {
+  padding-bottom: env(safe-area-inset-bottom);
+}
