@@ -72,22 +72,24 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
                     <span className="text-sm text-ink-faint">Monat gesamt</span>
                     <Preiswert min={ergebnis.preis.monatlichMin} max={ergebnis.preis.monatlichMax} />
                   </div>
+                  {ergebnis.preis.bestandteile && ergebnis.preis.bestandteile.length > 0 && (
+                    <div className="border-t border-line pt-2">
+                      <Collapsible title="Aufschlüsselung">
+                        <ul className="space-y-1 text-sm">
+                          {ergebnis.preis.bestandteile.map((b) => (
+                            <li key={b.label} className="flex justify-between gap-4 border-b border-line pb-1 text-ink-soft">
+                              <span>{b.label}</span>
+                              <span className={`font-medium tabular-nums ${b.wert < 0 ? 'text-accent' : 'text-ink'}`}>
+                                {b.wert > 0 ? '+' : ''}
+                                {formatEuro(b.wert)}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </Collapsible>
+                    </div>
+                  )}
                 </div>
-                {ergebnis.preis.bestandteile && ergebnis.preis.bestandteile.length > 0 && (
-                  <Collapsible title="Aufschlüsselung">
-                    <ul className="space-y-1 text-sm">
-                      {ergebnis.preis.bestandteile.map((b) => (
-                        <li key={b.label} className="flex justify-between gap-4 border-b border-line pb-1 text-ink-soft">
-                          <span>{b.label}</span>
-                          <span className={`font-medium tabular-nums ${b.wert < 0 ? 'text-accent' : 'text-ink'}`}>
-                            {b.wert > 0 ? '+' : ''}
-                            {formatEuro(b.wert)}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </Collapsible>
-                )}
               </div>
             ) : (
               <span className="text-sm text-ink-faint">Keine Preisschätzung verfügbar.</span>

@@ -65,7 +65,9 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
       </div>
 
       <div>
-        <TextareaField label="Anfrage-Text" id="wwaf-text" rows={11} value={text} onChange={(e) => setText(e.target.value)} />
+        <div translate="no">
+          <TextareaField label="Anfrage-Text" id="wwaf-text" rows={11} value={text} onChange={(e) => setText(e.target.value)} />
+        </div>
         <button
           type="button"
           onClick={senden}

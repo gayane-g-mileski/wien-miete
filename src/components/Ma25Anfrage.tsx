@@ -82,7 +82,9 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
         onChange={(e) => setEmail(e.target.value)}
       />
 
-      <TextareaField label="Nachricht" id="ma25-text" rows={7} value={text} onChange={(e) => setText(e.target.value)} />
+      <div translate="no">
+        <TextareaField label="Nachricht" id="ma25-text" rows={7} value={text} onChange={(e) => setText(e.target.value)} />
+      </div>
 
       <div>
         <span className="mb-1.5 block text-base font-medium text-ink">

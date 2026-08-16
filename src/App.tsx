@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Formular } from './components/Formular'
 import { Ergebnis } from './components/Ergebnis'
 import { Ergebnisleiste } from './components/Ergebnisleiste'
+import { SprachHinweis } from './components/SprachHinweis'
 import { evaluateMrg } from './lib/mrgEngine'
 import { leereMerkmale } from './lib/pricingData'
 import { ladeVerlauf, speichereVerlauf, type VerlaufEintrag } from './lib/verlauf'
@@ -67,15 +68,16 @@ function App() {
             über dem hellen Foto lesbar bleibt. */}
         <div className="pointer-events-none absolute inset-0 z-[-1] bg-gradient-to-r from-paper via-paper/90 to-paper/55 sm:via-paper/70 sm:to-transparent" />
 
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <span className="text-lg font-semibold tracking-tight text-ink">Mietzins-Check in Wien</span>
-          <div className="flex items-center gap-5 text-sm font-medium text-ink">
+        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
+          <span className="text-base font-semibold tracking-tight text-ink sm:text-lg">Mietzins-Check in Wien</span>
+          <div className="flex shrink-0 items-center gap-3 text-sm font-medium text-ink sm:gap-5">
             <a className="transition-colors hover:text-accent" href="#rechner">
               Mietrechner
             </a>
             <a className="transition-colors hover:text-accent" href="#quellen">
               Quelle
             </a>
+            <SprachHinweis />
           </div>
         </nav>
 
@@ -145,12 +147,6 @@ function App() {
                 Grundstücksgrenzen und Katastralgemeinden (BEV-Kataster):{' '}
                 <a className={quelleLink} href="https://kataster.bev.gv.at/#/center/13.35,47.77/zoom/7.6/vermv/0.6" target="_blank" rel="noreferrer">
                   kataster.bev.gv.at
-                </a>
-              </li>
-              <li>
-                Gemeindebauten Wien (Wiener Wohnen):{' '}
-                <a className={quelleLink} href="https://www.wienerwohnen.at/" target="_blank" rel="noreferrer">
-                  wienerwohnen.at
                 </a>
               </li>
               <li>
