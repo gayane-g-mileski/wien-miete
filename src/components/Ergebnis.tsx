@@ -63,6 +63,17 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
                 Richtwert Wien seit 1.4.2026: {RICHTWERT_WIEN.toLocaleString('de-AT', { minimumFractionDigits: 2 })} €/m².
               </p>
             )}
+            {ergebnis.begruendung.length > 0 && (
+              <div className="mt-3">
+                <Collapsible title="Was bedeutet das?">
+                  <ul className="space-y-1 text-sm text-ink-soft">
+                    {ergebnis.begruendung.map((b) => (
+                      <li key={b}>{b}</li>
+                    ))}
+                  </ul>
+                </Collapsible>
+              </div>
+            )}
           </Zeile>
 
           <Zeile label="Schutz & Preisgrenze">
@@ -115,14 +126,6 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
         </div>
 
         <div className="mt-6 space-y-8 rounded-xl bg-surface p-5 text-sm ring-1 ring-line">
-          <Collapsible title="Was bedeutet das?">
-            <ul className="space-y-1 text-ink-soft">
-              {ergebnis.begruendung.map((b) => (
-                <li key={b}>{b}</li>
-              ))}
-            </ul>
-          </Collapsible>
-
           <div>
             <p className="mb-1 font-semibold text-ink">Lage</p>
             <p className={LAGE_STYLE[lage.status]}>{lage.text}</p>
