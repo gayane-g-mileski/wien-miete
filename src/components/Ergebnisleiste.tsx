@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { MrgErgebnis } from '../lib/types'
 import { evaluateMrg } from '../lib/mrgEngine'
 import type { VerlaufEintrag } from '../lib/verlauf'
+import { dateiSpeichern } from '../lib/speichern'
 
 interface Props {
   ergebnis: MrgErgebnis
@@ -9,17 +10,6 @@ interface Props {
   verlauf: VerlaufEintrag[]
   onSelect: (eintrag: VerlaufEintrag) => void
   onClear: () => void
-}
-
-function downloadBlob(blob: Blob, name: string): void {
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = name
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  setTimeout(() => URL.revokeObjectURL(url), 1500)
 }
 
 const sekundaerBtn =
@@ -57,19 +47,42 @@ function EimerIcon({ className = 'h-4 w-4' }: { className?: string }) {
 
 export function Ergebnisleiste({ ergebnis, adresse, verlauf, onSelect, onClear }: Props) {
   const [zipLaeuft, setZipLaeuft] = useState(false)
+  const [fehler, setFehler] = useState<string | null>(null)
 
-  // PDF-/ZIP-Bibliotheken erst bei Bedarf laden (hält das Startpaket klein).
+  // Die PDF-Bibliothek im Hintergrund vorladen, damit der Klick sofort wirkt
+  // (manche Browser blockieren einen Download, der lange nach dem Klick kommt).
+  useEffect(() => {
+    void import('../lib/pdf')
+  }, [])
+
+  const melden = (e: unknown) => {
+    if (e instanceof DOMException && e.name === 'AbortError') return
+    console.error('Export fehlgeschlagen', e)
+    setFehler('Die Datei konnte nicht erzeugt werden. Bitte lade die Seite neu und versuch es noch einmal.')
+  }
+
   const exportEinzel = async () => {
-    const { ergebnisPdf, dateiname } = await import('../lib/pdf')
-    ergebnisPdf(ergebnis, adresse).save(`${dateiname(adresse)}.pdf`)
+    setFehler(null)
+    try {
+      const { ergebnisPdfBlob, dateiname } = await import('../lib/pdf')
+      await dateiSpeichern(ergebnisPdfBlob(ergebnis, adresse), `${dateiname(adresse)}.pdf`)
+    } catch (e) {
+      melden(e)
+    }
   }
 
   const exportEintrag = async (e: VerlaufEintrag) => {
-    const { ergebnisPdf, dateiname } = await import('../lib/pdf')
-    ergebnisPdf(evaluateMrg(e.input), e.adresse).save(`${dateiname(e.adresse)}.pdf`)
+    setFehler(null)
+    try {
+      const { ergebnisPdfBlob, dateiname } = await import('../lib/pdf')
+      await dateiSpeichern(ergebnisPdfBlob(evaluateMrg(e.input), e.adresse), `${dateiname(e.adresse)}.pdf`)
+    } catch (err) {
+      melden(err)
+    }
   }
 
   const exportAlle = async () => {
+    setFehler(null)
     setZipLaeuft(true)
     try {
       const [{ ergebnisPdfBlob, dateiname }, { default: JSZip }] = await Promise.all([
@@ -87,11 +100,19 @@ export function Ergebnisleiste({ ergebnis, adresse, verlauf, onSelect, onClear }
         zip.file(`${eindeutig}.pdf`, ergebnisPdfBlob(evaluateMrg(e.input), e.adresse))
       }
       const blob = await zip.generateAsync({ type: 'blob' })
-      downloadBlob(blob, 'Mietzins-Einschaetzungen.zip')
+      await dateiSpeichern(blob, 'Mietzins-Einschaetzungen.zip', 'application/zip')
+    } catch (e) {
+      melden(e)
     } finally {
       setZipLaeuft(false)
     }
   }
+
+  const fehlerZeile = fehler && (
+    <p role="alert" className="mt-4 px-1 text-[12px] text-danger">
+      {fehler}
+    </p>
+  )
 
   // Ohne Verlauf: allgemeines Export-Icon für das aktuelle Ergebnis.
   if (verlauf.length === 0) {
@@ -109,6 +130,7 @@ export function Ergebnisleiste({ ergebnis, adresse, verlauf, onSelect, onClear }
             <DokumentIcon />
           </button>
         </div>
+        {fehlerZeile}
       </div>
     )
   }
@@ -160,6 +182,7 @@ export function Ergebnisleiste({ ergebnis, adresse, verlauf, onSelect, onClear }
               </button>
             )}
           </div>
+          {fehlerZeile}
         </div>
       </div>
     </section>
