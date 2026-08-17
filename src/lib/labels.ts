@@ -78,8 +78,13 @@ export function zeigeBaujahr(objektart: Objektart): boolean {
   return ['wohnung', 'geschaeftsraum', 'dg_ausbau', 'zubau'].includes(objektart)
 }
 
+/**
+ * Die öffentliche Wohnbauförderung betrifft Wohnraum. Für ein Geschäftslokal
+ * ändert sie die Einstufung nicht (dort gilt ohnehin der angemessene bzw. bei
+ * Neubau der freie Mietzins), für die Vollausnahmen erst recht nicht.
+ */
 export function zeigeFoerderung(objektart: Objektart): boolean {
-  return ['wohnung', 'geschaeftsraum', 'dg_ausbau', 'zubau'].includes(objektart)
+  return objektart === 'wohnung'
 }
 
 export function zeigeKategorie(objektart: Objektart): boolean {

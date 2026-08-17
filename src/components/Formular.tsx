@@ -153,9 +153,9 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
         </div>
       </section>
 
-      {/* --- Förderung (inkl. Baubewilligung + MA25) --- */}
-      <Section title="Förderung">
-        {zeigeBaujahr(value.objektart) && (
+      {/* --- Baubewilligung des Gebäudes (gehört zum Objekt, nicht zur Förderung) --- */}
+      {zeigeBaujahr(value.objektart) && (
+        <Section title="Gebäude">
           <div>
             {baujahrOffen && (
               <p className="mb-1 px-1 text-[12px] font-medium text-coffee">
@@ -225,27 +225,49 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
               </p>
             )}
           </div>
-        )}
 
-        {value.objektart === 'dg_ausbau' && (
-          <Checkbox
-            checked={value.dgAusbauNachStichtag}
-            onChange={(v) => set('dgAusbauNachStichtag', v)}
-            label="Baubewilligung/Mietvertrag nach dem 31.12.2001"
-          />
-        )}
-        {value.objektart === 'zubau' && (
-          <Checkbox
-            checked={value.zubauNachStichtag}
-            onChange={(v) => set('zubauNachStichtag', v)}
-            label="Baubewilligung nach dem 30.9.2006"
-          />
-        )}
+          <div className="space-y-4">
+            {value.objektart === 'dg_ausbau' && (
+              <Checkbox
+                checked={value.dgAusbauNachStichtag}
+                onChange={(v) => set('dgAusbauNachStichtag', v)}
+                label="Baubewilligung/Mietvertrag nach dem 31.12.2001"
+              />
+            )}
+            {value.objektart === 'zubau' && (
+              <Checkbox
+                checked={value.zubauNachStichtag}
+                onChange={(v) => set('zubauNachStichtag', v)}
+                label="Baubewilligung nach dem 30.9.2006"
+              />
+            )}
 
-        {zeigeFoerderung(value.objektart) ? (
+            {/* MA25-Anfrage: Baujahr (und bei Wohnungen auch die Förderung) unbekannt */}
+            <div>
+              <Checkbox
+                checked={ma25Offen}
+                onChange={setMa25Offen}
+                label={
+                  zeigeFoerderung(value.objektart)
+                    ? 'Baujahr und öffentliche Förderung unbekannt? Kostenlos bei der MA 25 anfragen'
+                    : 'Baujahr unbekannt? Kostenlos bei der MA 25 anfragen'
+                }
+              />
+              {ma25Offen && (
+                <div className="mt-6">
+                  <Ma25Anfrage anschrift={value.anschrift} />
+                </div>
+              )}
+            </div>
+          </div>
+        </Section>
+      )}
+
+      {/* --- Förderung: nur bei Wohnungen relevant, und erst wenn das Baujahr feststeht --- */}
+      {zeigeFoerderung(value.objektart) && !baujahrOffen && (
+        <Section title="Förderung">
           <>
-            {/* Solange das Baujahr offen ist, keine baualtersabhängigen Angaben zeigen. */}
-            {baujahrOffen ? null : value.baubewilligungGebaeude === 'vor_1945' ? (
+            {value.baubewilligungGebaeude === 'vor_1945' ? (
               <p className="rounded-md bg-surface-2 px-3 py-2 text-sm text-ink-soft">
                 Bei einem Altbau (Baubewilligung bis 8.5.1945) ist die öffentliche Förderung für die Einstufung ohne
                 Bedeutung.
@@ -326,26 +348,10 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
                       ))}
                   </div>
                 )}
-
-              {/* MA25-Anfrage: Baujahr UND Förderung unbekannt */}
-              <div>
-                <Checkbox
-                  checked={ma25Offen}
-                  onChange={setMa25Offen}
-                  label="Baujahr und öffentliche Förderung unbekannt? Kostenlos bei der MA 25 anfragen"
-                />
-                {ma25Offen && (
-                  <div className="mt-6">
-                    <Ma25Anfrage anschrift={value.anschrift} />
-                  </div>
-                )}
-              </div>
             </div>
           </>
-        ) : (
-          <p className="text-base text-ink-faint">Bei dieser Objektart ist die Förderung für die Einstufung ohne Bedeutung.</p>
-        )}
-      </Section>
+        </Section>
+      )}
 
       {/* --- Ausstattung, Zustand & Zu-/Abschläge – nur wenn ein Richtwert
              (bzw. die Kategorie) die Miethöhe bestimmt --- */}

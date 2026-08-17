@@ -147,6 +147,7 @@ function computePreis(input: MietobjektInput, art: MietzinsArt): Preisspanne | n
     proM2Max: round2(proM2Max),
     monatlichMin: round2(proM2Min * flaeche),
     monatlichMax: round2(proM2Max * flaeche),
+    flaeche,
     bestandteile,
   }
 }
@@ -183,6 +184,16 @@ function lageInfo(input: MietobjektInput, art: MietzinsArt): LageInfo {
   return { status: laut ? 'abschlag' : 'neutral', bezirk: nr, koords, adresse, text }
 }
 
+// Objektarten, für die keine Wohnungsmieten hinterlegt sind – die Bandbreite
+// ist dort nur ein grober Anhaltspunkt.
+const NICHT_WOHNEN: MietobjektInput['objektart'][] = [
+  'geschaeftsraum',
+  'geschaeftsraum_kurzzeit',
+  'nebenflaeche_separat',
+  'pacht',
+  'wirtschaftspark',
+]
+
 function result(
   mietzinsArt: MietzinsArt,
   anwendung: MrgAnwendung,
@@ -191,6 +202,12 @@ function result(
   begruendung: string[],
   hinweise: string[] = [],
 ): MrgErgebnis {
+  if (NICHT_WOHNEN.includes(input.objektart)) {
+    hinweise = [
+      ...hinweise,
+      'Die Bandbreite beruht auf Wiener Wohnungsmieten und ist für diese Objektart nur ein grober Anhaltspunkt. Vergleichbare Angebote in der Umgebung sind hier der bessere Maßstab.',
+    ]
+  }
   return {
     mietzinsArt,
     mietzinsArtLabel: MIETZINS_LABEL[mietzinsArt],
@@ -273,8 +290,8 @@ export function evaluateMrg(input: MietobjektInput): MrgErgebnis {
     )
   }
 
-  // ---- 2) Förderung (beim Altbau ohne Bedeutung) ----
-  if (input.baubewilligungGebaeude !== 'vor_1945') {
+  // ---- 2) Förderung (nur für Wohnungen, beim Altbau ohne Bedeutung) ----
+  if (input.objektart === 'wohnung' && input.baubewilligungGebaeude !== 'vor_1945') {
     const foe = evaluateFoerderung(input.foerderungProgramm, input.tilgungsstatus, input.eigentumswohnung)
     if (foe) {
       return result(foe.mietzinsArt, foe.anwendung, input, foe.gesetze, foe.begruendung, foe.hinweise)

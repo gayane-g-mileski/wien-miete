@@ -123,6 +123,8 @@ export interface Preisspanne {
   proM2Max: number
   monatlichMin: number
   monatlichMax: number
+  /** Fläche, mit der die Monatsmiete gerechnet wurde. */
+  flaeche: number
   bestandteile?: Preisbestandteil[]
 }
 

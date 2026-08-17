@@ -52,6 +52,8 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
   const [erklaerungOffen, setErklaerungOffen] = useState(false)
   // Lage nur zeigen, wenn tatsächlich eine Anschrift eingegeben wurde.
   const zeigeLage = lage.adresse.trim().length > 0
+  // Ohne gesetzliche Obergrenze zeigt die Bandbreite den Markt, keine Grenze.
+  const freierPreis = ergebnis.mietzinsArt === 'frei'
 
   return (
     <div>
@@ -60,7 +62,7 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
 
       <div className="rounded-2xl border border-line bg-surface-2 p-5 shadow-sm ring-1 ring-accent/15 sm:p-6">
         <div className="space-y-1">
-          <Zeile label="Preisbandbreite">
+          <Zeile label={freierPreis ? 'Marktübliche Bandbreite' : 'Preisbandbreite'}>
             {ergebnis.preis ? (
               <div className="space-y-3">
                 <div className="space-y-4 rounded-xl bg-surface px-4 py-3 ring-1 ring-line sm:space-y-2">
@@ -70,7 +72,9 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
                     <Preiswert min={ergebnis.preis.proM2Min} max={ergebnis.preis.proM2Max} color="text-coffee" />
                   </div>
                   <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
-                    <span className="text-sm text-ink-faint">Monat gesamt</span>
+                    <span className="text-sm text-ink-faint">
+                      Monat gesamt für {ergebnis.preis.flaeche.toLocaleString('de-AT')} m²
+                    </span>
                     <Preiswert min={ergebnis.preis.monatlichMin} max={ergebnis.preis.monatlichMax} />
                   </div>
                   {ergebnis.preis.bestandteile && ergebnis.preis.bestandteile.length > 0 && (
@@ -91,6 +95,11 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
                     </div>
                   )}
                 </div>
+                {freierPreis && (
+                  <p className="px-1 text-sm text-ink-soft">
+                    Es gibt keine gesetzliche Obergrenze – die Werte zeigen, was in dieser Gegend üblich ist.
+                  </p>
+                )}
               </div>
             ) : (
               <span className="text-sm text-ink-faint">Keine Preisschätzung verfügbar.</span>

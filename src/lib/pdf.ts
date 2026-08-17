@@ -199,7 +199,9 @@ function bloeckeBauen(ergebnis: MrgErgebnis, adresse: string): Block[] {
         art: 'value',
         groesse: 12,
         farbe: INK,
-        text: `${euro(ergebnis.preis.monatlichMin)} – ${euro(ergebnis.preis.monatlichMax)} EUR / Monat gesamt`,
+        text:
+          `${euro(ergebnis.preis.monatlichMin)} – ${euro(ergebnis.preis.monatlichMax)} EUR / Monat gesamt ` +
+          `für ${ergebnis.preis.flaeche.toLocaleString('de-AT')} m²`,
       },
     )
     if (ergebnis.preis.bestandteile && ergebnis.preis.bestandteile.length > 0) {
