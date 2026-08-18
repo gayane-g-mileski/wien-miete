@@ -135,16 +135,12 @@ function setze(doc: jsPDF, bloecke: Block[], o: SatzOptionen): number {
         const hoehe = zwischen(4.3, 5.9, o.luft) * o.schrift
         doc.setFont('helvetica', 'normal')
         doc.setFontSize(10 * o.schrift)
-        const teile = zeilen(b.text, contentW - 5)
-        teile.forEach((zeile, i) => {
+        const teile = zeilen(b.text, contentW)
+        teile.forEach((zeile) => {
           platz(hoehe)
           if (o.zeichnen) {
-            if (i === 0) {
-              farbe(ACCENT)
-              doc.text('•', SEITE.mL, y)
-            }
             farbe(b.farbe)
-            doc.text(zeile, SEITE.mL + 5, y)
+            doc.text(zeile, SEITE.mL, y)
           }
           y += hoehe
         })
@@ -282,8 +278,8 @@ export function ergebnisPdf(ergebnis: MrgErgebnis, adresse: string): jsPDF {
     doc.setFontSize(7.5)
     doc.setTextColor(FAINT[0], FAINT[1], FAINT[2])
     const fuss = doc.splitTextToSize(
-      'Richtwert Wien seit 1.4.2026: 6,74 EUR/m². Kein Rechtsrat – automatisierte Ersteinschätzung auf Basis ' +
-        'vereinfachter Regeln und grober Marktmiet-Näherungen je Bezirk. Ersetzt keine rechtliche oder ' +
+      'Richtwert Wien seit 1.4.2026: 6,74 EUR/m². Automatisierte Ersteinschätzung eines Informationswerkzeugs auf ' +
+        'Basis vereinfachter Regeln und hinterlegter Näherungswerte. Kein Rechtsrat – ersetzt keine rechtliche oder ' +
         'immobilienwirtschaftliche Beratung im Einzelfall.',
       contentW - 12,
     )

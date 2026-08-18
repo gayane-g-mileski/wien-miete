@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { TextField, TextareaField } from './ui'
+import { aufKontaktVorbelegen } from '../lib/kontaktEvent'
 
 // Empfänger der Nachrichten aus dem Kontaktformular.
 const KONTAKT_EMAIL = 'gayane.mileski@gmail.com'
@@ -23,6 +24,18 @@ export function Kontakt() {
   const [nachricht, setNachricht] = useState('')
   const [fehler, setFehler] = useState<Fehler>({})
   const [status, setStatus] = useState<Status>('bereit')
+
+  // Buttons an anderer Stelle (Prüfbericht, Profi-Zugang) legen den Anlass hier ab.
+  useEffect(
+    () =>
+      aufKontaktVorbelegen((text) => {
+        setNachricht(text)
+        setStatus('bereit')
+        setFehler({})
+        setTimeout(() => document.getElementById('kontakt-nachricht')?.focus(), 400)
+      }),
+    [],
+  )
 
   const senden = async () => {
     // Jede Meldung steht bei dem Feld, zu dem sie gehört.

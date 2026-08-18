@@ -6,6 +6,9 @@ import type { BaubewilligungGebaeude, Koordinaten } from '../lib/types'
 
 interface Props {
   value: string
+  /** Eigene id/Beschriftung, damit das Feld mehrfach vorkommen kann (Hero + Formular). */
+  id?: string
+  label?: string
   onChange: (text: string, bezirk: number | null, koords: Koordinaten | null) => void
   onGemeindebau?: (detected: boolean) => void
   onBaujahr?: (periode: BaubewilligungGebaeude | null) => void
@@ -26,6 +29,8 @@ const floatLabel =
 
 export function AnschriftFeld({
   value,
+  id = 'anschrift',
+  label = 'Anschrift (optional)',
   onChange,
   onGemeindebau,
   onBaujahr,
@@ -34,11 +39,17 @@ export function AnschriftFeld({
 }: Props) {
   const [treffer, setTreffer] = useState<AdressTreffer[]>([])
   const [offen, setOffen] = useState(false)
+  // Nur das Feld sucht, in dem gerade getippt wird – sonst würden Hero- und
+  // Formularfeld dieselbe Abfrage doppelt schicken.
+  const [aktiv, setAktiv] = useState(false)
+  const gewaehltRef = useRef('')
   const boxRef = useRef<HTMLDivElement>(null)
   const abortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
     const q = value.trim()
+    // Nach einer Auswahl aus der Liste nicht gleich wieder danach suchen.
+    if (!aktiv || q === gewaehltRef.current) return
     if (q.length < 3) {
       setTreffer([])
       onFehlerChange?.(false)
@@ -61,7 +72,7 @@ export function AnschriftFeld({
       }
     }, 250)
     return () => clearTimeout(t)
-  }, [value, onFehlerChange])
+  }, [value, aktiv, onFehlerChange])
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
@@ -72,6 +83,7 @@ export function AnschriftFeld({
   }, [])
 
   const waehle = (t: AdressTreffer) => {
+    gewaehltRef.current = t.label.trim()
     onChange(t.label, t.bezirk, t.koords)
     setOffen(false)
     setTreffer([])
@@ -97,7 +109,7 @@ export function AnschriftFeld({
   return (
     <div ref={boxRef} className="relative">
       <input
-        id="anschrift"
+        id={id}
         type="text"
         autoComplete="off"
         placeholder=" "
@@ -107,10 +119,13 @@ export function AnschriftFeld({
           onChange(e.target.value, null, null)
           setOffen(true)
         }}
-        onFocus={() => treffer.length > 0 && setOffen(true)}
+        onFocus={() => {
+          setAktiv(true)
+          if (treffer.length > 0) setOffen(true)
+        }}
       />
-      <label htmlFor="anschrift" className={floatLabel}>
-        Anschrift (optional)
+      <label htmlFor={id} className={floatLabel}>
+        {label}
       </label>
       {offen && treffer.length > 0 && (
         <ul className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-lg border border-line bg-surface py-1 shadow-lg">

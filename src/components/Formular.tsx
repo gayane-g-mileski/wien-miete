@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { MerkmalKey, MietobjektInput, MietzinsArt } from '../lib/types'
 import {
@@ -28,9 +28,11 @@ interface Props {
   // Adress-Abfragen (Gemeindebau, Baujahr) sich nicht gegenseitig überschreiben.
   onChange: Dispatch<SetStateAction<MietobjektInput>>
   mietzinsArt: MietzinsArt
+  /** Erhöht sich, wenn die Anschrift außerhalb des Formulars gewechselt wurde. */
+  adressWechsel?: number
 }
 
-export function Formular({ value, onChange, mietzinsArt }: Props) {
+export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Props) {
   const [ma25Offen, setMa25Offen] = useState(false)
   const [rueckzahlungUnbekannt, setRueckzahlungUnbekannt] = useState(false)
   const [anschriftFehler, setAnschriftFehler] = useState(false)
@@ -39,6 +41,13 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
   const [baujahrOffen, setBaujahrOffen] = useState(true)
   // Baujahr laut Wiener Gebäudedaten – reine Information zur Adresse.
   const [baujahrQuelle, setBaujahrQuelle] = useState<BaujahrInfo | null>(null)
+
+  // Neue Adresse aus dem Hero: Baujahr-Auswahl und gefundene Angabe verwerfen.
+  useEffect(() => {
+    if (adressWechsel === 0) return
+    setBaujahrOffen(true)
+    setBaujahrQuelle(null)
+  }, [adressWechsel])
 
   const heute = new Date().toISOString().slice(0, 10)
   const istRichtwert = mietzinsArt === 'richtwert'

@@ -3,6 +3,8 @@ import type { LageStatus, MrgErgebnis } from '../lib/types'
 import { flaechenwidmungLink, laerminfoLink, lagezuschlagLink } from '../lib/geo'
 import { Collapsible } from './ui'
 import { RICHTWERT_WIEN } from '../lib/pricingData'
+import { ENGINE_VERSION, RECHTSGRUNDLAGE, RICHTWERT_QUELLE } from '../lib/version'
+import { kontaktVorbelegen } from '../lib/kontaktEvent'
 
 const LAGE_STYLE: Record<LageStatus, string> = {
   unbekannt: 'text-ink-soft',
@@ -65,13 +67,13 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
           <Zeile label={freierPreis ? 'Marktübliche Bandbreite' : 'Preisbandbreite'}>
             {ergebnis.preis ? (
               <div className="space-y-3">
-                <div className="space-y-4 rounded-xl bg-surface px-4 py-3 ring-1 ring-line sm:space-y-2">
-                  {/* Auf dem Handy steht der Wert unter dem Label, ab sm nebeneinander */}
-                  <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+                <div className="space-y-4 rounded-xl bg-surface px-4 py-3 ring-1 ring-line">
+                  {/* Label oben, Wert darunter – auf jeder Breite gleich */}
+                  <div className="flex flex-col gap-0.5">
                     <span className="text-sm text-ink-faint">Monatlich pro m², netto</span>
                     <Preiswert min={ergebnis.preis.proM2Min} max={ergebnis.preis.proM2Max} color="text-coffee" />
                   </div>
-                  <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+                  <div className="flex flex-col gap-0.5">
                     <span className="text-sm text-ink-faint">
                       Monat gesamt für {ergebnis.preis.flaeche.toLocaleString('de-AT')} m²
                     </span>
@@ -141,11 +143,11 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
               </p>
             )}
             {erklaerungOffen && ergebnis.begruendung.length > 0 && (
-              <ul className="mt-2 space-y-1 text-sm text-ink-soft">
+              <div className="mt-2 space-y-2 text-sm leading-relaxed text-ink-soft">
                 {ergebnis.begruendung.map((b) => (
-                  <li key={b}>{b}</li>
+                  <p key={b}>{b}</p>
                 ))}
-              </ul>
+              </div>
             )}
           </Zeile>
 
@@ -199,15 +201,38 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
             {ergebnis.hinweise.length > 0 && (
               <div>
                 <p className="mb-1 font-semibold text-accent">Zu beachten</p>
-                <ul className="list-inside list-disc space-y-1 text-ink-soft">
+                <div className="space-y-2 leading-relaxed text-ink-soft">
                   {ergebnis.hinweise.map((h) => (
-                    <li key={h}>{h}</li>
+                    <p key={h}>{h}</p>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
           </div>
         )}
+
+        {/* Herleitung: worauf die Einschätzung beruht */}
+        <p className="mt-6 px-1 text-[12px] leading-relaxed text-ink-faint">
+          Rechtsgrundlage: <span className="font-semibold text-ink-soft">{RECHTSGRUNDLAGE}</span> · {RICHTWERT_QUELLE} ·
+          Engine v{ENGINE_VERSION}
+        </p>
+
+        <button
+          type="button"
+          onClick={() =>
+            kontaktVorbelegen(
+              'Ich möchte den vollständigen Prüfbericht als PDF (€24) für folgendes Objekt: ' +
+                (lage.adresse.trim() || '[Anschrift bitte ergänzen]'),
+            )
+          }
+          className="mt-4 w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong"
+        >
+          Vollständigen Prüfbericht als PDF (€24)
+        </button>
+        <p className="mt-2 px-1 text-[12px] leading-relaxed text-ink-faint">
+          Der Prüfbericht ordnet die Wohnung Punkt für Punkt ein, mit Fundstellen und Rechenweg. Die kostenlose
+          Ersteinschätzung oben lässt sich unverändert als PDF sichern.
+        </p>
       </div>
     </div>
   )

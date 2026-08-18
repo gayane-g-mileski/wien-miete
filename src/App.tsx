@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Formular } from './components/Formular'
+import { Hero } from './components/Hero'
+import { Profis } from './components/Profis'
+import { Vergleich } from './components/Vergleich'
+import { Faq } from './components/Faq'
+import { Ueber } from './components/Ueber'
 import { Ergebnis } from './components/Ergebnis'
 import { Ergebnisleiste } from './components/Ergebnisleiste'
 import { SprachSchalter } from './components/SprachSchalter'
@@ -39,6 +44,9 @@ function App() {
   const [input, setInput] = useState<MietobjektInput>(initialInput)
   const ergebnis = useMemo(() => evaluateMrg(input), [input])
   const [verlauf, setVerlauf] = useState<VerlaufEintrag[]>(() => ladeVerlauf())
+  // Zählt Adresswechsel aus dem Hero, damit das Formular seine Baujahr-Auswahl
+  // zurücksetzt – die gehört zur alten Adresse.
+  const [adressWechsel, setAdressWechsel] = useState(0)
 
   // Verlauf immer aktuell halten: sobald eine echte (ausgewählte) Adresse
   // vorliegt, den zugehörigen Eintrag mit dem aktuellen Stand anlegen/aktualisieren.
@@ -82,38 +90,50 @@ function App() {
           <div className="flex shrink-0 items-center gap-3 text-sm font-medium text-ink sm:gap-5">
             {/* Auf dem Handy bleibt oben nur das Sprach-Icon */}
             <a className="hidden transition-colors hover:text-accent sm:inline" href="#rechner">
-              Mietrechner
+              Rechner
+            </a>
+            <a className="hidden transition-colors hover:text-accent sm:inline" href="#profis">
+              Für Profis
+            </a>
+            <a className="hidden transition-colors hover:text-accent sm:inline" href="#faq">
+              Fragen
             </a>
             <a className="hidden transition-colors hover:text-accent sm:inline" href="#quellen">
-              Quelle
+              Quellen
             </a>
             <SprachSchalter />
             <ThemaSchalter />
           </div>
         </nav>
 
-        <div className="mx-auto flex max-w-6xl flex-col justify-center px-4 pb-16 pt-10 sm:px-6 sm:pb-24 sm:pt-16">
-          <div className="hero-rise max-w-2xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">
-              Für Vermieter:innen &amp; Immobilien-Anleger:innen in Wien
-            </p>
-            <h1 className="mt-3 text-4xl font-bold leading-[1.1] tracking-tight text-ink sm:text-5xl">
-              Ersteinschätzung von Mietzinsart, Schutzumfang und marktüblicher Preisbandbreite
-            </h1>
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-ink-soft">
-              Die Einschätzung berücksichtigt den aktuellen Stand der österreichischen Gesetzeslage samt laufenden
-              Novellen, eine aktuelle Wiener Marktanalyse und offizielle Statistiken – und wird entsprechend fortlaufend
-              aktualisiert.
-            </p>
-          </div>
-        </div>
+        <Hero
+          anschrift={input.anschrift}
+          onAnschrift={(text, bezirk, koords) => {
+            setAdressWechsel((n) => n + 1)
+            setInput((prev) => ({
+              ...prev,
+              anschrift: text,
+              anschriftBezirk: bezirk,
+              anschriftKoords: koords,
+              gemeindebau: false,
+            }))
+          }}
+          onGemeindebau={(erkannt) => setInput((prev) => ({ ...prev, gemeindebau: erkannt }))}
+          onBaujahr={() => {}}
+          onBaujahrGefunden={() => {}}
+        />
       </header>
 
       <main id="rechner" className="mx-auto max-w-6xl scroll-mt-4 px-4 py-10 sm:px-6">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
           {/* Links: alle Eingaben untereinander */}
           <section>
-            <Formular value={input} onChange={setInput} mietzinsArt={ergebnis.mietzinsArt} />
+            <Formular
+              value={input}
+              onChange={setInput}
+              mietzinsArt={ergebnis.mietzinsArt}
+              adressWechsel={adressWechsel}
+            />
           </section>
 
           {/* Rechts: Ergebnis + Aktionen (Export, Verlauf) */}
@@ -130,20 +150,25 @@ function App() {
         </div>
       </main>
 
+      <Profis />
+      <Vergleich />
+      <Faq />
+      <Ueber />
       <Kontakt />
 
       <footer id="quellen" className="scroll-mt-4 border-t border-line bg-surface-2">
         <div className="mx-auto max-w-6xl space-y-3 px-4 py-8 text-xs leading-relaxed text-ink-soft sm:px-6">
           <div className="rounded-xl border border-danger/30 bg-danger/5 p-4 text-sm leading-relaxed text-ink-soft">
-            <strong className="text-base font-bold text-danger">Kein Rechtsrat.</strong> Dieses Tool bietet eine
-            automatisierte Ersteinschätzung auf Basis vereinfachter Regeln und grober, hinterlegter Marktmiet- und
-            Lagezuschlag-Näherungen je Bezirk. Es ersetzt keine rechtliche oder immobilienwirtschaftliche Beratung im
-            Einzelfall (z.B. Mietervereinigung, Rechtsanwält:in, Sachverständige).
+            <strong className="text-base font-bold text-danger">Kein Rechtsrat.</strong> Dieses Informationswerkzeug
+            liefert eine automatisierte Ersteinschätzung auf Basis vereinfachter Regeln und hinterlegter Näherungswerte
+            für Marktmiete und Lagezuschlag je Bezirk. Es ersetzt keine rechtliche oder immobilienwirtschaftliche
+            Beratung im Einzelfall (z.B. Mietervereinigung, Rechtsanwält:in, Sachverständige) und keine verbindliche
+            Auskunft der Schlichtungsstelle.
           </div>
           {/* 36px Abstand zum Disclaimer (24px Padding + 12px space-y) */}
           <div className="pt-6">
             <p className="mb-1 font-semibold text-ink">Genutzte Schnittstellen (APIs) &amp; Datenquellen</p>
-            <ul className="list-inside list-disc space-y-0.5">
+            <ul className="space-y-0.5">
               <li>
                 Adressdienst der Stadt Wien – OGDAddressService:{' '}
                 <a className={quelleLink} href="https://www.data.gv.at/katalog/dataset/c223b93a-2634-4f06-ac73-8709b9e16888" target="_blank" rel="noreferrer">
@@ -194,13 +219,23 @@ function App() {
               </li>
             </ul>
           </div>
-          <p className="border-t border-line pt-4 text-ink-faint">
-            <a className={quelleLink} href={`${import.meta.env.BASE_URL}datenschutz.html`} target="_blank" rel="noreferrer">
-              Datenschutz
-            </a>
-            <br />
-            © 2026 Gayane G. Mileski. All rights reserved. Built with the help of Claude (Anthropic) · 1000+ iterations
-          </p>
+          <div className="border-t border-line pt-4 text-ink-faint">
+            <p className="flex flex-wrap gap-x-4 gap-y-1">
+              <a className={quelleLink} href={`${import.meta.env.BASE_URL}impressum.html`} target="_blank" rel="noreferrer">
+                Impressum
+              </a>
+              <a className={quelleLink} href={`${import.meta.env.BASE_URL}datenschutz.html`} target="_blank" rel="noreferrer">
+                Datenschutz
+              </a>
+              <a className={quelleLink} href={`${import.meta.env.BASE_URL}agb.html`} target="_blank" rel="noreferrer">
+                AGB
+              </a>
+              <a className={quelleLink} href="#kontakt">
+                Kontakt
+              </a>
+            </p>
+            <p className="mt-2">© 2026 Gayane G. Mileski. Alle Rechte vorbehalten.</p>
+          </div>
         </div>
       </footer>
     </div>
