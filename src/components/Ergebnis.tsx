@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { LageStatus, MrgErgebnis } from '../lib/types'
-import { flaechenwidmungLink, laerminfoLink } from '../lib/geo'
+import { flaechenwidmungLink, laerminfoLink, lagezuschlagLink } from '../lib/geo'
 import { Collapsible } from './ui'
 import { RICHTWERT_WIEN } from '../lib/pricingData'
 
@@ -183,6 +183,9 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
                 <p className="mb-1 font-semibold text-ink">Lage</p>
                 <p className={LAGE_STYLE[lage.status]}>{lage.text}</p>
                 <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                  <a className="text-accent underline hover:text-accent-strong" href={lagezuschlagLink()} target="_blank" rel="noreferrer">
+                    Lagezuschlag für diese Liegenschaft prüfen (Lagezuschlagskarte)
+                  </a>
                   <a className="text-accent underline hover:text-accent-strong" href={laerminfoLink(lage.koords, lage.adresse)} target="_blank" rel="noreferrer">
                     Lärm an dieser Adresse prüfen (laerminfo.at)
                   </a>

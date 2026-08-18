@@ -92,6 +92,12 @@ export interface MietobjektInput {
   bezirk: number // Marktpreis-Fallback
   eigentumswohnung: boolean
   befristet: boolean
+  /**
+   * Tag des Hauptmietvertrags (ISO, leer = unbekannt). Entscheidet über das
+   * Mietzins-Regime: bis 31.12.1981 Altvertrag, 1.1.1982–28.2.1994
+   * Kategoriemietzins, ab 1.3.1994 Richtwert.
+   */
+  vertragsdatum: string
   // Förderung
   foerderungProgramm: FoerderungProgramm
   tilgungsstatus: Tilgungsstatus
@@ -105,7 +111,9 @@ export interface MietobjektInput {
 
 export type MietzinsArt =
   | 'richtwert'
+  | 'kategorie'
   | 'kategorie_d'
+  | 'altvertrag'
   | 'angemessen'
   | 'frei'
   | 'wgg'

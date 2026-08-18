@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Collapsible, TextareaField } from './ui'
 
-// Empfänger beim Bundeswohnbaufonds – eine Adresse hinterlegt.
-const EMPFAENGER = 'gerlinde.weiss@bmdw.gv.at'
+// Bewusst keine personenbezogene Adresse hinterlegt: Zuständigkeiten und
+// Ressortnamen ändern sich. Der fertige Text geht an die Verwaltungsstelle,
+// die Anschrift schlägt die nutzende Person selbst nach.
 
 function anfrageText(anschrift: string): string {
   const adr = anschrift.trim() || 'Wien …'
@@ -42,10 +43,24 @@ const FAELLE = [
 
 export function WwafHinweis({ anschrift }: { anschrift: string }) {
   const [text, setText] = useState(() => anfrageText(anschrift))
+  const [kopiert, setKopiert] = useState(false)
+
+  const betreff = 'Anfrage Bundeswohnbaufonds – Stand der Rückzahlung'
 
   const senden = () => {
-    const href = `mailto:${EMPFAENGER}?subject=${encodeURIComponent('Anfrage Bundeswohnbaufonds – Stand der Rückzahlung')}&body=${encodeURIComponent(text)}`
-    window.location.href = href
+    // Ohne Empfänger: Das E-Mail-Programm öffnet den fertigen Text, die
+    // Adresse trägt die nutzende Person nach aktuellem Stand selbst ein.
+    window.location.href = `mailto:?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(text)}`
+  }
+
+  const kopieren = async () => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setKopiert(true)
+      setTimeout(() => setKopiert(false), 2500)
+    } catch {
+      setKopiert(false)
+    }
   }
 
   return (
@@ -53,28 +68,38 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
       <p className="text-sm font-semibold text-accent">Diese Anfrage ist kostenlos</p>
 
       <div>
-        <p>Diese Auskunft bekommst du über eine Anfrage an das</p>
+        <p>Diese Auskunft bekommst du über eine Anfrage an die</p>
         <address translate="no" className="my-4 border-l-2 border-accent pl-3 not-italic leading-relaxed text-accent">
-          <span className="font-semibold">Bundesministerium für Wissenschaft, Forschung und Wirtschaft</span>
-          <br />
           <span className="font-semibold">Verwaltungsstelle Bundeswohnbaufonds</span>
           <br />
           Stubenring 1, 1010 Wien
         </address>
-        <p>oder mittels E-Mail.</p>
+        <p>
+          Die Verwaltungsstelle ist beim jeweils zuständigen Bundesministerium angesiedelt. Ressortnamen und
+          E-Mail-Adressen ändern sich – die aktuelle Kontaktadresse steht auf der Website des Ministeriums.
+        </p>
       </div>
 
       <div>
         <div translate="no">
           <TextareaField label="Anfrage-Text" id="wwaf-text" rows={11} value={text} onChange={(e) => setText(e.target.value)} />
         </div>
-        <button
-          type="button"
-          onClick={senden}
-          className="mt-3 w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent hover:bg-accent-strong"
-        >
-          Anfrage per E-Mail senden
-        </button>
+        <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={kopieren}
+            className="w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent hover:bg-accent-strong"
+          >
+            {kopiert ? 'Text kopiert' : 'Anfrage-Text kopieren'}
+          </button>
+          <button
+            type="button"
+            onClick={senden}
+            className="w-full rounded-lg border border-accent/50 px-4 py-2.5 text-base font-semibold text-accent hover:bg-accent/10"
+          >
+            Im E-Mail-Programm öffnen
+          </button>
+        </div>
       </div>
 
       <div className="border-t border-line pt-4">

@@ -25,6 +25,7 @@ const initialInput: MietobjektInput = {
   bezirk: 7,
   eigentumswohnung: false,
   befristet: false,
+  vertragsdatum: '',
   foerderungProgramm: 'keine',
   tilgungsstatus: 'offen',
   kategorie: 'A',
@@ -159,6 +160,12 @@ function App() {
                 Grundstücksgrenzen und Katastralgemeinden (BEV-Kataster):{' '}
                 <a className={quelleLink} href="https://kataster.bev.gv.at/#/center/13.35,47.77/zoom/7.6/vermv/0.6" target="_blank" rel="noreferrer">
                   kataster.bev.gv.at
+                </a>
+              </li>
+              <li>
+                Lagezuschlagskarte Wien (Lagezuschlag je Liegenschaft):{' '}
+                <a className={quelleLink} href="https://mein.wien.gv.at/Richtwert/ui/lagezuschlag/#/LagezuschlagImInternet/Adresse" target="_blank" rel="noreferrer">
+                  mein.wien.gv.at
                 </a>
               </li>
               <li>

@@ -12,11 +12,13 @@ import {
   ANGEMESSEN_ABSCHLAG_VON_FREI,
   BEFRISTUNGSABSCHLAG,
   HEIZUNG_ZUSCHLAG,
-  KATEGORIE_FAKTOR,
-  KAT_D_HMZ,
+  KATEGORIE_ABSCHLAG,
+  KATEGORIE_BETRAG,
+  KATEGORIE_ZEITRAUM,
   MERKMAL_KATALOG,
   RICHTWERT_WIEN,
   STOCKWERK_ABSCHLAG,
+  ZUSCHLAG_KORRIDOR,
   ZUSTAND_ABSCHLAG,
   bezirkAusAnschrift,
   getBezirk,
@@ -26,11 +28,29 @@ import { GESETZ, type Gesetzeslink } from './gesetze'
 
 const MIETZINS_LABEL: Record<MietzinsArt, string> = {
   richtwert: 'Richtwertmietzins',
+  kategorie: 'Kategoriemietzins',
   kategorie_d: 'Kategorie-D-Hauptmietzins',
+  altvertrag: 'Mietzins des Altvertrags',
   angemessen: 'Angemessener Hauptmietzins',
   frei: 'Freier Mietzins',
   wgg: 'WGG-/Kategoriemietzins',
   foerderungsrechtlich: 'Förderungsrechtlicher Hauptmietzins',
+}
+
+type Zeitregime = 'altvertrag' | 'kategorie' | 'richtwert' | 'unbekannt'
+
+/**
+ * Das Datum des Hauptmietvertrags entscheidet, welche Obergrenze gilt:
+ * bis 31.12.1981 bleibt der damals vereinbarte Mietzins maßgeblich,
+ * vom 1.1.1982 bis 28.2.1994 gilt der Kategoriemietzins,
+ * ab 1.3.1994 der Richtwert.
+ */
+function zeitregime(vertragsdatum: string): Zeitregime {
+  const tag = vertragsdatum.trim()
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(tag)) return 'unbekannt'
+  if (tag < KATEGORIE_ZEITRAUM.von) return 'altvertrag'
+  if (tag <= KATEGORIE_ZEITRAUM.bis) return 'kategorie'
+  return 'richtwert'
 }
 
 const ANWENDUNG_LABEL: Record<MrgAnwendung, string> = {
@@ -39,9 +59,11 @@ const ANWENDUNG_LABEL: Record<MrgAnwendung, string> = {
   ausnahme: 'Vollausnahme vom MRG',
 }
 
-function kategorieFaktorABC(k: Kategorie): number {
-  if (k === 'A' || k === 'B' || k === 'C') return KATEGORIE_FAKTOR[k]
-  return 0.55
+/** Richtwert-Grundwert der Wohnung: Normwohnung (Kat. A) minus Kategorieabschlag. */
+function grundwertRichtwert(k: Kategorie): { grundwert: number; abschlag: number } {
+  const stufe = k === 'B' ? 'B' : k === 'C' ? 'C' : 'A'
+  const abschlag = round2(RICHTWERT_WIEN * KATEGORIE_ABSCHLAG[stufe])
+  return { grundwert: round2(RICHTWERT_WIEN + abschlag), abschlag }
 }
 
 function round2(n: number): number {
@@ -92,25 +114,63 @@ function computePreis(input: MietobjektInput, art: MietzinsArt): Preisspanne | n
 
   switch (art) {
     case 'richtwert': {
-      const basis = round2(RICHTWERT_WIEN * kategorieFaktorABC(input.kategorie))
-      const teile: Preisbestandteil[] = [{ label: `Grundwert (Kat. ${katKurz(input.kategorie)})`, wert: basis }]
+      const { grundwert, abschlag: katAbschlag } = grundwertRichtwert(input.kategorie)
+      const teile: Preisbestandteil[] = [{ label: 'Richtwert Wien (Normwohnung, Kat. A)', wert: RICHTWERT_WIEN }]
+      if (katAbschlag !== 0) {
+        const prozent = Math.round(-KATEGORIE_ABSCHLAG[input.kategorie === 'B' ? 'B' : 'C'] * 100)
+        teile.push({ label: `Abschlag Kategorie ${katKurz(input.kategorie)} (${prozent} %, Praxiswert)`, wert: katAbschlag })
+      }
       const lage = lagezuschlagWert(input)
-      if (lage.wert > 0) teile.push({ label: 'Lagezuschlag', wert: round2(lage.wert) })
-      teile.push(...ausstattungsBestandteile(input))
+      if (lage.wert > 0) teile.push({ label: 'Lagezuschlag (Bezirksnäherung)', wert: round2(lage.wert) })
+
+      // Gesamtschau statt linearer Addition: Die Summe der Ausstattungs-Zu- und
+      // -Abschläge bleibt in einem Korridor um den Grundwert (§ 16 Abs 2 MRG,
+      // OGH RS0117881).
+      const ausstattung = ausstattungsBestandteile(input)
+      const summeRoh = ausstattung.reduce((s, t) => s + t.wert, 0)
+      const grenze = round2(grundwert * ZUSCHLAG_KORRIDOR)
+      const summe = Math.max(-grenze, Math.min(grenze, summeRoh))
+      teile.push(...ausstattung)
+      const gedeckelt = round2(summe - summeRoh)
+      if (gedeckelt !== 0) {
+        teile.push({
+          label: `Deckelung nach Gesamtschau (max. ±${Math.round(ZUSCHLAG_KORRIDOR * 100)} % des Grundwerts)`,
+          wert: gedeckelt,
+        })
+      }
+
       let proM2 = teile.reduce((s, t) => s + t.wert, 0)
-      proM2 = Math.max(proM2, KAT_D_HMZ.brauchbar)
+      proM2 = Math.max(proM2, KATEGORIE_BETRAG.D_brauchbar)
       if (input.befristet) {
-        const abschlag = round2(-proM2 * BEFRISTUNGSABSCHLAG)
-        teile.push({ label: 'Abschlag für befristeten Vertrag (25 %)', wert: abschlag })
-        proM2 += abschlag
+        const befristung = round2(-proM2 * BEFRISTUNGSABSCHLAG)
+        teile.push({ label: 'Abschlag für befristeten Vertrag (25 %)', wert: befristung })
+        proM2 += befristung
       }
       bestandteile = teile.map((t) => ({ label: t.label, wert: round2(t.wert) }))
       proM2Min = proM2 * 0.94
       proM2Max = proM2 * 1.06
       break
     }
+    case 'kategorie': {
+      // Vertrag aus der Zeit des Kategoriemietzinses: Obergrenze ist der
+      // amtliche Kategoriebetrag, ohne Zu- und Abschläge.
+      const betrag = KATEGORIE_BETRAG[input.kategorie]
+      const teile: Preisbestandteil[] = [
+        { label: `Kategoriebetrag ${katKurz(input.kategorie)} (§ 15a MRG)`, wert: betrag },
+      ]
+      let proM2 = betrag
+      if (input.befristet) {
+        const befristung = round2(-proM2 * BEFRISTUNGSABSCHLAG)
+        teile.push({ label: 'Abschlag für befristeten Vertrag (25 %)', wert: befristung })
+        proM2 += befristung
+      }
+      bestandteile = teile
+      proM2Min = proM2
+      proM2Max = proM2
+      break
+    }
     case 'kategorie_d': {
-      let basis = input.kategorie === 'D_unbrauchbar' ? KAT_D_HMZ.unbrauchbar : KAT_D_HMZ.brauchbar
+      let basis = KATEGORIE_BETRAG[input.kategorie === 'D_unbrauchbar' ? 'D_unbrauchbar' : 'D_brauchbar']
       if (input.befristet) basis *= 1 - BEFRISTUNGSABSCHLAG
       proM2Min = basis
       proM2Max = basis
@@ -127,13 +187,13 @@ function computePreis(input: MietobjektInput, art: MietzinsArt): Preisspanne | n
       break
     }
     case 'foerderungsrechtlich': {
-      const basis = RICHTWERT_WIEN * kategorieFaktorABC(input.kategorie)
+      const basis = grundwertRichtwert(input.kategorie).grundwert
       proM2Min = basis * 0.85
       proM2Max = basis * 1.3
       break
     }
     case 'wgg': {
-      const basis = RICHTWERT_WIEN * kategorieFaktorABC(input.kategorie) * 0.85
+      const basis = grundwertRichtwert(input.kategorie).grundwert * 0.85
       proM2Min = basis * 0.8
       proM2Max = basis * 1.2
       break
@@ -174,7 +234,7 @@ function lageInfo(input: MietobjektInput, art: MietzinsArt): LageInfo {
 
   if (zuschlag > 0) {
     const betrag = zuschlag.toFixed(2).replace('.', ',')
-    let text = `Die Adresse liegt in einer gefragten Gegend (${nr}. Bezirk, ${b.name}). Für so eine gute Lage darf die Miete etwas höher sein – hier rund ${betrag} € pro m² zusätzlich.`
+    let text = `Die Adresse liegt in einer gefragten Gegend (${nr}. Bezirk, ${b.name}). Für so eine gute Lage darf die Miete etwas höher sein – hier rund ${betrag} € pro m² zusätzlich. Das ist ein Bezirksmittel; amtlich gilt der Lagezuschlag je Liegenschaft laut Lagezuschlagskarte der Stadt Wien.`
     if (laut) text += ' Weil du "laute Lage/Straßenlärm" angehakt hast, wird das mit einem Abzug gegengerechnet.'
     return { status: laut ? 'abschlag' : 'zuschlag', bezirk: nr, koords, adresse, text }
   }
@@ -208,6 +268,39 @@ function result(
       'Die Bandbreite beruht auf Wiener Wohnungsmieten und ist für diese Objektart nur ein grober Anhaltspunkt. Vergleichbare Angebote in der Umgebung sind hier der bessere Maßstab.',
     ]
   }
+
+  // Das Vertragsdatum entscheidet, ob statt des Richtwerts der Kategoriemietzins
+  // gilt oder der Mietzins des Altvertrags weiterläuft.
+  if (mietzinsArt === 'richtwert') {
+    const regime = zeitregime(input.vertragsdatum)
+    if (regime === 'kategorie') {
+      mietzinsArt = 'kategorie'
+      gesetze = [GESETZ.mrg()]
+      begruendung = [
+        'Der Hauptmietvertrag wurde zwischen 1.1.1982 und 28.2.1994 abgeschlossen. Für solche Verträge richtet sich die Obergrenze nach der Ausstattung der Wohnung – es gilt der Kategoriemietzins, nicht der Richtwert.',
+      ]
+      hinweise = [
+        ...hinweise,
+        'Der Kategoriebetrag wird regelmäßig an die Inflation angepasst (Wertsicherung). Maßgeblich ist die Kategorie im Zeitpunkt des Vertragsabschlusses.',
+      ]
+    } else if (regime === 'altvertrag') {
+      mietzinsArt = 'altvertrag'
+      gesetze = [GESETZ.mrg()]
+      begruendung = [
+        'Der Hauptmietvertrag stammt aus der Zeit vor dem 1.1.1982. Dann bleibt grundsätzlich der damals vereinbarte Mietzins maßgeblich; weder Richtwert noch Kategoriebetrag lassen sich darauf anwenden.',
+      ]
+      hinweise = [
+        ...hinweise,
+        'Eine Erhöhung ist nur in den gesetzlich vorgesehenen Fällen möglich (z.B. Wertsicherung, Erhaltungs- und Verbesserungsarbeiten, Anhebung nach § 46 MRG bei Eintritt). Eine Preisschätzung ist hier nicht sinnvoll.',
+      ]
+    } else if (regime === 'unbekannt') {
+      hinweise = [
+        ...hinweise,
+        'Ohne Datum des Mietvertrags wird der Richtwert angenommen. Verträge vom 1.1.1982 bis 28.2.1994 unterliegen dem Kategoriemietzins, ältere dem vereinbarten Mietzins des Altvertrags.',
+      ]
+    }
+  }
+
   return {
     mietzinsArt,
     mietzinsArtLabel: MIETZINS_LABEL[mietzinsArt],

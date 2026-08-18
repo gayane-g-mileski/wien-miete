@@ -1,4 +1,4 @@
-import type { MerkmalKey } from './types'
+import type { Kategorie, MerkmalKey } from './types'
 
 // Preis-Referenzdaten. Quellen: mietervereinigung.at (Richtwert, Zu-/Abschläge,
 // Lagezuschlag Wien), Richtwertgesetz, allgemeine Marktbeobachtung. Marktmiet- und
@@ -7,18 +7,46 @@ import type { MerkmalKey } from './types'
 /** Richtwert Wien in €/m² netto, monatlich (mietrechtliche Normwohnung, Kat. A). Seit 1.4.2026. */
 export const RICHTWERT_WIEN = 6.74
 
-/** Kategorie-Faktor auf den Richtwert (Normwohnung = Kategorie A). */
-export const KATEGORIE_FAKTOR: Record<'A' | 'B' | 'C', number> = {
-  A: 1,
-  B: 0.75,
-  C: 0.5,
+/**
+ * Amtliche Kategoriebeträge (§ 15a MRG) in €/m² netto pro Monat, seit 1.4.2026.
+ * Sie gelten als Obergrenze für Verträge vom 1.1.1982 bis 28.2.1994 und – bei
+ * Kategorie D – unabhängig vom Vertragsdatum.
+ */
+export const KATEGORIE_BETRAG: Record<Kategorie, number> = {
+  A: 4.51,
+  B: 3.38,
+  C: 2.25,
+  D_brauchbar: 2.25,
+  D_unbrauchbar: 1.13,
 }
 
-/** Gesetzlich fixierter Kategorie-D-Hauptmietzins, €/m² netto pro Monat. */
-export const KAT_D_HMZ = {
-  brauchbar: 2.24,
-  unbrauchbar: 1.12,
+/**
+ * Zeitraum, in dem der Kategoriemietzins gilt. Davor bleibt der damals
+ * vereinbarte Mietzins maßgeblich, danach gilt der Richtwert.
+ */
+export const KATEGORIE_ZEITRAUM = { von: '1982-01-01', bis: '1994-02-28' }
+
+/**
+ * Abschlag vom Richtwert je Kategoriestufe. Der Richtwert ist gesetzlich für
+ * die mietrechtliche Normwohnung (Kategorie A) definiert; eine gesetzliche
+ * Staffel für B und C gibt es nicht. Die Praxis rechnet mit rund einem Viertel
+ * Abschlag je Stufe – die Werte sind daher Näherungen, keine Rechengrößen des
+ * Gesetzes, und werden im Ergebnis auch so ausgewiesen.
+ */
+export const KATEGORIE_ABSCHLAG: Record<'A' | 'B' | 'C', number> = {
+  A: 0,
+  B: -0.25,
+  C: -0.5,
 }
+
+/**
+ * Plausibilitätskorridor für die Summe der Ausstattungs-Zu- und -Abschläge,
+ * bezogen auf den Grundwert. § 16 Abs 2 MRG verlangt eine Gesamtschau nach der
+ * Verkehrsauffassung; der OGH lehnt es ab, jedes Ausstattungsdetail einzeln zu
+ * bewerten und die Zuschläge schlicht zu addieren (RIS-Justiz RS0117881).
+ * Deshalb wird die Summe hier gedeckelt, statt linear weiterzuzählen.
+ */
+export const ZUSCHLAG_KORRIDOR = 0.4
 
 /** Befristungsabschlag bei Vollanwendung (schriftlich), WHG + GL. */
 export const BEFRISTUNGSABSCHLAG = 0.25
@@ -98,6 +126,11 @@ export interface BezirkInfo {
   /**
    * Geschätzter Lagezuschlag in €/m² für überdurchschnittliche Lagen des Bezirks.
    * 0 = im Bezirksdurchschnitt keine überdurchschnittliche Lage / kein Lagezuschlag.
+   */
+  /**
+   * Bezirksnäherung für den Lagezuschlag in €/m². Amtlich ist der Lagezuschlag
+   * grundstücksscharf – maßgeblich ist die Lagezuschlagskarte der Stadt Wien,
+   * die im Ergebnis für die eingegebene Adresse verlinkt wird.
    */
   lagezuschlag: number
 }

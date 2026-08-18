@@ -16,7 +16,7 @@ import { FOERDERUNG_PROGRAMM_LABEL, TILGUNGSSTATUS_LABEL, foerderungenFuer, stat
 import { BEZIRKE, MERKMAL_GRUPPEN, MERKMAL_KATALOG, bezirkAusAnschrift } from '../lib/pricingData'
 import { bauperiodenLink } from '../lib/geo'
 import type { BaujahrInfo } from '../lib/geo'
-import { Checkbox, NumberField, Section, SelectField, SpaltenTitel } from './ui'
+import { Checkbox, DateField, NumberField, Section, SelectField, SpaltenTitel } from './ui'
 import { AnschriftFeld } from './AnschriftFeld'
 import { Ma25Anfrage } from './Ma25Anfrage'
 import { WwafHinweis } from './WwafHinweis'
@@ -40,8 +40,12 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
   // Baujahr laut Wiener Gebäudedaten – reine Information zur Adresse.
   const [baujahrQuelle, setBaujahrQuelle] = useState<BaujahrInfo | null>(null)
 
+  const heute = new Date().toISOString().slice(0, 10)
   const istRichtwert = mietzinsArt === 'richtwert'
-  const zeigeKat = istRichtwert || mietzinsArt === 'kategorie_d'
+  // Die Ausstattungskategorie zählt auch beim Kategoriemietzins – dort bestimmt
+  // sie sogar direkt den Betrag.
+  const zeigeKat = istRichtwert || mietzinsArt === 'kategorie' || mietzinsArt === 'kategorie_d'
+  const befristungWirkt = zeigeKat
   // Große Altbauwohnung der Kategorie A/B: Der Richtwert entfällt. Die Kategorie
   // bleibt trotzdem wählbar, weil sie über diese Ausnahme mitentscheidet.
   // Die Eigentumswohnung wirkt sich nur bei laufendem Förderungsdarlehen
@@ -145,8 +149,17 @@ export function Formular({ value, onChange, mietzinsArt }: Props) {
           onChange={(e) => set('flaeche', Math.max(0, Number(e.target.value)))}
         />
 
+        <DateField
+          label="Abschluss des Mietvertrags"
+          id="vertragsdatum"
+          value={value.vertragsdatum}
+          max={heute}
+          hint="Entscheidet über die Obergrenze: ab 1.3.1994 Richtwert, vom 1.1.1982 bis 28.2.1994 Kategoriemietzins, davor der Mietzins des Altvertrags."
+          onChange={(e) => set('vertragsdatum', e.target.value)}
+        />
+
         <div className="space-y-4">
-          {istRichtwert && (
+          {befristungWirkt && (
             <Checkbox checked={value.befristet} onChange={(v) => set('befristet', v)} label="Befristeter Mietvertrag" />
           )}
           </div>

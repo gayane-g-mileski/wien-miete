@@ -179,6 +179,15 @@ export function laerminfoLink(koords: Koordinaten | null, adresse = ''): string 
   return 'https://maps.laerminfo.at/'
 }
 
+/**
+ * Lagezuschlagskarte der Stadt Wien. Der Lagezuschlag gilt grundstücksscharf –
+ * die hinterlegten Bezirkswerte sind nur eine Näherung, verbindlich ist die
+ * Auskunft für die konkrete Liegenschaft.
+ */
+export function lagezuschlagLink(): string {
+  return 'https://mein.wien.gv.at/Richtwert/ui/lagezuschlag/#/LagezuschlagImInternet/Adresse'
+}
+
 /** Eine CSV-Zeile in Felder zerlegen (mit Anführungszeichen-Behandlung). */
 function csvZeile(zeile: string): string[] {
   const felder: string[] = []

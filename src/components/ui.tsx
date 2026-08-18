@@ -64,6 +64,22 @@ export function TextField({ label, hint, fehler, id, ...props }: FieldProps & In
   )
 }
 
+/** Datumsfeld – das Label steht dauerhaft oben, weil ein leeres Datumsfeld
+ *  bereits das Format anzeigt. */
+export function DateField({ label, hint, fehler, id, ...props }: FieldProps & InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <div>
+      <div className="relative">
+        <input id={id} type="date" {...props} className={`${box(fehler)} h-14 px-3 pt-3`} />
+        <label htmlFor={id} className={topLabel}>
+          {label}
+        </label>
+      </div>
+      <Hint fehler={fehler}>{hint}</Hint>
+    </div>
+  )
+}
+
 export function NumberField({ label, hint, fehler, id, ...props }: FieldProps & InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div>
