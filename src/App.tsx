@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Formular } from './components/Formular'
 import { Hero } from './components/Hero'
+import { Werkzeuge } from './components/Werkzeuge'
 import { Profis } from './components/Profis'
 import { Vergleich } from './components/Vergleich'
 import { Faq } from './components/Faq'
@@ -93,6 +94,9 @@ function App() {
           <div className="flex shrink-0 items-center gap-3 text-sm font-medium text-ink sm:gap-5">
             {/* Auf dem Handy bleibt oben nur das Sprach-Icon */}
             <a className="hidden transition-colors hover:text-accent sm:inline" href="#rechner">
+              Mietzins
+            </a>
+            <a className="hidden transition-colors hover:text-accent sm:inline" href="#werkzeuge">
               Rechner
             </a>
             <a className="hidden transition-colors hover:text-accent sm:inline" href="#profis">
@@ -153,6 +157,7 @@ function App() {
         </div>
       </main>
 
+      <Werkzeuge />
       <Profis />
       <Vergleich />
       <Faq />

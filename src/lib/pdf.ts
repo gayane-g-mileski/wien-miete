@@ -329,3 +329,103 @@ export function ergebnisPdf(ergebnis: MrgErgebnis, adresse: string): jsPDF {
 export function ergebnisPdfBlob(ergebnis: MrgErgebnis, adresse: string): Blob {
   return ergebnisPdf(ergebnis, adresse).output('blob')
 }
+
+// ---------------------------------------------------------------------------
+// Erhöhungsschreiben zur Wertsicherung
+// ---------------------------------------------------------------------------
+
+export interface SchreibenDaten {
+  anschrift: string
+  mieter: string
+  vermieter: string
+  alt: number
+  neu: number
+  satz: number
+  wirksamAb: string
+  grundlage: string
+  schritte: { was: string; ergebnis: string; quelle: string }[]
+}
+
+function tag(iso: string): string {
+  const [j, m, t] = iso.split('-')
+  return t && m && j ? `${Number(t)}.${Number(m)}.${j}` : iso
+}
+
+/** Fertiges Schreiben, mit dem die Erhöhung angekündigt wird. */
+export function erhoehungsschreiben(d: SchreibenDaten): jsPDF {
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+  const pageH = doc.internal.pageSize.getHeight()
+  const heute = new Date().toLocaleDateString('de-AT', { day: '2-digit', month: 'long', year: 'numeric' })
+  const differenz = Math.round((d.neu - d.alt) * 100) / 100
+
+  const bloecke: Block[] = [
+    { art: 'kicker', text: 'ANKÜNDIGUNG DER WERTSICHERUNG' },
+    { art: 'titel', text: d.anschrift.trim() || 'Mietobjekt' },
+    { art: 'datum', text: `Wien, am ${heute}` },
+    { art: 'linie' },
+
+    { art: 'para', farbe: SOFT, text: `An: ${d.mieter.trim() || '[Name der Mieterin / des Mieters]'}` },
+    { art: 'para', farbe: SOFT, text: `Von: ${d.vermieter.trim() || '[Name der Vermieterin / des Vermieters]'}` },
+    { art: 'abschnitt' },
+
+    { art: 'para', farbe: SOFT, text: 'Sehr geehrte Damen und Herren,' },
+    {
+      art: 'para',
+      farbe: SOFT,
+      text:
+        `aufgrund der vereinbarten bzw. gesetzlich vorgesehenen Wertsicherung wird der Hauptmietzins ab ` +
+        `${tag(d.wirksamAb)} angepasst. Die Erhöhung beträgt ${(d.satz * 100).toLocaleString('de-AT', { maximumFractionDigits: 2 })} %.`,
+    },
+    { art: 'abschnitt' },
+
+    { art: 'heading', text: 'Neuer Hauptmietzins' },
+    { art: 'value', groesse: 15, farbe: COFFEE, text: `${euro(d.neu)} EUR netto pro Monat` },
+    {
+      art: 'para',
+      farbe: SOFT,
+      text: `bisher ${euro(d.alt)} EUR – Differenz ${differenz >= 0 ? '+' : ''}${euro(differenz)} EUR pro Monat. Betriebskosten und Umsatzsteuer bleiben davon unberührt.`,
+    },
+    { art: 'abschnitt' },
+
+    { art: 'heading', text: 'Rechnung im Einzelnen' },
+    ...d.schritte.map((s): Block => ({ art: 'bullet', farbe: SOFT, text: `${s.was}: ${s.ergebnis} (${s.quelle})` })),
+    { art: 'abschnitt' },
+
+    { art: 'heading', text: 'Rechtsgrundlage' },
+    { art: 'bullet', farbe: SOFT, text: d.grundlage },
+    {
+      art: 'bullet',
+      farbe: SOFT,
+      text: 'Die Anhebung wird mit dem auf die Zustellung dieses Schreibens folgenden Zinstermin wirksam, frühestens zum oben genannten Stichtag.',
+    },
+    { art: 'abschnitt' },
+
+    { art: 'para', farbe: SOFT, text: 'Mit freundlichen Grüßen' },
+    { art: 'para', farbe: FAINT, text: d.vermieter.trim() || '[Unterschrift]' },
+  ]
+
+  const { luft, schrift } = besteEinstellung(bloecke, pageH - SEITE.unten)
+  setze(doc, bloecke, { luft, schrift, zeichnen: true })
+
+  const pageW = doc.internal.pageSize.getWidth()
+  doc.setDrawColor(0xe5, 0xdd, 0xd1)
+  doc.setLineWidth(0.3)
+  doc.line(SEITE.mL, pageH - 18, pageW - SEITE.mR, pageH - 18)
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(7.5)
+  doc.setTextColor(FAINT[0], FAINT[1], FAINT[2])
+  doc.text(
+    doc.splitTextToSize(
+      `Erstellt am ${new Date().toLocaleString('de-AT')} mit dem Mietzins-Check in Wien, Engine v${ENGINE_VERSION}. ` +
+        'Automatisierte Berechnung eines Informationswerkzeugs, kein Rechtsrat – Wortlaut und Zustellung vor dem Versand prüfen.',
+      pageW - SEITE.mL - SEITE.mR - 12,
+    ),
+    SEITE.mL,
+    pageH - 14,
+  )
+  return doc
+}
+
+export function erhoehungsschreibenBlob(d: SchreibenDaten): Blob {
+  return erhoehungsschreiben(d).output('blob')
+}

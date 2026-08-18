@@ -87,11 +87,12 @@ export function Portfolio() {
 
       {zeilen.length > 0 && (
         <>
-          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { titel: 'Einheiten geprüft', wert: String(zeilen.length) },
               { titel: 'mit gesetzlicher Obergrenze', wert: String(zeilen.filter((z) => z.ergebnis.preisschutz).length) },
               { titel: 'mutmaßlich über der Grenze', wert: `${ueber.length}${geprueft.length ? ` von ${geprueft.length}` : ''}` },
+              { titel: 'jetzt anpassbar (Wertsicherung)', wert: String(zeilen.filter((z) => z.indexSatz > 0).length) },
             ].map((k) => (
               <div key={k.titel} className="rounded-xl bg-surface-2 px-4 py-3">
                 <p className="text-2xl font-bold tabular-nums text-accent">{k.wert}</p>
@@ -104,7 +105,7 @@ export function Portfolio() {
             <table className="w-full min-w-[44rem] border-collapse text-left">
               <thead>
                 <tr className="border-b border-line bg-surface-2">
-                  {['Einheit', 'm²', 'Mietzinsart', 'Obergrenze/Monat', 'Ist-Miete', 'Differenz'].map((h) => (
+                  {['Einheit', 'm²', 'Mietzinsart', 'Obergrenze/Monat', 'Ist-Miete', 'Differenz', 'Nach Wertsicherung'].map((h) => (
                     <th key={h} className={`${zelle} font-semibold text-ink`} scope="col">
                       {h}
                     </th>
@@ -131,6 +132,11 @@ export function Portfolio() {
                     <td className={`${zelle} tabular-nums font-semibold ${z.ueberGrenze ? 'text-danger' : 'text-accent'}`}>
                       {z.differenz != null ? `${z.differenz > 0 ? '+' : ''}${euro(z.differenz)} €` : '–'}
                     </td>
+                    <td className={`${zelle} tabular-nums text-ink-soft`}>
+                      {z.indexNeu != null && z.indexSatz > 0
+                        ? `${euro(z.indexNeu)} € (+${(z.indexSatz * 100).toLocaleString('de-AT', { maximumFractionDigits: 2 })} %)`
+                        : '–'}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -149,8 +155,9 @@ export function Portfolio() {
 
           <p className="mt-4 text-[12px] leading-relaxed text-ink-faint">
             Die Sammelprüfung rechnet mit den Angaben aus der Datei und ohne Zu- und Abschläge für Ausstattung, Lage
-            oder Zustand. Sie zeigt, welche Einheiten sich lohnen, genauer angesehen zu werden – die Einzelprüfung oben
-            bleibt maßgeblich.
+            oder Zustand. Die Spalte „Nach Wertsicherung“ zeigt, was im kommenden Jahr nach dem
+            Mieten-Wertsicherungsgesetz zulässig wäre. Sie zeigt, welche Einheiten sich lohnen, genauer angesehen zu
+            werden – die Einzelprüfung oben bleibt maßgeblich.
           </p>
         </>
       )}

@@ -1,4 +1,5 @@
 import { evaluateMrg } from './mrgEngine'
+import { berechneIndex } from './wertsicherung'
 import { leereMerkmale, bezirkAusAnschrift } from './pricingData'
 import type { Kategorie, MietobjektInput, MrgErgebnis } from './types'
 
@@ -17,6 +18,9 @@ export interface PortfolioZeile {
   differenz: number | null
   /** Fehlt eine Angabe, die das Ergebnis wesentlich beeinflusst? */
   unsicher: string[]
+  /** Zulässiger Mietzins nach der nächsten Wertsicherung. */
+  indexNeu: number | null
+  indexSatz: number
 }
 
 export interface PortfolioErgebnis {
@@ -104,7 +108,7 @@ function spaltenIndex(kopf: string[]): Record<string, number> {
 
 const JA = /^(ja|j|yes|y|true|wahr|x|1)$/i
 
-export function pruefePortfolio(text: string): PortfolioErgebnis {
+export function pruefePortfolio(text: string, indexJahr = new Date().getFullYear() + 1): PortfolioErgebnis {
   const zeilen = text.split(/\r?\n/).filter((z) => z.trim())
   const fehler: string[] = []
   if (zeilen.length < 2) return { zeilen: [], fehler: ['Die Datei enthält keine Datenzeilen.'] }
@@ -162,6 +166,20 @@ export function pruefePortfolio(text: string): PortfolioErgebnis {
     const grenze = ergebnis.preisschutz ? (ergebnis.preis?.monatlichMax ?? null) : null
     const differenz = istMiete != null && grenze != null ? Math.round((istMiete - grenze) * 100) / 100 : null
 
+    // Wertsicherung für das ganze Portfolio: Was darf im kommenden Jahr
+    // angepasst werden?
+    const index =
+      istMiete != null
+        ? berechneIndex({
+            mietzinsArt: ergebnis.mietzinsArt,
+            aktuell: istMiete,
+            letzteAnpassung: input.vertragsdatum,
+            jahr: indexJahr,
+            indexSteigerung: 0,
+            schwelle: 0,
+          })
+        : null
+
     ergebnisse.push({
       nr: i + 1,
       bezeichnung,
@@ -171,6 +189,8 @@ export function pruefePortfolio(text: string): PortfolioErgebnis {
       ueberGrenze: differenz != null && differenz > 0,
       differenz,
       unsicher,
+      indexNeu: index ? index.neu : null,
+      indexSatz: index ? index.satz : 0,
     })
   })
 
@@ -188,6 +208,8 @@ export function portfolioAlsCsv(zeilen: PortfolioZeile[]): string {
     'Ist-Miete',
     'Differenz',
     'Ueber Grenze',
+    'Wertsicherung neu',
+    'Wertsicherung %',
     'Offene Angaben',
   ]
   const zeile = (z: PortfolioZeile) =>
@@ -200,6 +222,8 @@ export function portfolioAlsCsv(zeilen: PortfolioZeile[]): string {
       z.istMiete ?? '',
       z.differenz ?? '',
       z.ueberGrenze ? 'ja' : 'nein',
+      z.indexNeu ?? '',
+      z.indexSatz ? (z.indexSatz * 100).toFixed(2) : '',
       z.unsicher.join(' / '),
     ]
       .map((w) => `"${String(w).replace(/"/g, '""')}"`)
