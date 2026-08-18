@@ -18,7 +18,7 @@ interface Fehler {
   versand?: string
 }
 
-export function Kontakt() {
+export function KontaktInhalt() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [nachricht, setNachricht] = useState('')
@@ -74,8 +74,7 @@ export function Kontakt() {
   }
 
   return (
-    <section id="kontakt" className="scroll-mt-4 border-t border-line bg-surface">
-      <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-16">
+    <div className="rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6">
         <h2 className="mb-1 px-1 text-[2rem] font-semibold leading-tight tracking-tight text-accent">Kontakt</h2>
         <p className="mb-8 px-1 text-sm font-semibold text-ink-faint">Fragen, Hinweise oder Fehler gefunden?</p>
 
@@ -121,7 +120,6 @@ export function Kontakt() {
 
           {status === 'ok' && <p className="text-base font-medium text-accent">Danke, deine Nachricht ist angekommen.</p>}
         </div>
-      </div>
-    </section>
+    </div>
   )
 }

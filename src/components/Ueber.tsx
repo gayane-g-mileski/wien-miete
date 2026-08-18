@@ -24,10 +24,9 @@ const METHODIK = [
   },
 ]
 
-export function Ueber() {
+export function UeberInhalt() {
   return (
-    <section id="ueber" className="scroll-mt-4 border-t border-line bg-paper">
-      <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-16">
+    <div>
         <h2 className="text-[2rem] font-semibold leading-tight tracking-tight text-ink">Wer dahintersteht</h2>
 
         <div className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-start">
@@ -61,7 +60,6 @@ export function Ueber() {
             </div>
           ))}
         </div>
-      </div>
-    </section>
+    </div>
   )
 }

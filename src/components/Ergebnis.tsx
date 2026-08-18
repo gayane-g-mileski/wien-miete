@@ -4,7 +4,7 @@ import { flaechenwidmungLink, laerminfoLink, lagezuschlagLink } from '../lib/geo
 import { Collapsible } from './ui'
 import { RICHTWERT_WIEN } from '../lib/pricingData'
 import { ENGINE_VERSION, RECHTSGRUNDLAGE, RICHTWERT_QUELLE } from '../lib/version'
-import { kontaktVorbelegen } from '../lib/kontaktEvent'
+import { kontoOeffnen } from '../lib/kontoEvent'
 
 const LAGE_STYLE: Record<LageStatus, string> = {
   unbekannt: 'text-ink-soft',
@@ -258,9 +258,8 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
         <button
           type="button"
           onClick={() =>
-            kontaktVorbelegen(
-              'Ich möchte den vollständigen Prüfbericht als PDF (€24) für folgendes Objekt: ' +
-                (lage.adresse.trim() || '[Anschrift bitte ergänzen]'),
+            kontoOeffnen(
+              'Für den kostenpflichtigen Prüfbericht brauchst du ein Konto. Die kostenlose Ersteinschätzung bleibt ohne Anmeldung nutzbar.',
             )
           }
           className="mt-4 w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong"

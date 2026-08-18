@@ -1,4 +1,4 @@
-import { kontaktVorbelegen } from '../lib/kontaktEvent'
+import { kontoOeffnen } from '../lib/kontoEvent'
 import { Portfolio } from './Portfolio'
 
 const PUNKTE = [
@@ -48,11 +48,7 @@ export function Profis() {
         <div className="mt-9">
           <button
             type="button"
-            onClick={() =>
-              kontaktVorbelegen(
-                'Ich interessiere mich für den Profi-Zugang (Mehrfachprüfung, CSV-Import, Indexierung, Team-Zugänge) und möchte ihn 14 Tage testen.',
-              )
-            }
+            onClick={() => kontoOeffnen('Der Profi-Zugang läuft über ein Konto – Testphase 14 Tage.')}
             className="rounded-lg bg-accent px-5 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong"
           >
             14 Tage testen

@@ -5,12 +5,14 @@ import { Werkzeuge } from './components/Werkzeuge'
 import { Profis } from './components/Profis'
 import { Vergleich } from './components/Vergleich'
 import { Faq } from './components/Faq'
-import { Ueber } from './components/Ueber'
 import { Ergebnis } from './components/Ergebnis'
 import { Ergebnisleiste } from './components/Ergebnisleiste'
 import { SprachSchalter } from './components/SprachSchalter'
-import { Kontakt } from './components/Kontakt'
+import { UeberKontakt } from './components/UeberKontakt'
+import { Preise } from './components/Preise'
+import { Konto } from './components/Konto'
 import { ThemaSchalter } from './components/ThemaSchalter'
+import { kontoOeffnen } from './lib/kontoEvent'
 import { evaluateMrg } from './lib/mrgEngine'
 import { leereMerkmale } from './lib/pricingData'
 import { ladeVerlauf, speichereVerlauf, type VerlaufEintrag } from './lib/verlauf'
@@ -105,9 +107,16 @@ function App() {
             <a className="hidden transition-colors hover:text-accent sm:inline" href="#faq">
               Fragen
             </a>
-            <a className="hidden transition-colors hover:text-accent sm:inline" href="#quellen">
-              Quellen
+            <a className="hidden transition-colors hover:text-accent sm:inline" href="#preise">
+              Preise
             </a>
+            <button
+              type="button"
+              onClick={() => kontoOeffnen(undefined, 'anmelden')}
+              className="rounded-lg border border-accent/50 px-3 py-1.5 text-sm font-semibold text-accent transition-colors hover:bg-accent/10"
+            >
+              Anmelden
+            </button>
             <SprachSchalter />
             <ThemaSchalter />
           </div>
@@ -161,8 +170,8 @@ function App() {
       <Profis />
       <Vergleich />
       <Faq />
-      <Ueber />
-      <Kontakt />
+      <Preise />
+      <UeberKontakt />
 
       <footer id="quellen" className="scroll-mt-4 border-t border-line bg-surface-2">
         <div className="mx-auto max-w-6xl space-y-3 px-4 py-8 text-xs leading-relaxed text-ink-soft sm:px-6">
@@ -246,6 +255,8 @@ function App() {
           </div>
         </div>
       </footer>
+
+      <Konto />
     </div>
   )
 }

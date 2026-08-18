@@ -16,7 +16,7 @@ export function Werkzeuge() {
 
   return (
     <section id="werkzeuge" className="scroll-mt-4 border-t border-line bg-paper">
-      <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6 sm:py-16">
+      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
         <h2 className="text-[2rem] font-semibold leading-tight tracking-tight text-ink">Weitere Rechner</h2>
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink-soft">
           Drei Fragen, die sich an die Miethöhe anschließen: Wie viel darf erhöht werden, was gehört in die
