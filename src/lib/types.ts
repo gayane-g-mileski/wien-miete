@@ -1,6 +1,7 @@
 // Domain types für den Wiener Mietzins-Check.
 
 import type { Gesetzeslink } from './gesetze'
+import type { LagezuschlagHerleitung } from './lagezuschlag'
 
 export type Objektart =
   | 'wohnung'
@@ -98,6 +99,15 @@ export interface MietobjektInput {
    * Kategoriemietzins, ab 1.3.1994 Richtwert.
    */
   vertragsdatum: string
+  /**
+   * Liegt die Adresse in einem Gründerzeitviertel? Dann entfällt der
+   * Lagezuschlag (§ 2 Abs 3 RichtWG).
+   */
+  gruenderzeitviertel: Gruenderzeitlage
+  /** Denkmalgeschütztes Gebäude mit erheblichen Aufwendungen (§ 16 Abs 1 Z 3 MRG). */
+  denkmalschutzAufwand: boolean
+  /** Haus wurde nach Kriegsschaden mit öffentlichen Mitteln wiederhergestellt. */
+  kriegsschadenWiederaufbau: boolean
   // Förderung
   foerderungProgramm: FoerderungProgramm
   tilgungsstatus: Tilgungsstatus
@@ -108,6 +118,8 @@ export interface MietobjektInput {
   stockwerk: Stockwerk
   merkmale: Merkmale
 }
+
+export type Gruenderzeitlage = 'ja' | 'nein' | 'unbekannt'
 
 export type MietzinsArt =
   | 'richtwert'
@@ -126,6 +138,19 @@ export interface Preisbestandteil {
   wert: number // €/m²
 }
 
+/** Drei Blickwinkel auf dieselbe Wohnung – siehe mrgEngine. */
+export type SichtName = 'judikatur' | 'schlichtung' | 'markt'
+
+export interface Sicht {
+  name: SichtName
+  titel: string
+  erklaerung: string
+  proM2Min: number
+  proM2Max: number
+  monatlichMin: number
+  monatlichMax: number
+}
+
 export interface Preisspanne {
   proM2Min: number
   proM2Max: number
@@ -134,6 +159,8 @@ export interface Preisspanne {
   /** Fläche, mit der die Monatsmiete gerechnet wurde. */
   flaeche: number
   bestandteile?: Preisbestandteil[]
+  /** Judikatur-, Schlichtungsstellen- und Marktsicht auf dieselbe Wohnung. */
+  sichten?: Sicht[]
 }
 
 export type LageStatus = 'unbekannt' | 'zuschlag' | 'neutral' | 'abschlag'
@@ -158,4 +185,6 @@ export interface MrgErgebnis {
   gesetze: Gesetzeslink[] // Links zu den Gesetzestexten
   hinweise: string[]
   lage: LageInfo
+  /** Herleitung des Lagezuschlags – Schritt für Schritt, mit Quellen. */
+  lagezuschlag?: LagezuschlagHerleitung
 }

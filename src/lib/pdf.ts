@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf'
 import type { MrgErgebnis } from './types'
+import { ENGINE_VERSION, RICHTWERT_QUELLE } from './version'
 
 // Erzeugt aus einem Ergebnis ein sauber gesetztes PDF im Druckformat (A4),
 // kein Screenshot – echter Text, auswähl- und durchsuchbar.
@@ -225,9 +226,43 @@ function bloeckeBauen(ergebnis: MrgErgebnis, adresse: string): Block[] {
     b.push({ art: 'abschnitt' })
   }
 
+  if (ergebnis.preis?.sichten && ergebnis.preis.sichten.length > 0) {
+    b.push({ art: 'heading', text: 'Judikatur, Schlichtungsstelle, Markt' })
+    for (const si of ergebnis.preis.sichten) {
+      b.push({
+        art: 'bullet',
+        farbe: SOFT,
+        text: `${si.titel}: ${euro(si.proM2Min)} – ${euro(si.proM2Max)} EUR/m² (${euro(si.monatlichMin)} – ${euro(si.monatlichMax)} EUR im Monat). ${si.erklaerung}`,
+      })
+    }
+    b.push({ art: 'abschnitt' })
+  }
+
+  if (ergebnis.lagezuschlag && ergebnis.lagezuschlag.schritte.length > 1) {
+    b.push({ art: 'heading', text: 'Herleitung des Lagezuschlags' })
+    for (const sch of ergebnis.lagezuschlag.schritte) {
+      b.push({ art: 'bullet', text: `${sch.was}: ${sch.ergebnis} (${sch.quelle})`, farbe: SOFT })
+    }
+    b.push({ art: 'abschnitt' })
+  }
+
   if (ergebnis.gesetze.length > 0) {
     b.push({ art: 'heading', text: 'Gesetze zum Nachlesen' })
     for (const g of ergebnis.gesetze) b.push({ art: 'bullet', text: `${g.label}: ${g.url}`, farbe: SOFT })
+    b.push({ art: 'abschnitt' })
+  }
+
+  // Prüfbare Grundlagen: Fundstellen, Datenquellen, Zeitstempel, Version.
+  b.push({ art: 'heading', text: 'Grundlagen dieser Einschätzung' })
+  for (const t of [
+    'Mietzinsbildung: § 16 MRG. Zuschläge und Abschläge nach § 16 Abs 2 MRG in einer Gesamtschau nach der Verkehrsauffassung, nicht als Summe von Einzelposten – OGH RIS-Justiz RS0117881.',
+    'Lagezuschlag: § 16 Abs 3 MRG; Ausschluss in Gründerzeitvierteln nach § 2 Abs 3 RichtWG. Verbindlich ist die Lagezuschlagskarte der Stadt Wien (MA 25), abgeleitet aus den Grundkostenanteilen.',
+    'Kategoriebeträge: § 15a MRG in der kundgemachten Höhe. Zeitliche Abgrenzung: Verträge ab 1.3.1994 Richtwert, 1.1.1982 bis 28.2.1994 Kategoriemietzins, davor der vereinbarte Mietzins des Altvertrags.',
+    'Datenquellen: Adressdienst und Gebäudedaten der Stadt Wien (data.wien.gv.at), Rechtsinformationssystem des Bundes (ris.bka.gv.at), Marktmieten als hinterlegte Näherung je Bezirk.',
+    `${RICHTWERT_QUELLE}.`,
+    `Erstellt am ${new Date().toLocaleString('de-AT')} · Engine v${ENGINE_VERSION} · automatisierte Ersteinschätzung eines Informationswerkzeugs, keine Rechtsberatung.`,
+  ]) {
+    b.push({ art: 'bullet', text: t, farbe: SOFT })
   }
 
   return b

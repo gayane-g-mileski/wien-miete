@@ -1,13 +1,14 @@
 import { kontaktVorbelegen } from '../lib/kontaktEvent'
+import { Portfolio } from './Portfolio'
 
 const PUNKTE = [
   {
     titel: '400 Einheiten in 20 Minuten prüfen',
-    text: 'Ganze Zinshäuser oder Portfolios am Stück einschätzen, statt Wohnung für Wohnung durchzugehen.',
+    text: 'Lade deine Bestandsliste hoch – die Auswertung sagt dir, welche Einheiten mutmaßlich über der Grenze liegen. Gleich hier ausprobieren.',
   },
   {
     titel: 'CSV-Import',
-    text: 'Bestandsliste hochladen – Anschrift, Fläche, Kategorie, Vertragsdatum – und die Einschätzung je Einheit zurückbekommen.',
+    text: 'Anschrift, Fläche, Kategorie, Baujahr, Vertragsdatum und Ist-Miete genügen; das Ergebnis kommt als Tabelle und als CSV zurück.',
   },
   {
     titel: 'Indexierung',
@@ -38,6 +39,10 @@ export function Profis() {
               <p className="mt-2 text-sm leading-relaxed text-ink-soft">{p.text}</p>
             </div>
           ))}
+        </div>
+
+        <div className="mt-9">
+          <Portfolio />
         </div>
 
         <div className="mt-9">

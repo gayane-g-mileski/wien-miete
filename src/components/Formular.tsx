@@ -248,7 +248,29 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
             )}
           </div>
 
+          {/* Gründerzeitviertel: schließt den Lagezuschlag aus (§ 2 Abs 3 RichtWG) */}
+          {value.objektart === 'wohnung' && !baujahrOffen && (
+            <SelectField
+              label="Gründerzeitviertel"
+              id="gruenderzeit"
+              value={value.gruenderzeitviertel}
+              hint="In einem Gründerzeitviertel entfällt der Lagezuschlag. Gemeint sind Gebiete, in denen überwiegend Häuser aus 1870–1917 stehen, die ursprünglich Kleinwohnungen ohne Bad hatten."
+              onChange={(e) => set('gruenderzeitviertel', e.target.value as MietobjektInput['gruenderzeitviertel'])}
+            >
+              <option value="unbekannt">unbekannt</option>
+              <option value="ja">ja – Lagezuschlag entfällt</option>
+              <option value="nein">nein</option>
+            </SelectField>
+          )}
+
           <div className="space-y-4">
+            {value.objektart === 'wohnung' && !baujahrOffen && value.baubewilligungGebaeude === 'vor_1945' && (
+              <Checkbox
+                checked={value.kriegsschadenWiederaufbau}
+                onChange={(v) => set('kriegsschadenWiederaufbau', v)}
+                label="Haus nach Kriegsschaden mit öffentlichen Mitteln wiederhergestellt (Wiederaufbaufonds)"
+              />
+            )}
             {value.objektart === 'dg_ausbau' && (
               <Checkbox
                 checked={value.dgAusbauNachStichtag}
@@ -441,12 +463,23 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
                   <p className="text-sm font-semibold text-ink-faint">{gruppe}</p>
                   <div className="flex flex-col gap-2">
                     {MERKMAL_KATALOG.filter((m) => m.gruppe === gruppe).map((m) => (
-                      <Checkbox
-                        key={m.key}
-                        checked={value.merkmale[m.key]}
-                        onChange={(v) => setMerkmal(m.key, v)}
-                        label={m.label}
-                      />
+                      <div key={m.key}>
+                        <Checkbox
+                          checked={value.merkmale[m.key]}
+                          onChange={(v) => setMerkmal(m.key, v)}
+                          label={m.label}
+                        />
+                        {/* Denkmalschutz kann den Richtwert ganz verdrängen */}
+                        {m.key === 'denkmalschutz' && value.merkmale.denkmalschutz && (
+                          <div className="mt-3 ml-6">
+                            <Checkbox
+                              checked={value.denkmalschutzAufwand}
+                              onChange={(v) => set('denkmalschutzAufwand', v)}
+                              label="Erhebliche eigene Aufwendungen für die Erhaltung (§ 16 Abs 1 Z 3 MRG)"
+                            />
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>

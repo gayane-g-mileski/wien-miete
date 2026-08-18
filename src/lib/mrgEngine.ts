@@ -7,6 +7,7 @@ import type {
   MrgErgebnis,
   Preisbestandteil,
   Preisspanne,
+  Sicht,
 } from './types'
 import {
   ANGEMESSEN_ABSCHLAG_VON_FREI,
@@ -24,6 +25,7 @@ import {
   getBezirk,
 } from './pricingData'
 import { evaluateFoerderung } from './foerderung'
+import { lagezuschlagHerleiten, type LagezuschlagHerleitung } from './lagezuschlag'
 import { GESETZ, type Gesetzeslink } from './gesetze'
 
 const MIETZINS_LABEL: Record<MietzinsArt, string> = {
@@ -79,12 +81,6 @@ function bezirkVonEingabe(input: MietobjektInput): number | null {
   return input.anschriftBezirk ?? bezirkAusAnschrift(input.anschrift)
 }
 
-function lagezuschlagWert(input: MietobjektInput): { wert: number; bezirk: number | null } {
-  const nr = bezirkVonEingabe(input)
-  if (nr == null) return { wert: 0, bezirk: null }
-  return { wert: getBezirk(nr).lagezuschlag, bezirk: nr }
-}
-
 function marktband(input: MietobjektInput): { min: number; max: number } {
   const nr = bezirkVonEingabe(input) ?? input.bezirk
   const b = getBezirk(nr)
@@ -104,7 +100,55 @@ function ausstattungsBestandteile(input: MietobjektInput): Preisbestandteil[] {
   return teile
 }
 
-function computePreis(input: MietobjektInput, art: MietzinsArt): Preisspanne | null {
+/**
+ * Richtwert-Rechnung für einen bestimmten Lagezuschlag und einen bestimmten
+ * Korridor für die Ausstattungszuschläge. Beides unterscheidet die drei
+ * Sichten (Judikatur, Schlichtungsstelle, Markt) voneinander.
+ */
+function richtwertRechnung(
+  input: MietobjektInput,
+  korridor: number,
+  lageWert: number,
+): { proM2: number; teile: Preisbestandteil[] } {
+  const { grundwert, abschlag: katAbschlag } = grundwertRichtwert(input.kategorie)
+  const teile: Preisbestandteil[] = [{ label: 'Richtwert Wien (Normwohnung, Kat. A)', wert: RICHTWERT_WIEN }]
+  if (katAbschlag !== 0) {
+    const prozent = Math.round(-KATEGORIE_ABSCHLAG[input.kategorie === 'B' ? 'B' : 'C'] * 100)
+    teile.push({ label: `Abschlag Kategorie ${katKurz(input.kategorie)} (${prozent} %, Praxiswert)`, wert: katAbschlag })
+  }
+  if (lageWert > 0) teile.push({ label: 'Lagezuschlag (§ 16 Abs 3 MRG)', wert: round2(lageWert) })
+
+  // Gesamtschau statt linearer Addition: Die Summe der Ausstattungs-Zu- und
+  // -Abschläge bleibt in einem Korridor um den Grundwert (§ 16 Abs 2 MRG,
+  // OGH RS0117881).
+  const ausstattung = ausstattungsBestandteile(input)
+  const summeRoh = ausstattung.reduce((s, t) => s + t.wert, 0)
+  const grenze = round2(grundwert * korridor)
+  const summe = Math.max(-grenze, Math.min(grenze, summeRoh))
+  teile.push(...ausstattung)
+  const gedeckelt = round2(summe - summeRoh)
+  if (gedeckelt !== 0) {
+    teile.push({
+      label: `Deckelung nach Gesamtschau (max. ±${Math.round(korridor * 100)} % des Grundwerts)`,
+      wert: gedeckelt,
+    })
+  }
+
+  let proM2 = teile.reduce((s, t) => s + t.wert, 0)
+  proM2 = Math.max(proM2, KATEGORIE_BETRAG.D_brauchbar)
+  if (input.befristet) {
+    const befristung = round2(-proM2 * BEFRISTUNGSABSCHLAG)
+    teile.push({ label: 'Abschlag für befristeten Vertrag (25 %)', wert: befristung })
+    proM2 += befristung
+  }
+  return { proM2, teile: teile.map((t) => ({ label: t.label, wert: round2(t.wert) })) }
+}
+
+function computePreis(
+  input: MietobjektInput,
+  art: MietzinsArt,
+  lz: LagezuschlagHerleitung,
+): Preisspanne | null {
   const { flaeche } = input
   const markt = marktband(input)
 
@@ -114,41 +158,14 @@ function computePreis(input: MietobjektInput, art: MietzinsArt): Preisspanne | n
 
   switch (art) {
     case 'richtwert': {
-      const { grundwert, abschlag: katAbschlag } = grundwertRichtwert(input.kategorie)
-      const teile: Preisbestandteil[] = [{ label: 'Richtwert Wien (Normwohnung, Kat. A)', wert: RICHTWERT_WIEN }]
-      if (katAbschlag !== 0) {
-        const prozent = Math.round(-KATEGORIE_ABSCHLAG[input.kategorie === 'B' ? 'B' : 'C'] * 100)
-        teile.push({ label: `Abschlag Kategorie ${katKurz(input.kategorie)} (${prozent} %, Praxiswert)`, wert: katAbschlag })
-      }
-      const lage = lagezuschlagWert(input)
-      if (lage.wert > 0) teile.push({ label: 'Lagezuschlag (Bezirksnäherung)', wert: round2(lage.wert) })
-
-      // Gesamtschau statt linearer Addition: Die Summe der Ausstattungs-Zu- und
-      // -Abschläge bleibt in einem Korridor um den Grundwert (§ 16 Abs 2 MRG,
-      // OGH RS0117881).
-      const ausstattung = ausstattungsBestandteile(input)
-      const summeRoh = ausstattung.reduce((s, t) => s + t.wert, 0)
-      const grenze = round2(grundwert * ZUSCHLAG_KORRIDOR)
-      const summe = Math.max(-grenze, Math.min(grenze, summeRoh))
-      teile.push(...ausstattung)
-      const gedeckelt = round2(summe - summeRoh)
-      if (gedeckelt !== 0) {
-        teile.push({
-          label: `Deckelung nach Gesamtschau (max. ±${Math.round(ZUSCHLAG_KORRIDOR * 100)} % des Grundwerts)`,
-          wert: gedeckelt,
-        })
-      }
-
-      let proM2 = teile.reduce((s, t) => s + t.wert, 0)
-      proM2 = Math.max(proM2, KATEGORIE_BETRAG.D_brauchbar)
-      if (input.befristet) {
-        const befristung = round2(-proM2 * BEFRISTUNGSABSCHLAG)
-        teile.push({ label: 'Abschlag für befristeten Vertrag (25 %)', wert: befristung })
-        proM2 += befristung
-      }
-      bestandteile = teile.map((t) => ({ label: t.label, wert: round2(t.wert) }))
-      proM2Min = proM2 * 0.94
-      proM2Max = proM2 * 1.06
+      // Die Bandbreite kommt aus der Streuung des Lagezuschlags, nicht aus
+      // einem pauschalen Zu- und Abschlag.
+      const mitte = richtwertRechnung(input, ZUSCHLAG_KORRIDOR, lz.wert)
+      const unten = richtwertRechnung(input, ZUSCHLAG_KORRIDOR, lz.min).proM2
+      const oben = richtwertRechnung(input, ZUSCHLAG_KORRIDOR, lz.max).proM2
+      bestandteile = mitte.teile
+      proM2Min = Math.min(unten, oben, mitte.proM2) * 0.98
+      proM2Max = Math.max(unten, oben, mitte.proM2) * 1.02
       break
     }
     case 'kategorie': {
@@ -212,8 +229,64 @@ function computePreis(input: MietobjektInput, art: MietzinsArt): Preisspanne | n
   }
 }
 
+
+/**
+ * Drei Blickwinkel auf dieselbe Wohnung:
+ *  – Judikatur: strenge Gesamtschau, Zuschläge eng gedeckelt, unterer
+ *    Lagezuschlag. So rechnen Gerichte, wenn sie Zuschläge zusammenschauen.
+ *  – Schlichtungsstelle: der Wert, mit dem hier gerechnet wird.
+ *  – Markt: was in dieser Gegend tatsächlich verlangt wird.
+ */
+function baueSichten(input: MietobjektInput, art: MietzinsArt, lz: LagezuschlagHerleitung): Sicht[] | undefined {
+  if (art !== 'richtwert') return undefined
+  const markt = marktband(input)
+  const streng = richtwertRechnung(input, ZUSCHLAG_KORRIDOR / 2, lz.min).proM2
+  const mitte = richtwertRechnung(input, ZUSCHLAG_KORRIDOR, lz.wert).proM2
+  const oben = richtwertRechnung(input, ZUSCHLAG_KORRIDOR, lz.max).proM2
+
+  const bau = (
+    name: Sicht['name'],
+    titel: string,
+    erklaerung: string,
+    min: number,
+    max: number,
+  ): Sicht => ({
+    name,
+    titel,
+    erklaerung,
+    proM2Min: round2(min),
+    proM2Max: round2(max),
+    monatlichMin: round2(min * input.flaeche),
+    monatlichMax: round2(max * input.flaeche),
+  })
+
+  return [
+    bau(
+      'judikatur',
+      'Judikatur-Sicht',
+      'Strenge Gesamtschau nach § 16 Abs 2 MRG: Zuschläge werden nicht aufaddiert, sondern zusammen bewertet (OGH RS0117881). Unterer Lagezuschlag.',
+      streng * 0.98,
+      streng * 1.02,
+    ),
+    bau(
+      'schlichtung',
+      'Schlichtungsstellen-Sicht',
+      'Der Wert, mit dem hier gerechnet wird: Zuschläge im Korridor um den Grundwert, Lagezuschlag in seiner Bandbreite.',
+      Math.min(mitte, oben) * 0.98,
+      Math.max(mitte, oben) * 1.02,
+    ),
+    bau(
+      'markt',
+      'Marktsicht',
+      'Was in dieser Gegend tatsächlich verlangt wird – ohne Rücksicht darauf, was gesetzlich zulässig ist.',
+      markt.min,
+      markt.max,
+    ),
+  ]
+}
+
 /** Menschliche Lage-Erklärung (Zuschlag/Abschlag/neutral/unbekannt). */
-function lageInfo(input: MietobjektInput, art: MietzinsArt): LageInfo {
+function lageInfo(input: MietobjektInput, art: MietzinsArt, lz: LagezuschlagHerleitung): LageInfo {
   const nr = bezirkVonEingabe(input)
   const koords = input.anschriftKoords
   const adresse = input.anschrift
@@ -230,11 +303,21 @@ function lageInfo(input: MietobjektInput, art: MietzinsArt): LageInfo {
   }
 
   const b = getBezirk(nr)
-  const zuschlag = art === 'richtwert' ? b.lagezuschlag : 0
+  const zuschlag = art === 'richtwert' ? lz.wert : 0
+
+  if (lz.ausgeschlossen && art === 'richtwert') {
+    return {
+      status: 'neutral',
+      bezirk: nr,
+      koords,
+      adresse,
+      text: `Die Adresse liegt in einem Gründerzeitviertel (${nr}. Bezirk, ${b.name}). Dort ist ein Lagezuschlag nach § 2 Abs 3 RichtWG ausgeschlossen – auch wenn der Bezirk sonst als gute Lage gilt.`,
+    }
+  }
 
   if (zuschlag > 0) {
-    const betrag = zuschlag.toFixed(2).replace('.', ',')
-    let text = `Die Adresse liegt in einer gefragten Gegend (${nr}. Bezirk, ${b.name}). Für so eine gute Lage darf die Miete etwas höher sein – hier rund ${betrag} € pro m² zusätzlich. Das ist ein Bezirksmittel; amtlich gilt der Lagezuschlag je Liegenschaft laut Lagezuschlagskarte der Stadt Wien.`
+    const spanne = `${lz.min.toFixed(2).replace('.', ',')} bis ${lz.max.toFixed(2).replace('.', ',')}`
+    let text = `Die Adresse liegt in einer gefragten Gegend (${nr}. Bezirk, ${b.name}). Für so eine gute Lage darf die Miete höher sein – hier rund ${spanne} € pro m² zusätzlich. Der Zuschlag gilt je Liegenschaft; maßgeblich ist die Lagezuschlagskarte der Stadt Wien.`
     if (laut) text += ' Weil du "laute Lage/Straßenlärm" angehakt hast, wird das mit einem Abzug gegengerechnet.'
     return { status: laut ? 'abschlag' : 'zuschlag', bezirk: nr, koords, adresse, text }
   }
@@ -262,6 +345,11 @@ function result(
   begruendung: string[],
   hinweise: string[] = [],
 ): MrgErgebnis {
+  const lz = lagezuschlagHerleiten(
+    bezirkVonEingabe(input),
+    input.gruenderzeitviertel,
+    null,
+  )
   if (NICHT_WOHNEN.includes(input.objektart)) {
     hinweise = [
       ...hinweise,
@@ -308,11 +396,15 @@ function result(
     anwendungLabel: ANWENDUNG_LABEL[anwendung],
     kuendigungsschutz: anwendung !== 'ausnahme',
     preisschutz: anwendung === 'voll',
-    preis: computePreis(input, mietzinsArt),
+    preis: (() => {
+      const p = computePreis(input, mietzinsArt, lz)
+      return p ? { ...p, sichten: baueSichten(input, mietzinsArt, lz) } : null
+    })(),
     begruendung,
     gesetze,
     hinweise,
-    lage: lageInfo(input, mietzinsArt),
+    lage: lageInfo(input, mietzinsArt, lz),
+    lagezuschlag: lz,
   }
 }
 
@@ -383,7 +475,31 @@ export function evaluateMrg(input: MietobjektInput): MrgErgebnis {
     )
   }
 
-  // ---- 2) Förderung (nur für Wohnungen, beim Altbau ohne Bedeutung) ----
+  // ---- 2a) Kriegsschaden und Wiederaufbau ----
+  // Ein Altbau, der nach Kriegsschaden mit Mitteln des Wohnhaus-Wiederaufbau-
+  // fonds wiederhergestellt wurde, folgt den Förderungsregeln – auch wenn die
+  // Baubewilligung vor 1945 liegt.
+  if (input.objektart === 'wohnung' && input.kriegsschadenWiederaufbau) {
+    const foe = evaluateFoerderung('wwg1948', input.tilgungsstatus, input.eigentumswohnung)
+    if (foe) {
+      return result(
+        foe.mietzinsArt,
+        foe.anwendung,
+        input,
+        foe.gesetze,
+        [
+          'Das Haus wurde nach einem Kriegsschaden mit öffentlichen Mitteln wiederhergestellt (Wohnhaus-Wiederaufbaufonds).',
+          ...foe.begruendung,
+        ],
+        [
+          ...foe.hinweise,
+          'Maßgeblich ist, ob gerade diese Wohnung mit Fondsmitteln wiederhergestellt wurde. Bei Bewilligungen nach dem 31.8.1952 genügt die Wiederherstellung allgemeiner Teile des Hauses.',
+        ],
+      )
+    }
+  }
+
+  // ---- 2b) Förderung (nur für Wohnungen, beim Altbau ohne Bedeutung) ----
   if (input.objektart === 'wohnung' && input.baubewilligungGebaeude !== 'vor_1945') {
     const foe = evaluateFoerderung(input.foerderungProgramm, input.tilgungsstatus, input.eigentumswohnung)
     if (foe) {
@@ -448,6 +564,23 @@ export function evaluateMrg(input: MietobjektInput): MrgErgebnis {
   }
 
   if (input.baubewilligungGebaeude === 'vor_1945') {
+    // Denkmalschutz: Hat die Vermieterseite erhebliche eigene Mittel in die
+    // Erhaltung des geschützten Gebäudes gesteckt, darf statt des Richtwerts
+    // der angemessene Mietzins vereinbart werden.
+    if (input.denkmalschutzAufwand && input.merkmale.denkmalschutz) {
+      return result(
+        'angemessen',
+        'voll',
+        input,
+        [GESETZ.mrg()],
+        [
+          'Das Gebäude steht unter Denkmalschutz und die Vermieterseite hat dafür erhebliche eigene Mittel aufgewendet. In diesem Fall darf statt des Richtwerts der angemessene Mietzins vereinbart werden (§ 16 Abs 1 Z 3 MRG).',
+        ],
+        [
+          'Die Aufwendungen müssen erheblich und über die laufende Erhaltung hinausgehend sein; im Streitfall ist das nachzuweisen. Öffentliche Förderungen und Zuschüsse zählen dabei nicht als eigene Mittel.',
+        ],
+      )
+    }
     if (input.kategorie === 'D_brauchbar' || input.kategorie === 'D_unbrauchbar') {
       return result(
         'kategorie_d',

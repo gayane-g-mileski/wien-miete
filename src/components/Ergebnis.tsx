@@ -97,6 +97,44 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
                     </div>
                   )}
                 </div>
+                {/* Drei Sichten auf dieselbe Wohnung */}
+                {ergebnis.preis.sichten && ergebnis.preis.sichten.length > 0 && (
+                  <div className="rounded-xl bg-surface px-4 py-3 ring-1 ring-line">
+                    <Collapsible title="Judikatur · Schlichtungsstelle · Markt">
+                      <div className="space-y-4">
+                        {ergebnis.preis.sichten.map((si) => (
+                          <div key={si.name}>
+                            <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+                              <span className="text-sm font-semibold text-ink">{si.titel}</span>
+                              <span className="tabular-nums text-base font-semibold text-coffee">
+                                {formatEuro(si.proM2Min)} — {formatEuro(si.proM2Max)} €/m²
+                              </span>
+                            </div>
+                            <p className="mt-0.5 text-[12px] leading-relaxed text-ink-faint">{si.erklaerung}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </Collapsible>
+                  </div>
+                )}
+
+                {/* Herleitung des Lagezuschlags */}
+                {ergebnis.lagezuschlag && ergebnis.lagezuschlag.schritte.length > 1 && (
+                  <div className="rounded-xl bg-surface px-4 py-3 ring-1 ring-line">
+                    <Collapsible title="Lagezuschlag – wie er zustande kommt">
+                      <div className="space-y-3">
+                        {ergebnis.lagezuschlag.schritte.map((sch) => (
+                          <div key={sch.was}>
+                            <p className="text-sm font-medium text-ink">{sch.was}</p>
+                            <p className="text-sm text-ink-soft">{sch.ergebnis}</p>
+                            <p className="text-[12px] text-ink-faint">Quelle: {sch.quelle}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </Collapsible>
+                  </div>
+                )}
+
                 {freierPreis && (
                   <p className="px-1 text-sm text-ink-soft">
                     Es gibt keine gesetzliche Obergrenze – die Werte zeigen, was in dieser Gegend üblich ist.

@@ -179,6 +179,72 @@ export function laerminfoLink(koords: Koordinaten | null, adresse = ''): string 
   return 'https://maps.laerminfo.at/'
 }
 
+export interface GruenderzeitBefund {
+  /** Anteil der Gebäude im Umkreis mit Baujahr 1870–1917. */
+  anteil: number
+  /** Wie viele Gebäude ausgewertet werden konnten. */
+  gebaeude: number
+  /** Radius der Auswertung in Metern. */
+  radius: number
+}
+
+/**
+ * Schätzt den Gründerzeit-Anteil rund um eine Adresse aus den Gebäudedaten der
+ * Stadt Wien. § 2 Abs 3 RichtWG schließt einen Lagezuschlag aus, wenn die Lage
+ * in einem Gebiet liegt, in dem überwiegend Gebäude aus 1870–1917 stehen, die
+ * ursprünglich Kleinwohnungen ohne Bad enthielten. Der Baualtersanteil ist nur
+ * das erste Merkmal davon – deshalb ist das Ergebnis ein Indiz, kein Beweis.
+ */
+export async function gruenderzeitAnteil(
+  koords: Koordinaten,
+  signal?: AbortSignal,
+): Promise<GruenderzeitBefund | null> {
+  const { lat, lon } = koords
+  // ~150 m Umkreis: 0.00135° Breite ≈ 150 m, Länge in Wien entsprechend weiter.
+  const dLat = 0.00135
+  const dLon = 0.00202
+  const basis =
+    'https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0' +
+    '&srsName=EPSG:4326&typeName=ogdwien:GEBAEUDEINFOOGD&outputFormat=csv'
+  const boxen = [
+    `${lon - dLon},${lat - dLat},${lon + dLon},${lat + dLat},EPSG:4326`,
+    `${lat - dLat},${lon - dLon},${lat + dLat},${lon + dLon},EPSG:4326`,
+  ]
+
+  for (const box of boxen) {
+    try {
+      const res = await fetch(`${basis}&bbox=${box}`, { signal })
+      if (!res.ok) continue
+      const text = await res.text()
+      if (!text || text.trimStart().startsWith('<')) continue
+      const zeilen = text.split(/\r?\n/).filter((z) => z.trim())
+      if (zeilen.length < 3) continue
+      const kopf = csvZeile(zeilen[0]).map((h) => h.trim().toUpperCase())
+      const iBj = kopf.findIndex((h) => h === 'BAUJAHR')
+      const iLabel = kopf.findIndex((h) => h === 'L_BAUJ' || h === 'BAUALTER')
+      if (iBj < 0 && iLabel < 0) continue
+
+      let gesamt = 0
+      let gruenderzeit = 0
+      for (const zeile of zeilen.slice(1)) {
+        const f = csvZeile(zeile)
+        const info =
+          (iBj >= 0 ? baujahrDeuten(f[iBj] ?? '') : null) ?? (iLabel >= 0 ? baujahrDeuten(f[iLabel] ?? '') : null)
+        if (!info) continue
+        const jahr = Number((info.text.match(/\b(1[89]\d{2}|20\d{2})\b/) ?? [])[1])
+        if (!Number.isFinite(jahr)) continue
+        gesamt++
+        if (jahr >= 1870 && jahr <= 1917) gruenderzeit++
+      }
+      if (gesamt < 5) continue // zu dünne Datenlage für eine Aussage
+      return { anteil: gruenderzeit / gesamt, gebaeude: gesamt, radius: 150 }
+    } catch {
+      /* nächste Achsreihenfolge versuchen */
+    }
+  }
+  return null
+}
+
 /**
  * Lagezuschlagskarte der Stadt Wien. Der Lagezuschlag gilt grundstücksscharf –
  * die hinterlegten Bezirkswerte sind nur eine Näherung, verbindlich ist die
