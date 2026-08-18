@@ -1,4 +1,4 @@
-import { UeberInhalt } from './Ueber'
+import { MethodikInhalt, UeberInhalt } from './Ueber'
 import { KontaktInhalt } from './Kontakt'
 
 /** „Wer dahintersteht“ und „Kontakt“ nebeneinander. */
@@ -11,6 +11,11 @@ export function UeberKontakt() {
           <div id="kontakt" className="scroll-mt-4">
             <KontaktInhalt />
           </div>
+        </div>
+
+        {/* Methodik darunter, 1024 px breit */}
+        <div className="mx-auto mt-14 max-w-5xl border-t border-line pt-10">
+          <MethodikInhalt />
         </div>
       </div>
     </section>

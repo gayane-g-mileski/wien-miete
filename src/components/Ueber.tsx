@@ -51,15 +51,23 @@ export function UeberInhalt() {
           </div>
         </div>
 
-        <h3 className="mt-12 text-sm font-semibold uppercase tracking-[0.14em] text-accent">Methodik</h3>
-        <div className="mt-5 space-y-6">
-          {METHODIK.map((m) => (
-            <div key={m.titel}>
-              <p className="text-base font-semibold text-ink">{m.titel}</p>
-              <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">{m.text}</p>
-            </div>
-          ))}
-        </div>
+    </div>
+  )
+}
+
+/** Methodik steht unter „Wer dahintersteht“ und dem Kontakt, über die ganze Spalte. */
+export function MethodikInhalt() {
+  return (
+    <div>
+      <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-accent">Methodik</h3>
+      <div className="mt-6 grid grid-cols-1 gap-x-10 gap-y-6 sm:grid-cols-2">
+        {METHODIK.map((m) => (
+          <div key={m.titel}>
+            <p className="text-base font-semibold text-ink">{m.titel}</p>
+            <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">{m.text}</p>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
