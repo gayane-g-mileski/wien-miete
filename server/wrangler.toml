@@ -1,0 +1,28 @@
+name = "mietzins-check-api"
+main = "src/index.ts"
+compatibility_date = "2026-08-01"
+
+# EU-Region: Daten der Kundschaft bleiben in der Europäischen Union.
+[placement]
+mode = "smart"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "mietzins"
+# Nach `npx wrangler d1 create mietzins` die ausgegebene Kennung eintragen.
+database_id = "HIER_DIE_D1_KENNUNG_EINTRAGEN"
+
+[vars]
+# Erlaubte Herkunft(en) für CORS und für die Rücksprungadressen, kommagetrennt.
+ERLAUBTE_HERKUNFT = "https://gayane-g-mileski.github.io"
+MAIL_ABSENDER = "Mietzins-Check <noreply@mietzins-check.at>"
+MAIL_ENDPUNKT = ""
+
+# Geheimnisse werden nicht hier abgelegt, sondern gesetzt mit:
+#   npx wrangler secret put SITZUNG_GEHEIMNIS
+#   npx wrangler secret put STRIPE_SCHLUESSEL
+#   npx wrangler secret put STRIPE_WEBHOOK_GEHEIMNIS
+#   npx wrangler secret put STRIPE_PREIS_BERICHT
+#   npx wrangler secret put STRIPE_PREIS_PROFI
+#   npx wrangler secret put STRIPE_PREIS_API
+#   npx wrangler secret put MAIL_SCHLUESSEL

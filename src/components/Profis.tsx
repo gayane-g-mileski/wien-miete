@@ -1,4 +1,5 @@
 import { kontoOeffnen } from '../lib/kontoEvent'
+import { href } from '../lib/seo'
 import { Portfolio } from './Portfolio'
 
 const PUNKTE = [
@@ -17,6 +18,14 @@ const PUNKTE = [
   {
     titel: 'Team-Zugänge',
     text: 'Mehrere Personen, gemeinsame Objektlisten, nachvollziehbare Prüfberichte für Hausverwaltung und Eigentümer:innen.',
+  },
+  {
+    titel: 'Schnittstelle für die eigene Software',
+    text: 'Dieselbe Einschätzung als JSON: Mietzinsart, Anwendungsbereich, Bandbreite und Herleitung – mit API-Schlüssel und versionierter Rechenlogik.',
+  },
+  {
+    titel: 'White-Label für die eigene Website',
+    text: 'Der Rechner als iframe im eigenen Erscheinungsbild, ohne fremde Marke. Anfragen landen in Ihrem Postfach.',
   },
 ]
 
@@ -45,18 +54,25 @@ export function Profis() {
           <Portfolio />
         </div>
 
-        <div className="mt-9">
+        <div className="mt-9 flex flex-wrap items-center gap-4">
           <button
             type="button"
-            onClick={() => kontoOeffnen('Der Profi-Zugang läuft über ein Konto – Testphase 14 Tage.')}
+            onClick={() => kontoOeffnen('Der Profi-Zugang kostet ab 49,00 € pro Monat inklusive Umsatzsteuer.', 'registrieren', 'profi')}
             className="rounded-lg bg-accent px-5 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong"
           >
-            14 Tage testen
+            Profi-Zugang bestellen
           </button>
-          <p className="mt-3 text-sm text-ink-faint">
-            Der Profi-Zugang ist in Vorbereitung. Wir melden uns, sobald der Test-Zugang bereitsteht.
-          </p>
+          <a
+            href={href('api/')}
+            className="rounded-lg border border-accent/50 px-5 py-2.5 text-base font-semibold text-accent transition-colors hover:bg-accent/10"
+          >
+            Schnittstelle und White-Label
+          </a>
         </div>
+        <p className="mt-3 text-sm text-ink-faint">
+          Monatlich kündbar, Preise inklusive Umsatzsteuer. Für Bestände mit personenbezogenen Daten Dritter liegt ein
+          Auftragsverarbeitungsvertrag nach Art. 28 DSGVO bereit.
+        </p>
       </div>
     </section>
   )

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="de-AT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, follow" />
+    <title>Mietzins-Rechner</title>
+    <script>
+      // Design aus der Adresse übernehmen, bevor gezeichnet wird.
+      try {
+        var t = new URLSearchParams(location.search).get('thema')
+        if (t === 'dunkel') document.documentElement.dataset.theme = 'dark'
+        if (t === 'hell') document.documentElement.dataset.theme = 'light'
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/embed.tsx"></script>
+  </body>
+</html>

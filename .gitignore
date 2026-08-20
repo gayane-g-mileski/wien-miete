@@ -23,7 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 
-# App-Signatur (niemals einchecken)
-android/keystore.properties
-*.keystore
-*.jks
+# Zugangsdaten und lokale Umgebungen (niemals einchecken)
+.env
+.env.*
+!.env.example
+.wrangler

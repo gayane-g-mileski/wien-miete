@@ -1,0 +1,99 @@
+/* Gemeinsames Aussehen der Rechtstexte (Impressum, Datenschutz, AGB,
+   Rücktrittsbelehrung, Auftragsverarbeitung). Bewusst schlicht und ohne
+   JavaScript, damit die Seiten überall lesbar bleiben. */
+
+:root {
+  color-scheme: light dark;
+  --paper: #f5f1ea;
+  --flaeche: #ffffff;
+  --ink: #6f4e37;
+  --soft: #574d45;
+  --accent: #607456;
+  --linie: #e5ddd1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #17130f;
+    --flaeche: #221d18;
+    --ink: #f3efe9;
+    --soft: #cabfb2;
+    --accent: #9db98e;
+    --linie: #39312a;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+}
+
+main {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+h1 {
+  font-size: 2rem;
+  color: var(--accent);
+}
+
+h2 {
+  margin-top: 2.25rem;
+  font-size: 1.15rem;
+}
+
+h3 {
+  margin-top: 1.75rem;
+  font-size: 1rem;
+}
+
+p,
+li,
+td,
+th {
+  color: var(--soft);
+}
+
+a {
+  color: var(--accent);
+}
+
+.stand {
+  font-size: 0.875rem;
+}
+
+.offen {
+  border: 1px solid var(--accent);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--linie);
+  padding: 0.55rem 0.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.umbruch {
+  overflow-x: auto;
+}

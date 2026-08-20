@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { statusleisteAnpassen } from '../lib/nativ'
 
 // Umschalter zwischen hellem und dunklem Design. Ohne Auswahl folgt die Seite
 // der Systemeinstellung; eine getroffene Wahl bleibt gespeichert.
@@ -44,7 +43,6 @@ export function ThemaSchalter() {
     } catch {
       // Speichern ist optional (z.B. im privaten Modus).
     }
-    void statusleisteAnpassen(dunkel)
   }, [dunkel])
 
   const titel = dunkel ? 'Helles Design' : 'Dunkles Design'

@@ -259,12 +259,14 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
           type="button"
           onClick={() =>
             kontoOeffnen(
-              'Für den kostenpflichtigen Prüfbericht brauchst du ein Konto. Die kostenlose Ersteinschätzung bleibt ohne Anmeldung nutzbar.',
+              'Der Prüfbericht PRO kostet 24,00 € inklusive Umsatzsteuer und wird über ein Konto abgerechnet. Die kostenlose Ersteinschätzung bleibt ohne Anmeldung nutzbar.',
+              'registrieren',
+              'bericht',
             )
           }
           className="mt-4 w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong"
         >
-          Vollständigen Prüfbericht als PDF (€24)
+          Prüfbericht PRO als PDF – 24,00 € inkl. USt
         </button>
         <p className="mt-2 px-1 text-[12px] leading-relaxed text-ink-faint">
           Der Prüfbericht ordnet die Wohnung Punkt für Punkt ein, mit Fundstellen und Rechenweg. Die kostenlose

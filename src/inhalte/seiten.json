@@ -1,0 +1,386 @@
+{
+  "hinweis": "Inhalte der Ratgeberseiten. Quelle für die Oberfläche (src/lib/seo.ts) und für das Pre-Rendering (scripts/prerender.mjs). Sprache bewusst auf automatisierte Ersteinschätzung gehalten – nie Gutachten, nie Rechtsauskunft.",
+  "seiten": [
+    {
+      "pfad": "richtwert-wien",
+      "titel": "Richtwertmietzins Wien 2026: Höhe, Zuschläge und Berechnung",
+      "beschreibung": "Richtwert Wien 6,74 €/m² seit 1.4.2026: Wann er gilt, wie Zu- und Abschläge nach § 16 Abs 2 MRG einfließen und wie sich der zulässige Hauptmietzins nachrechnen lässt.",
+      "kicker": "Richtwertmietzins",
+      "h1": "Richtwertmietzins in Wien: Höhe, Anwendung und Berechnung",
+      "einleitung": "Der Richtwert ist der Ausgangspunkt für die Mietzinsobergrenze in Wiener Altbauwohnungen, die voll unter das Mietrechtsgesetz fallen. Er beschreibt keine fertige Miete, sondern den Preis einer gesetzlich definierten Normwohnung – erst Zu- und Abschläge machen daraus den Betrag für die konkrete Wohnung.",
+      "abschnitte": [
+        {
+          "ueberschrift": "Wie hoch ist der Richtwert in Wien?",
+          "absaetze": [
+            "Für Wien beträgt der Richtwert seit 1. April 2026 6,74 € je Quadratmeter Nutzfläche und Monat, netto und ohne Betriebskosten. Er gilt für die mietrechtliche Normwohnung: brauchbarer Zustand, Ausstattungskategorie A, durchschnittliche Lage, kein besonderer Ausstattungsvorteil.",
+            "Seit dem Mieten-Wertsicherungsgesetz wird der Richtwert jährlich angepasst statt in mehrjährigen Sprüngen. Die Anhebung zum 1. April 2026 betrug 1 %; für 2027 sieht das Gesetz höchstens 2 % vor. Der endgültige Betrag steht jeweils erst mit der Kundmachung fest."
+          ]
+        },
+        {
+          "ueberschrift": "Für welche Wohnungen gilt der Richtwert?",
+          "absaetze": [
+            "Der Richtwert greift bei Wohnungen in der Vollanwendung des MRG, deren Hauptmietvertrag ab dem 1. März 1994 geschlossen wurde. Das sind vor allem Wohnungen in Häusern mit einer Baubewilligung vor dem 9. Mai 1945.",
+            "Bei Verträgen vom 1. Jänner 1982 bis 28. Februar 1994 richtet sich die Obergrenze stattdessen nach der Ausstattungskategorie (§ 15a MRG). Davor bleibt der damals wirksam vereinbarte Mietzins maßgeblich.",
+            "Kein Richtwert gilt unter anderem im Neubau, bei geförderten Objekten, bei Ein- und Zweifamilienhäusern, bei Wohnungen der Kategorie A oder B über 130 m² Nutzfläche (§ 16 Abs 1 Z 4 MRG) und bei Häusern, die nach dem 8. Mai 1945 ohne öffentliche Mittel neu errichtet wurden."
+          ]
+        },
+        {
+          "ueberschrift": "Zu- und Abschläge nach § 16 Abs 2 MRG",
+          "absaetze": [
+            "Vom Richtwert aus wird nach oben und unten korrigiert: Lage, Erhaltungszustand des Hauses, Ausstattung der Wohnung, Stockwerk, Aufzug, Freiflächen, Heizung. § 16 Abs 2 MRG verlangt dabei eine Bewertung nach der Verkehrsauffassung.",
+            "Die Rechtsprechung des Obersten Gerichtshofs lehnt es ab, jedes Ausstattungsdetail einzeln zu bepreisen und die Beträge einfach zu addieren; maßgeblich ist eine Gesamtschau (RIS-Justiz RS0117881). Dieses Werkzeug bildet das ab, indem die Summe der Zuschläge in einem Korridor gedeckelt wird, statt linear weiterzuzählen.",
+            "Ein befristeter Hauptmietvertrag führt in der Vollanwendung zu einem Abschlag von 25 %."
+          ],
+          "tabelle": {
+            "kopf": ["Größe", "Wert seit 1.4.2026", "Grundlage"],
+            "zeilen": [
+              ["Richtwert Wien", "6,74 €/m²", "Richtwertgesetz"],
+              ["Kategorie A", "4,51 €/m²", "§ 15a MRG"],
+              ["Kategorie B", "3,38 €/m²", "§ 15a MRG"],
+              ["Kategorie C und D brauchbar", "2,25 €/m²", "§ 15a MRG"],
+              ["Kategorie D unbrauchbar", "1,13 €/m²", "§ 15a MRG"],
+              ["Befristungsabschlag", "25 %", "§ 16 Abs 7 MRG"]
+            ]
+          }
+        },
+        {
+          "ueberschrift": "Rechenbeispiel",
+          "absaetze": [
+            "Eine Altbauwohnung mit 75 m² in einem gepflegten Haus im 7. Bezirk, Kategorie A, unbefristet: Ausgangspunkt sind 6,74 €/m². Kommt für die Liegenschaft ein Lagezuschlag in Betracht und liegen Ausstattungsvorteile vor, steigt der Wert; bei schlechtem Erhaltungszustand oder Erdgeschoss ohne Freifläche sinkt er.",
+            "Der zulässige Hauptmietzins ergibt sich aus dem korrigierten Quadratmeterwert mal Nutzfläche. Betriebskosten, Umsatzsteuer und Aufwendungen für mitvermietete Einrichtung kommen getrennt dazu und zählen nicht zum Hauptmietzins."
+          ]
+        }
+      ],
+      "faq": [
+        {
+          "frage": "Ist der Richtwert die zulässige Miete?",
+          "antwort": "Nein. Der Richtwert ist der Preis der gesetzlich definierten Normwohnung. Die Obergrenze für die konkrete Wohnung ergibt sich erst nach den Zu- und Abschlägen nach § 16 Abs 2 MRG."
+        },
+        {
+          "frage": "Gilt der Richtwert auch für Geschäftslokale?",
+          "antwort": "Nein. Für Geschäftsräume gilt der angemessene Hauptmietzins nach § 16 Abs 1 MRG oder – außerhalb des Vollanwendungsbereichs – freie Preisbildung."
+        },
+        {
+          "frage": "Was ist, wenn der vereinbarte Mietzins zu hoch war?",
+          "antwort": "Eine überhöhte Mietzinsvereinbarung kann nach § 16 Abs 8 MRG befristet geltend gemacht werden: bei unbefristeten Verträgen drei Jahre ab der Vereinbarung, bei befristeten frühestens sechs Monate nach Ende oder Umwandlung des Mietverhältnisses. Zuständig sind die Schlichtungsstelle der Stadt Wien oder das Bezirksgericht."
+        }
+      ],
+      "verwandt": ["lagezuschlag-wien", "angemessener-mietzins", "mieterhoehung-wertsicherung"]
+    },
+    {
+      "pfad": "lagezuschlag-wien",
+      "titel": "Lagezuschlag Wien: Karte, Gründerzeitviertel und Berechnung",
+      "beschreibung": "Der Lagezuschlag gilt je Liegenschaft, nicht je Bezirk. Wie die Lagezuschlagskarte der Stadt Wien zu lesen ist, wann § 2 Abs 3 RichtWG den Zuschlag ausschließt und wie er hergeleitet wird.",
+      "kicker": "Lagezuschlag",
+      "h1": "Lagezuschlag in Wien: Wann er zusteht und wie hoch er ist",
+      "einleitung": "Der Lagezuschlag ist der größte einzelne Hebel auf den Richtwertmietzins – und der am häufigsten bestrittene. Er hängt nicht am Bezirk, sondern an der einzelnen Liegenschaft und muss begründet werden.",
+      "abschnitte": [
+        {
+          "ueberschrift": "Was der Lagezuschlag ist",
+          "absaetze": [
+            "Ist die Lage der Liegenschaft besser als die durchschnittliche Lage eines Gebiets mit vorwiegend Gründerzeitbebauung, darf ein Zuschlag zum Richtwert verlangt werden (§ 16 Abs 3 MRG). Maßgeblich sind die allgemeine Verkehrslage, Infrastruktur, Grünraum, Ruhe und das Erscheinungsbild des Umfelds.",
+            "Der Zuschlag muss der Mieterin oder dem Mieter spätestens bei Vertragsabschluss schriftlich bekanntgegeben werden, samt den für ihn maßgeblichen Umständen. Fehlt diese Bekanntgabe, ist er nicht wirksam vereinbart."
+          ]
+        },
+        {
+          "ueberschrift": "Ausschluss im Gründerzeitviertel (§ 2 Abs 3 RichtWG)",
+          "absaetze": [
+            "Liegt die Liegenschaft in einem Gebiet, das überwiegend aus Gebäuden besteht, die vor 1917 errichtet wurden und in dem zum Zeitpunkt der Errichtung überwiegend Kleinwohnungen der Ausstattungskategorie D lagen, gilt die Lage per Gesetz als durchschnittlich. Ein Lagezuschlag ist dort ausgeschlossen.",
+            "Das betrifft in Wien große zusammenhängende Teile der Bezirke innerhalb des Gürtels und entlang der Ausfallstraßen. Ob eine konkrete Adresse in einem solchen Gebiet liegt, ist eine Tatfrage – in Verfahren wird sie regelmäßig über Sachverständige geklärt."
+          ]
+        },
+        {
+          "ueberschrift": "Die Lagezuschlagskarte der Stadt Wien",
+          "absaetze": [
+            "Die Stadt Wien veröffentlicht seit 1994 eine Lagezuschlagskarte, aus der sich für eine Adresse der von der Schlichtungsstelle herangezogene Wert ablesen lässt. Dieses Werkzeug rechnet mit einer dokumentierten Bandbreite je Bezirk und verlinkt die amtliche Karte, damit der Wert für die konkrete Liegenschaft geprüft werden kann.",
+            "Die Herleitung wird in der Einschätzung Schritt für Schritt ausgewiesen: Ausgangsbandbreite, Auf- oder Abschlag für die Lage, Prüfung des Gründerzeit-Ausschlusses, Ergebnis. So bleibt nachvollziehbar, welcher Betrag woher stammt."
+          ]
+        }
+      ],
+      "faq": [
+        {
+          "frage": "Gilt der Lagezuschlag für den ganzen Bezirk gleich?",
+          "antwort": "Nein. Er wird je Liegenschaft bestimmt. Bezirkswerte sind nur eine Näherung und im Streitfall nicht ausreichend."
+        },
+        {
+          "frage": "Kann ein einmal vereinbarter Lagezuschlag später wegfallen?",
+          "antwort": "Wird der Zuschlag im Verfahren als unbegründet oder als nach § 2 Abs 3 RichtWG ausgeschlossen beurteilt, wirkt sich das auf den zulässigen Mietzins aus. Für die Rückforderung gelten die Fristen des § 16 Abs 8 MRG."
+        },
+        {
+          "frage": "Zählt eine Lage an einer stark befahrenen Straße als überdurchschnittlich?",
+          "antwort": "Lärm und Emissionen sprechen eher gegen einen Zuschlag. Entscheidend ist die Gesamtbetrachtung des Umfelds im Vergleich zur durchschnittlichen Gründerzeitlage."
+        }
+      ],
+      "verwandt": ["richtwert-wien", "angemessener-mietzins", "hausverwaltung-mietzinspruefung"]
+    },
+    {
+      "pfad": "angemessener-mietzins",
+      "titel": "Angemessener Mietzins nach § 16 Abs 1 MRG: Wann er gilt",
+      "beschreibung": "Angemessener Hauptmietzins statt Richtwert: Die Ausnahmetatbestände des § 16 Abs 1 MRG – Geschäftsräume, Wohnungen über 130 m², Denkmalschutz, Wirtschaftlichkeitsaufwand – im Überblick.",
+      "kicker": "Angemessener Mietzins",
+      "h1": "Angemessener Hauptmietzins nach § 16 Abs 1 MRG",
+      "einleitung": "In bestimmten Fällen tritt an die Stelle des Richtwerts der angemessene Hauptmietzins. Er orientiert sich an Größe, Art, Beschaffenheit, Lage, Ausstattungs- und Erhaltungszustand – also am Vergleichswert am Markt, begrenzt durch die Angemessenheit.",
+      "abschnitte": [
+        {
+          "ueberschrift": "Die wichtigsten Fälle",
+          "absaetze": [
+            "Für Geschäftsräumlichkeiten gilt in der Vollanwendung der angemessene Mietzins. Ebenso für Wohnungen der Ausstattungskategorie A oder B mit mehr als 130 m² Nutzfläche, wenn sie innerhalb von sechs Monaten nach Räumung durch den früheren Mieter vermietet werden (§ 16 Abs 1 Z 4 MRG).",
+            "Weiter erfasst sind Objekte in Gebäuden, die aufgrund einer nach dem 8. Mai 1945 erteilten Baubewilligung neu errichtet wurden, sowie Wohnungen, die aus einer Standardanhebung durch die Vermieterseite entstanden sind.",
+            "Steht das Gebäude unter Denkmalschutz und hat die Vermieterseite dafür erhebliche eigene Mittel aufgewendet, kommt § 16 Abs 1 Z 3 MRG in Betracht."
+          ]
+        },
+        {
+          "ueberschrift": "Wie der angemessene Mietzins ermittelt wird",
+          "absaetze": [
+            "Herangezogen wird der Vergleich mit ähnlichen Objekten in vergleichbarer Lage. In Verfahren geschieht das über Sachverständigengutachten; außergerichtlich helfen Marktbeobachtung und Bandbreiten.",
+            "Dieses Werkzeug leitet den angemessenen Mietzins aus der hinterlegten Marktmiete des Bezirks ab und weist den Abstand offen aus. Das ist eine Näherung für die Ersteinschätzung und ersetzt keine Bewertung im Einzelfall."
+          ]
+        },
+        {
+          "ueberschrift": "Abgrenzung zum freien Mietzins",
+          "absaetze": [
+            "Außerhalb des Vollanwendungsbereichs – etwa im freifinanzierten Neubau nach dem 30. Juni 1953, bei Ein- und Zweifamilienhäusern oder bei Dachbodenausbauten nach dem Stichtag – gibt es keine gesetzliche Preisgrenze. Dort gilt, was vereinbart wurde, begrenzt durch die allgemeinen Grenzen des Zivilrechts.",
+            "Auch ohne Preisschutz kann der Kündigungsschutz des MRG anwendbar bleiben. Beide Fragen sind getrennt zu prüfen."
+          ]
+        }
+      ],
+      "faq": [
+        {
+          "frage": "Ist der angemessene Mietzins immer höher als der Richtwertmietzins?",
+          "antwort": "In der Regel liegt er darüber, weil er am Marktvergleich ansetzt. Zwingend ist das nicht – in schwachen Lagen kann der Abstand gering sein."
+        },
+        {
+          "frage": "Gilt die 130-m²-Grenze für jede große Wohnung?",
+          "antwort": "Nein. Sie setzt Kategorie A oder B und die Vermietung innerhalb von sechs Monaten nach Räumung durch den vorherigen Hauptmieter voraus."
+        },
+        {
+          "frage": "Was gilt für Geschäftslokale?",
+          "antwort": "In der Vollanwendung der angemessene Mietzins, außerhalb davon freie Preisbildung. Der Kündigungsschutz ist gesondert zu prüfen."
+        }
+      ],
+      "verwandt": ["richtwert-wien", "befristeter-mietvertrag", "lagezuschlag-wien"]
+    },
+    {
+      "pfad": "mieterhoehung-wertsicherung",
+      "titel": "Mieterhöhung und Wertsicherung 2026/2027 in Österreich",
+      "beschreibung": "Wertsicherung nach dem Mieten-Wertsicherungsgesetz: jährliche Anpassung, Deckel von 1 % (2026) und höchstens 2 % (2027), Schwellenwerte und das Erhöhungsschreiben.",
+      "kicker": "Wertsicherung",
+      "h1": "Mieterhöhung und Wertsicherung: Was 2026 und 2027 zulässig ist",
+      "einleitung": "Seit dem Mieten-Wertsicherungsgesetz werden Richtwert und Kategoriebeträge jährlich angepasst und gesetzlich gedeckelt. Für frei vereinbarte Mietzinse zählt weiterhin die Klausel im Vertrag – innerhalb der gesetzlichen Grenzen.",
+      "abschnitte": [
+        {
+          "ueberschrift": "Die gesetzlichen Deckel",
+          "absaetze": [
+            "Zum 1. April 2026 wurden Richtwert und Kategoriebeträge um 1 % angehoben. Für 2027 lässt das Gesetz höchstens 2 % zu. Angepasst wird jährlich, frühestens ein Jahr nach der letzten Anpassung.",
+            "Für gesetzlich geregelte Mietzinse – Richtwert, Kategorie, WGG – ergibt sich die zulässige Erhöhung unmittelbar aus dieser Anpassung. Für freie und angemessene Mietzinse gilt die vertragliche Wertsicherungsklausel, gekappt durch die gesetzliche Obergrenze."
+          ]
+        },
+        {
+          "ueberschrift": "Schwellenwert und Zeitpunkt",
+          "absaetze": [
+            "Viele Klauseln sehen einen Schwellenwert vor: Erst wenn der Index um einen bestimmten Prozentsatz gestiegen ist, darf angepasst werden. Wird die Schwelle nicht erreicht, bleibt die Erhöhung offen und wird später nachgeholt, sofern die Klausel das vorsieht.",
+            "Die Erhöhung wirkt nicht automatisch: Sie muss der Mieterin oder dem Mieter rechtzeitig schriftlich angekündigt werden. Bei Kategoriemietzinsen verlangt § 16 Abs 9 MRG ein Erhöhungsbegehren, das spätestens 14 Tage vor dem nächsten Zinstermin zugeht."
+          ]
+        },
+        {
+          "ueberschrift": "Erhöhungsschreiben erstellen",
+          "absaetze": [
+            "Das Werkzeug rechnet die zulässige Erhöhung nach, weist den Rechenweg mit Fundstelle aus und erzeugt daraus ein Erhöhungsschreiben als PDF – mit altem und neuem Betrag, Stichtag und Grundlage.",
+            "Für mehrere Einheiten lässt sich eine Bestandsliste als CSV einlesen; die Auswertung zeigt, welche Einheit wann und um wie viel anpassbar ist."
+          ]
+        }
+      ],
+      "faq": [
+        {
+          "frage": "Darf ohne Wertsicherungsklausel erhöht werden?",
+          "antwort": "Bei frei vereinbarten Mietzinsen nicht. Ohne Grundlage im Vertrag bleibt der vereinbarte Betrag. Gesetzliche Anpassungen bei Kategoriemietzinsen folgen eigenen Regeln."
+        },
+        {
+          "frage": "Wie oft darf angepasst werden?",
+          "antwort": "Höchstens einmal jährlich und frühestens ein Jahr nach der letzten Anpassung."
+        },
+        {
+          "frage": "Steht der Wert für 2027 schon fest?",
+          "antwort": "Der Deckel von 2 % ergibt sich aus dem Gesetz; der konkrete Betrag steht erst mit der Kundmachung fest. Bis dahin rechnet das Werkzeug mit dem Deckel und weist das aus."
+        }
+      ],
+      "verwandt": ["richtwert-wien", "betriebskosten-pruefen", "hausverwaltung-mietzinspruefung"]
+    },
+    {
+      "pfad": "betriebskosten-pruefen",
+      "titel": "Betriebskosten prüfen nach § 21 MRG: Was verrechnet werden darf",
+      "beschreibung": "Welche Positionen nach § 21 MRG Betriebskosten sind, was Erhaltung ist und nicht überwälzt werden darf, und wie sich die Jahresabrechnung Position für Position prüfen lässt.",
+      "kicker": "Betriebskosten",
+      "h1": "Betriebskosten prüfen: der Katalog des § 21 MRG",
+      "einleitung": "Betriebskosten sind abschließend aufgezählt. Was nicht im Katalog steht, darf nicht auf die Mieterschaft überwälzt werden – der häufigste Fehler in Abrechnungen sind Positionen aus der Erhaltung und der Verwaltung des Hauses.",
+      "abschnitte": [
+        {
+          "ueberschrift": "Was im Katalog steht",
+          "absaetze": [
+            "Erfasst sind unter anderem Wasser und Abwasser, Rauchfangkehrung, Kanalräumung, Unratabfuhr, Schädlingsbekämpfung, Beleuchtung der allgemeinen Teile, Versicherungsprämien für Feuer, Haftpflicht und Leitungswasserschaden, öffentliche Abgaben, Hausbetreuung sowie das Verwaltungshonorar in der gesetzlich geregelten Höhe.",
+            "Nicht dazu zählen Erhaltungs- und Verbesserungsarbeiten, Rücklagen für künftige Sanierungen, Kosten der Vermietung sowie Aufwendungen, die nur einzelnen Objekten zugutekommen."
+          ]
+        },
+        {
+          "ueberschrift": "Abrechnung und Fristen",
+          "absaetze": [
+            "Die Vermieterseite hat bis zum 30. Juni des Folgejahres abzurechnen und die Belege zur Einsicht bereitzuhalten. Einwendungen gegen die Abrechnung lassen sich bei der Schlichtungsstelle geltend machen.",
+            "Der Verteilungsschlüssel richtet sich grundsätzlich nach der Nutzfläche, soweit nichts anderes wirksam vereinbart ist."
+          ]
+        },
+        {
+          "ueberschrift": "Prüfung mit dem Werkzeug",
+          "absaetze": [
+            "Der Betriebskosten-Prüfer ordnet jede eingegebene Position dem Katalog zu, kennzeichnet nicht überwälzbare Positionen und rechnet den Anteil auf die eigene Nutzfläche um. Das Ergebnis nennt die Fundstelle je Position und lässt sich als PDF sichern.",
+            "Die Zuordnung ist eine automatisierte Ersteinschätzung. Ob eine konkrete Rechnung tatsächlich unter eine Position fällt, hängt vom Einzelfall ab."
+          ]
+        }
+      ],
+      "faq": [
+        {
+          "frage": "Sind Reparaturen Betriebskosten?",
+          "antwort": "Nein. Erhaltung ist von den Betriebskosten getrennt und wird aus dem Hauptmietzins finanziert."
+        },
+        {
+          "frage": "Gilt § 21 MRG auch in der Teilanwendung?",
+          "antwort": "Der Betriebskostenkatalog gilt auch in der Teilanwendung. In der Vollausnahme richtet sich die Überwälzung nach dem Vertrag."
+        },
+        {
+          "frage": "Was tun bei einer fehlerhaften Abrechnung?",
+          "antwort": "Zuerst Belegeinsicht verlangen, dann Einwendungen erheben. Zuständig ist in Wien die Schlichtungsstelle, danach das Bezirksgericht."
+        }
+      ],
+      "verwandt": ["mieterhoehung-wertsicherung", "richtwert-wien", "rendite-vorsorgewohnung"]
+    },
+    {
+      "pfad": "befristeter-mietvertrag",
+      "titel": "Befristeter Mietvertrag in Wien: 25 % Abschlag und Fristen",
+      "beschreibung": "Befristung im Vollanwendungsbereich des MRG: Mindestdauer drei Jahre, Schriftlichkeit, 25 % Befristungsabschlag und was bei Verlängerung gilt.",
+      "kicker": "Befristung",
+      "h1": "Befristeter Mietvertrag: Abschlag, Mindestdauer, Verlängerung",
+      "einleitung": "Wer befristet vermietet, muss im Vollanwendungsbereich einen Abschlag von 25 % auf den zulässigen Hauptmietzins hinnehmen. Formfehler machen die Befristung unwirksam – mit der Folge eines unbefristeten Vertrags.",
+      "abschnitte": [
+        {
+          "ueberschrift": "Voraussetzungen der Befristung",
+          "absaetze": [
+            "Die Befristung muss schriftlich vereinbart sein und einen unbedingten Endtermin nennen. Bei Wohnungen beträgt die Mindestdauer drei Jahre; eine Verlängerung ist wieder nur schriftlich und wieder für mindestens drei Jahre möglich.",
+            "Ist die Befristung unwirksam, gilt der Vertrag als auf unbestimmte Zeit geschlossen. Der Befristungsabschlag entfällt dann."
+          ]
+        },
+        {
+          "ueberschrift": "Der Abschlag von 25 %",
+          "absaetze": [
+            "Im Vollanwendungsbereich vermindert sich der zulässige Hauptmietzins bei befristeten Hauptmietverträgen um 25 % (§ 16 Abs 7 MRG). Der Abschlag betrifft den Hauptmietzins, nicht die Betriebskosten.",
+            "Wird der Vertrag später in einen unbefristeten umgewandelt, fällt der Abschlag ab diesem Zeitpunkt weg."
+          ]
+        }
+      ],
+      "faq": [
+        {
+          "frage": "Gilt der Abschlag auch außerhalb der Vollanwendung?",
+          "antwort": "Nein. Ohne gesetzliche Preisgrenze gibt es auch keinen gesetzlichen Befristungsabschlag."
+        },
+        {
+          "frage": "Kann die Mieterin früher ausziehen?",
+          "antwort": "Nach einem Jahr kann die Mieterseite unter Einhaltung der gesetzlichen Frist kündigen. Für die Vermieterseite ist der Vertrag bis zum Endtermin gebunden."
+        },
+        {
+          "frage": "Was passiert nach dem Endtermin ohne Verlängerung?",
+          "antwort": "Wird das Mietverhältnis fortgesetzt, kann es sich in ein unbefristetes verwandeln. Die Details sind einzelfallabhängig."
+        }
+      ],
+      "verwandt": ["richtwert-wien", "angemessener-mietzins", "mieterhoehung-wertsicherung"]
+    },
+    {
+      "pfad": "rendite-vorsorgewohnung",
+      "titel": "Rendite einer Vorsorgewohnung berechnen: brutto, netto, nach Steuer",
+      "beschreibung": "Vorsorgewohnung durchrechnen: Kaufnebenkosten, Leerstand, Instandhaltungsrücklage, AfA nach § 16 Abs 1 Z 8 EStG und Instandsetzung auf 15 Jahre nach § 28 Abs 2 EStG.",
+      "kicker": "Rendite",
+      "h1": "Rendite einer Vorsorgewohnung: die vollständige Rechnung",
+      "einleitung": "Die Bruttorendite sagt wenig. Erst nach Kaufnebenkosten, Leerstand, nicht überwälzbaren Kosten, Rücklage und Steuer zeigt sich, was von der Miete übrig bleibt.",
+      "abschnitte": [
+        {
+          "ueberschrift": "Was in die Rechnung gehört",
+          "absaetze": [
+            "Zu den Anschaffungskosten kommen 3,5 % Grunderwerbsteuer, 1,1 % Eintragungsgebühr sowie Makler-, Vertrags- und Bewertungskosten. Auf der Ertragsseite steht der Netto-Hauptmietzins, vermindert um erwarteten Leerstand.",
+            "Laufend abzuziehen sind nicht überwälzbare Bewirtschaftungskosten und die Zuführung zur Instandhaltungsrücklage."
+          ]
+        },
+        {
+          "ueberschrift": "Steuerliche Größen",
+          "absaetze": [
+            "Absetzbar ist die Absetzung für Abnutzung von 1,5 % auf den Gebäudeanteil der Anschaffungskosten (§ 16 Abs 1 Z 8 EStG); der Grundanteil ist nicht abschreibbar. Instandsetzungsaufwand ist auf fünfzehn Jahre zu verteilen (§ 28 Abs 2 EStG).",
+            "Die Rücklage selbst ist erst bei Verausgabung absetzbar und bleibt in der Bemessungsgrundlage außen vor. Fremdkapitalzinsen mindern den Überschuss."
+          ]
+        },
+        {
+          "ueberschrift": "Was die Rechnung nicht leisten kann",
+          "absaetze": [
+            "Das Ergebnis ist eine Orientierung und keine Steuerberatung. Liebhabereibeurteilung, Vorsteuerabzug, Umsatzsteueroption bei der Vermietung und die persönliche Progression bleiben Fragen für die steuerliche Vertretung."
+          ]
+        }
+      ],
+      "faq": [
+        {
+          "frage": "Welche Rendite ist realistisch?",
+          "antwort": "Das hängt von Kaufpreis, Lage und Mietzinsregime ab. Entscheidend ist die Rechnung nach Kosten und Steuer, nicht die Bruttorendite aus dem Exposé."
+        },
+        {
+          "frage": "Zählt der Mietzins brutto oder netto?",
+          "antwort": "Gerechnet wird mit dem Netto-Hauptmietzins ohne Betriebskosten und ohne Umsatzsteuer."
+        },
+        {
+          "frage": "Wie wird der Gebäudeanteil angesetzt?",
+          "antwort": "Das Werkzeug rechnet mit 60 % Gebäudeanteil als Ausgangswert. Der tatsächliche Anteil kann abweichen und ist steuerlich zu belegen."
+        }
+      ],
+      "verwandt": ["betriebskosten-pruefen", "hausverwaltung-mietzinspruefung", "richtwert-wien"]
+    },
+    {
+      "pfad": "hausverwaltung-mietzinspruefung",
+      "titel": "Mietzinsprüfung für Hausverwaltungen: Bestand, API, White-Label",
+      "beschreibung": "Ganze Bestände prüfen statt einzelner Wohnungen: CSV-Import, Wertsicherung in Serie, Prüfberichte mit Fundstellen, REST-API und White-Label-Rechner für die eigene Website.",
+      "kicker": "Für Unternehmen",
+      "h1": "Mietzinsprüfung für Hausverwaltungen und Bestandshalter",
+      "einleitung": "Dieselbe Prüflogik wie im kostenlosen Rechner, nur für viele Einheiten gleichzeitig – als Oberfläche, als Schnittstelle für die eigene Software und als eingebetteter Rechner im eigenen Erscheinungsbild.",
+      "abschnitte": [
+        {
+          "ueberschrift": "Bestand statt Einzelfall",
+          "absaetze": [
+            "Eine Bestandsliste mit Anschrift, Fläche, Kategorie, Baujahr, Vertragsdatum und Ist-Miete genügt. Die Auswertung zeigt je Einheit die voraussichtliche Mietzinsart, die Bandbreite und den Abstand zur aktuellen Miete – als Tabelle, als CSV und als Prüfbericht.",
+            "Für die Wertsicherung lässt sich in einem Durchgang feststellen, welche Einheiten wann und um wie viel anpassbar sind; Erhöhungsschreiben entstehen in Serie."
+          ]
+        },
+        {
+          "ueberschrift": "Schnittstelle für die eigene Software",
+          "absaetze": [
+            "Die REST-Schnittstelle liefert dieselbe Einschätzung als JSON: Mietzinsart, Anwendungsbereich des MRG, Bandbreite, Herleitung des Lagezuschlags und die Fundstellen. Authentifiziert wird mit einem API-Schlüssel, abgerechnet nach Abfragen.",
+            "Jede Antwort trägt die Version der Rechenlogik und einen Zeitstempel, damit Ergebnisse im Akt nachvollziehbar bleiben."
+          ]
+        },
+        {
+          "ueberschrift": "White-Label für die eigene Website",
+          "absaetze": [
+            "Der Rechner lässt sich als iframe in die eigene Seite einbetten – mit eigenem Namen, eigener Farbe und eigenem Logo, ohne fremde Marke. Anfragen aus dem eingebetteten Rechner landen in Ihrem Postfach.",
+            "Für die Verarbeitung personenbezogener Daten Ihrer Kundschaft steht ein Auftragsverarbeitungsvertrag nach Art. 28 DSGVO bereit."
+          ]
+        }
+      ],
+      "faq": [
+        {
+          "frage": "Wie viele Einheiten sind möglich?",
+          "antwort": "Der CSV-Import ist auf große Bestände ausgelegt; die Auswertung läuft im Browser. Für laufende Abfragen aus einem Fremdsystem ist die Schnittstelle vorgesehen."
+        },
+        {
+          "frage": "Bleiben die Daten in der EU?",
+          "antwort": "Die Auswertung im Browser verlässt das Gerät nicht. Bei Nutzung der Schnittstelle werden die übermittelten Objektdaten in der EU verarbeitet; Einzelheiten regelt der Auftragsverarbeitungsvertrag."
+        },
+        {
+          "frage": "Ersetzt das eine Bewertung?",
+          "antwort": "Nein. Auch im Unternehmenszugang bleibt das Ergebnis eine automatisierte Ersteinschätzung und kein Gutachten und keine Rechtsauskunft."
+        }
+      ],
+      "verwandt": ["mieterhoehung-wertsicherung", "betriebskosten-pruefen", "lagezuschlag-wien"]
+    }
+  ]
+}

@@ -1,10 +1,8 @@
-import { istApp } from './nativ'
-
-// Dateien speichern – je nach Umgebung auf verschiedenen Wegen:
-//  * Browser: Blob-Link mit download-Attribut (klassischer Download)
-//  * iPhone/iPad im Browser: dort wird ein Download oft ignoriert, deshalb
-//    zusätzlich das Teilen-Menü (Web Share API) als Weg in „Dateien“
-//  * App (iOS/Android): Datei in den Cache schreiben und das Teilen-Menü öffnen
+// Dateien im Browser speichern.
+//
+//  * Regelfall: Blob-Link mit download-Attribut (klassischer Download)
+//  * iPhone/iPad: dort wird ein Download häufig ignoriert, deshalb zusätzlich
+//    das Teilen-Menü (Web Share API) als Weg in „Dateien“
 
 function blobLink(blob: Blob, name: string): void {
   const url = URL.createObjectURL(blob)
@@ -18,30 +16,6 @@ function blobLink(blob: Blob, name: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 2000)
 }
 
-async function alsBase64(blob: Blob): Promise<string> {
-  const puffer = await blob.arrayBuffer()
-  let roh = ''
-  const bytes = new Uint8Array(puffer)
-  const BLOCK = 0x8000
-  for (let i = 0; i < bytes.length; i += BLOCK) {
-    roh += String.fromCharCode(...bytes.subarray(i, i + BLOCK))
-  }
-  return btoa(roh)
-}
-
-async function inAppSpeichern(blob: Blob, name: string): Promise<void> {
-  const [{ Filesystem, Directory }, { Share }] = await Promise.all([
-    import('@capacitor/filesystem'),
-    import('@capacitor/share'),
-  ])
-  const { uri } = await Filesystem.writeFile({
-    path: name,
-    data: await alsBase64(blob),
-    directory: Directory.Cache,
-  })
-  await Share.share({ title: name, url: uri })
-}
-
 function istApple(): boolean {
   return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
 }
@@ -51,11 +25,6 @@ function istApple(): boolean {
  * kann die Meldung dann anzeigen, statt einfach nichts zu tun.
  */
 export async function dateiSpeichern(blob: Blob, name: string, typ = 'application/pdf'): Promise<void> {
-  if (istApp()) {
-    await inAppSpeichern(blob, name)
-    return
-  }
-
   // Auf iPhone/iPad führt der Download-Link oft ins Leere: dort das
   // Teilen-Menü anbieten, über das die Datei in „Dateien“ landet.
   if (istApple() && typeof navigator.share === 'function') {

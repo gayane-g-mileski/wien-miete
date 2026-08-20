@@ -2,7 +2,7 @@ import type { BaubewilligungGebaeude, Koordinaten } from './types'
 
 // Anbindung an offene Wiener Geodaten. Läuft im Browser der Nutzer:innen direkt
 // gegen data.wien.gv.at (öffentlich, CORS-fähig). Fällt bei Netz-/CORS-Fehlern
-// still zurück (die App bleibt mit manueller PLZ-Eingabe nutzbar).
+// still zurück (die Anwendung bleibt mit manueller PLZ-Eingabe nutzbar).
 
 export interface AdressTreffer {
   label: string

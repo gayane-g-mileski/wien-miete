@@ -13,8 +13,8 @@ export function UeberKontakt() {
           </div>
         </div>
 
-        {/* Methodik darunter, 1024 px breit */}
-        <div className="mx-auto mt-14 max-w-5xl border-t border-line pt-10">
+        {/* Methodik darunter, so breit wie „Was dieses Werkzeug kann“ */}
+        <div className="mt-14 border-t border-line pt-10">
           <MethodikInhalt />
         </div>
       </div>

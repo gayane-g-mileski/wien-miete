@@ -24,7 +24,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Browser für das Pre-Rendering (fertiges HTML für Suchmaschinen)
+      - run: npx playwright-core install --with-deps chromium
       - run: npm run build
+      - run: npm run prerender
       - uses: actions/configure-pages@v5
         with:
           enablement: true

@@ -1,3 +1,5 @@
+import type { Produkt } from './konto'
+
 // Öffnet die Anmeldung von überall auf der Seite – etwa aus einem Preis-Button
 // oder aus dem Ergebnis heraus, wenn etwas Kostenpflichtiges angeklickt wird.
 
@@ -8,10 +10,12 @@ export interface KontoAnlass {
   modus: 'anmelden' | 'registrieren'
   /** Wofür die Anmeldung nötig ist – erscheint über dem Formular. */
   anlass?: string
+  /** Kostenpflichtiges Produkt, das nach der Anmeldung gekauft werden soll. */
+  produkt?: Produkt
 }
 
-export function kontoOeffnen(anlass?: string, modus: KontoAnlass['modus'] = 'registrieren'): void {
-  window.dispatchEvent(new CustomEvent<KontoAnlass>(NAME, { detail: { modus, anlass } }))
+export function kontoOeffnen(anlass?: string, modus: KontoAnlass['modus'] = 'registrieren', produkt?: Produkt): void {
+  window.dispatchEvent(new CustomEvent<KontoAnlass>(NAME, { detail: { modus, anlass, produkt } }))
 }
 
 export function aufKontoOeffnen(handler: (a: KontoAnlass) => void): () => void {
