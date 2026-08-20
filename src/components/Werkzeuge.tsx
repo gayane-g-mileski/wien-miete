@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Wertsicherung } from './Wertsicherung'
 import { Betriebskosten } from './Betriebskosten'
 import { Rendite } from './Rendite'
+import { ereignis } from '../lib/analytics'
 
 const REITER = [
   { id: 'wertsicherung', titel: 'Wertsicherung', unter: 'MieWeG · § 16 Abs 9 MRG' },
@@ -30,7 +31,10 @@ export function Werkzeuge() {
               type="button"
               role="tab"
               aria-selected={aktiv === r.id}
-              onClick={() => setAktiv(r.id)}
+              onClick={() => {
+                setAktiv(r.id)
+                ereignis('rechner_gewechselt', { rechner: r.id })
+              }}
               className={`rounded-lg px-4 py-2.5 text-left transition-colors ${
                 aktiv === r.id
                   ? 'bg-accent text-on-accent'

@@ -3,6 +3,7 @@ import type { MrgErgebnis } from '../lib/types'
 import { evaluateMrg } from '../lib/mrgEngine'
 import type { VerlaufEintrag } from '../lib/verlauf'
 import { dateiSpeichern } from '../lib/speichern'
+import { ereignis } from '../lib/analytics'
 
 interface Props {
   ergebnis: MrgErgebnis
@@ -66,6 +67,7 @@ export function Ergebnisleiste({ ergebnis, adresse, verlauf, onSelect, onClear }
     try {
       const { ergebnisPdfBlob, dateiname } = await import('../lib/pdf')
       await dateiSpeichern(ergebnisPdfBlob(ergebnis, adresse), `${dateiname(adresse)}.pdf`)
+      ereignis('pdf_export', { art: 'einzel' })
     } catch (e) {
       melden(e)
     }
@@ -76,6 +78,7 @@ export function Ergebnisleiste({ ergebnis, adresse, verlauf, onSelect, onClear }
     try {
       const { ergebnisPdfBlob, dateiname } = await import('../lib/pdf')
       await dateiSpeichern(ergebnisPdfBlob(evaluateMrg(e.input), e.adresse), `${dateiname(e.adresse)}.pdf`)
+      ereignis('pdf_export', { art: 'verlauf' })
     } catch (err) {
       melden(err)
     }
@@ -101,6 +104,7 @@ export function Ergebnisleiste({ ergebnis, adresse, verlauf, onSelect, onClear }
       }
       const blob = await zip.generateAsync({ type: 'blob' })
       await dateiSpeichern(blob, 'Mietzins-Einschaetzungen.zip', 'application/zip')
+      ereignis('zip_export', { anzahl: verlauf.length })
     } catch (e) {
       melden(e)
     } finally {

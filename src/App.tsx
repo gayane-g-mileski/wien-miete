@@ -20,7 +20,7 @@ import { leereMerkmale } from './lib/pricingData'
 import { ladeVerlauf, speichereVerlauf, type VerlaufEintrag } from './lib/verlauf'
 import { useRoute } from './lib/router'
 import { BASIS, MARKE, RATGEBER, href } from './lib/seo'
-import { analytikStarten, seitenaufruf } from './lib/analytics'
+import { analytikStarten, ereignis, seitenaufruf } from './lib/analytics'
 import { anmeldungAusUrlUebernehmen, useKonto } from './lib/konto'
 import type { MietobjektInput } from './lib/types'
 
@@ -143,6 +143,8 @@ function Startseite() {
           anschrift={input.anschrift}
           onAnschrift={(text, bezirk, koords) => {
             setAdressWechsel((n) => n + 1)
+            // Ohne Anschrift, nur der Bezirk – die Messung bleibt anonym.
+            ereignis('adresse_gewaehlt', { bezirk: bezirk ?? 0 })
             setInput((prev) => ({
               ...prev,
               anschrift: text,
