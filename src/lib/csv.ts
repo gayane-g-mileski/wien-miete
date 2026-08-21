@@ -10,6 +10,8 @@ export interface PortfolioZeile {
   nr: number
   bezeichnung: string
   flaeche: number
+  /** Datum des Hauptmietvertrags (ISO) – entscheidet über die Mietzinsart. */
+  vertragsdatum: string
   istMiete: number | null
   ergebnis: MrgErgebnis
   /** Ist-Miete über der oberen Grenze der Einschätzung? */
@@ -184,6 +186,7 @@ export function pruefePortfolio(text: string, indexJahr = new Date().getFullYear
       nr: i + 1,
       bezeichnung,
       flaeche,
+      vertragsdatum: input.vertragsdatum,
       istMiete,
       ergebnis,
       ueberGrenze: differenz != null && differenz > 0,
@@ -202,6 +205,7 @@ export function portfolioAlsCsv(zeilen: PortfolioZeile[]): string {
   const kopf = [
     'Bezeichnung',
     'Flaeche',
+    'Vertragsdatum',
     'Mietzinsart',
     'Anwendung',
     'Obergrenze/Monat',
@@ -216,6 +220,7 @@ export function portfolioAlsCsv(zeilen: PortfolioZeile[]): string {
     [
       z.bezeichnung,
       z.flaeche,
+      z.vertragsdatum,
       z.ergebnis.mietzinsArtLabel,
       z.ergebnis.anwendungLabel,
       z.ergebnis.preisschutz ? (z.ergebnis.preis?.monatlichMax ?? '') : 'keine Obergrenze',

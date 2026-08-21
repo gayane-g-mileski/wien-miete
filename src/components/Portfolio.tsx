@@ -8,6 +8,13 @@ function euro(n: number): string {
   return n.toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
+/** ISO-Datum als 15.03.1990; ohne Angabe ein Gedankenstrich. */
+function datumKurz(iso: string): string {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return '–'
+  const [j, m, t] = iso.split('-')
+  return `${t}.${m}.${j}`
+}
+
 export function Portfolio() {
   const [zeilen, setZeilen] = useState<PortfolioZeile[]>([])
   const [fehler, setFehler] = useState<string[]>([])
@@ -28,9 +35,6 @@ export function Portfolio() {
       setMeldung('Die Datei konnte nicht gelesen werden.')
     }
   }
-
-  const ueber = zeilen.filter((z) => z.ueberGrenze)
-  const geprueft = zeilen.filter((z) => z.istMiete != null && z.ergebnis.preisschutz)
 
   const exportieren = async () => {
     try {
@@ -87,25 +91,11 @@ export function Portfolio() {
 
       {zeilen.length > 0 && (
         <>
-          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { titel: 'Einheiten geprüft', wert: String(zeilen.length) },
-              { titel: 'mit gesetzlicher Obergrenze', wert: String(zeilen.filter((z) => z.ergebnis.preisschutz).length) },
-              { titel: 'mutmaßlich über der Grenze', wert: `${ueber.length}${geprueft.length ? ` von ${geprueft.length}` : ''}` },
-              { titel: 'jetzt anpassbar (Wertsicherung)', wert: String(zeilen.filter((z) => z.indexSatz > 0).length) },
-            ].map((k) => (
-              <div key={k.titel} className="rounded-xl bg-surface-2 px-4 py-3">
-                <p className="text-2xl font-bold tabular-nums text-accent">{k.wert}</p>
-                <p className="mt-1 text-sm text-ink-faint">{k.titel}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-6 overflow-x-auto rounded-xl ring-1 ring-line">
-            <table className="w-full min-w-[44rem] border-collapse text-left">
+          <div className="mt-8 overflow-x-auto rounded-xl ring-1 ring-line">
+            <table className="w-full min-w-[50rem] border-collapse text-left">
               <thead>
                 <tr className="border-b border-line bg-surface-2">
-                  {['Einheit', 'm²', 'Mietzinsart', 'Obergrenze/Monat', 'Ist-Miete', 'Differenz', 'Nach Wertsicherung'].map((h) => (
+                  {['Einheit', 'm²', 'Mietvertrag', 'Mietzinsart', 'Obergrenze/Monat', 'Ist-Miete', 'Differenz', 'Nach Wertsicherung'].map((h) => (
                     <th key={h} className={`${zelle} font-semibold text-ink`} scope="col">
                       {h}
                     </th>
@@ -124,6 +114,8 @@ export function Portfolio() {
                       )}
                     </th>
                     <td className={`${zelle} tabular-nums text-ink-soft`}>{z.flaeche}</td>
+                    {/* Das Vertragsdatum steht neben der Mietzinsart, weil es sie bestimmt. */}
+                    <td className={`${zelle} tabular-nums text-ink-soft`}>{datumKurz(z.vertragsdatum)}</td>
                     <td className={`${zelle} text-ink-soft`}>{z.ergebnis.mietzinsArtLabel}</td>
                     <td className={`${zelle} tabular-nums text-ink-soft`}>
                       {z.ergebnis.preisschutz && z.ergebnis.preis ? `${euro(z.ergebnis.preis.monatlichMax)} €` : 'keine'}
