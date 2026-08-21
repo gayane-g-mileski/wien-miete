@@ -39,7 +39,7 @@ export function Betriebskosten() {
         value={betraege[p.key] ?? ''}
         placeholder="0"
         onChange={(e) => setzeBetrag(p.key, Math.max(0, Number(e.target.value)))}
-        className="h-11 w-full shrink-0 rounded-lg border border-line bg-transparent px-3 text-base tabular-nums text-ink outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent sm:w-40"
+        className="h-11 w-full shrink-0 rounded-lg border border-line bg-transparent px-3 text-base tabular-nums text-ink outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent @sm:w-40"
       />
     </div>
   )
@@ -51,7 +51,7 @@ export function Betriebskosten() {
         der Abrechnung ein – die Prüfung rechnet den Anteil der Wohnung und benennt Posten, die nicht hineingehören.
       </p>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 @sm:grid-cols-2 @lg:grid-cols-3">
         <NumberField
           label="Nutzfläche des Hauses (m²)"
           id="bk-haus"
@@ -86,7 +86,7 @@ export function Betriebskosten() {
         <div className="rounded-xl bg-surface-2 px-4">{unzulaessig.map(feld)}</div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 @sm:grid-cols-2 @lg:grid-cols-3">
         <div className="rounded-xl bg-surface-2 px-4 py-3">
           <p className="text-2xl font-bold tabular-nums text-coffee">{euro(ergebnis.anteilMonat)} €</p>
           <p className="mt-1 text-sm text-ink-faint">Anteil der Wohnung pro Monat</p>

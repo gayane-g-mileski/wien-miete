@@ -63,7 +63,7 @@ export function Rendite() {
         EStG.
       </p>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 @sm:grid-cols-2">
         {felder.map((f) => (
           <NumberField
             key={f.id}
@@ -78,7 +78,7 @@ export function Rendite() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 @sm:grid-cols-2 @lg:grid-cols-3">
         {[
           { titel: 'Bruttorendite', wert: prozent(r.bruttorendite), farbe: 'text-ink' },
           { titel: 'Nettorendite vor Steuer', wert: prozent(r.nettorendite), farbe: 'text-coffee' },
@@ -91,7 +91,7 @@ export function Rendite() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-x-8 gap-y-2 text-sm @sm:grid-cols-2">
         {[
           ['Gesamtkosten des Erwerbs', `${euro(r.gesamtkosten)} €`],
           ['Kaufpreis pro m²', `${euro(r.kaufpreisProM2)} €`],

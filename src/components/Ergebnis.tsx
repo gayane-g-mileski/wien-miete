@@ -54,8 +54,6 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
   const [erklaerungOffen, setErklaerungOffen] = useState(false)
   // Lage nur zeigen, wenn tatsächlich eine Anschrift eingegeben wurde.
   const zeigeLage = lage.adresse.trim().length > 0
-  // Ohne gesetzliche Obergrenze zeigt die Bandbreite den Markt, keine Grenze.
-  const freierPreis = ergebnis.mietzinsArt === 'frei'
 
   return (
     <div>
@@ -64,88 +62,6 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
 
       <div className="rounded-2xl border border-line bg-surface-2 p-5 shadow-sm ring-1 ring-accent/15 sm:p-6">
         <div className="space-y-1">
-          <Zeile label={freierPreis ? 'Marktübliche Bandbreite' : 'Preisbandbreite'}>
-            {ergebnis.preis ? (
-              <div className="space-y-3">
-                <div className="space-y-4 rounded-xl bg-surface px-4 py-3 ring-1 ring-line">
-                  {/* Label oben, Wert darunter – auf jeder Breite gleich */}
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-sm text-ink-faint">Monatlich pro m², netto</span>
-                    <Preiswert min={ergebnis.preis.proM2Min} max={ergebnis.preis.proM2Max} color="text-coffee" />
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-sm text-ink-faint">
-                      Monat gesamt für {ergebnis.preis.flaeche.toLocaleString('de-AT')} m²
-                    </span>
-                    <Preiswert min={ergebnis.preis.monatlichMin} max={ergebnis.preis.monatlichMax} />
-                  </div>
-                  {ergebnis.preis.bestandteile && ergebnis.preis.bestandteile.length > 0 && (
-                    <div className="border-t border-line pt-2">
-                      <Collapsible title="Aufschlüsselung">
-                        <ul className="space-y-1 text-sm">
-                          {ergebnis.preis.bestandteile.map((b) => (
-                            <li key={b.label} className="flex justify-between gap-4 border-b border-line pb-1 text-ink-soft">
-                              <span>{b.label}</span>
-                              <span className={`font-medium tabular-nums ${b.wert < 0 ? 'text-accent' : 'text-ink'}`}>
-                                {b.wert > 0 ? '+' : ''}
-                                {formatEuro(b.wert)}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </Collapsible>
-                    </div>
-                  )}
-                </div>
-                {/* Drei Sichten auf dieselbe Wohnung */}
-                {ergebnis.preis.sichten && ergebnis.preis.sichten.length > 0 && (
-                  <div className="rounded-xl bg-surface px-4 py-3 ring-1 ring-line">
-                    <Collapsible title="Judikatur · Schlichtungsstelle · Markt">
-                      <div className="space-y-4">
-                        {ergebnis.preis.sichten.map((si) => (
-                          <div key={si.name}>
-                            <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-                              <span className="text-sm font-semibold text-ink">{si.titel}</span>
-                              <span className="tabular-nums text-base font-semibold text-coffee">
-                                {formatEuro(si.proM2Min)} — {formatEuro(si.proM2Max)} €/m²
-                              </span>
-                            </div>
-                            <p className="mt-0.5 text-[12px] leading-relaxed text-ink-faint">{si.erklaerung}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </Collapsible>
-                  </div>
-                )}
-
-                {/* Herleitung des Lagezuschlags */}
-                {ergebnis.lagezuschlag && ergebnis.lagezuschlag.schritte.length > 1 && (
-                  <div className="rounded-xl bg-surface px-4 py-3 ring-1 ring-line">
-                    <Collapsible title="Lagezuschlag – wie er zustande kommt">
-                      <div className="space-y-3">
-                        {ergebnis.lagezuschlag.schritte.map((sch) => (
-                          <div key={sch.was}>
-                            <p className="text-sm font-medium text-ink">{sch.was}</p>
-                            <p className="text-sm text-ink-soft">{sch.ergebnis}</p>
-                            <p className="text-[12px] text-ink-faint">Quelle: {sch.quelle}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </Collapsible>
-                  </div>
-                )}
-
-                {freierPreis && (
-                  <p className="px-1 text-sm text-ink-soft">
-                    Es gibt keine gesetzliche Obergrenze – die Werte zeigen, was in dieser Gegend üblich ist.
-                  </p>
-                )}
-              </div>
-            ) : (
-              <span className="text-sm text-ink-faint">Keine Preisschätzung verfügbar.</span>
-            )}
-          </Zeile>
-
           <Zeile label="Mietzinsart">
             {/* Das Chevron sitzt direkt neben dem Wert und klappt die Erklärung auf */}
             <div className="flex items-start justify-between gap-3">
@@ -270,9 +186,103 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
         </button>
         <p className="mt-2 px-1 text-[12px] leading-relaxed text-ink-faint">
           Der Prüfbericht ordnet die Wohnung Punkt für Punkt ein, mit Fundstellen und Rechenweg. Die kostenlose
-          Ersteinschätzung oben lässt sich unverändert als PDF sichern.
+          Ersteinschätzung lässt sich unverändert als PDF sichern.
         </p>
       </div>
+    </div>
+  )
+}
+
+/**
+ * Preisbandbreite – erster Reiter unter dem Ergebnis. Steht bewusst außerhalb
+ * der Ergebniskarte, damit sie sich mit den übrigen Rechnern abwechseln kann.
+ */
+export function Preisbandbreite({ ergebnis }: { ergebnis: MrgErgebnis }) {
+  // Ohne gesetzliche Obergrenze zeigt die Bandbreite den Markt, keine Grenze.
+  const freierPreis = ergebnis.mietzinsArt === 'frei'
+
+  if (!ergebnis.preis) {
+    return <p className="text-sm text-ink-faint">Für dieses Objekt gibt es keine Preisschätzung.</p>
+  }
+
+  return (
+    <div className="space-y-3">
+      {freierPreis && <p className="text-xs font-semibold text-ink-faint">Marktübliche Bandbreite</p>}
+
+      <div className="space-y-4 rounded-xl bg-surface px-4 py-3 ring-1 ring-line">
+        {/* Label oben, Wert darunter – auf jeder Breite gleich */}
+        <div className="flex flex-col gap-0.5">
+          <span className="text-sm text-ink-faint">Monatlich pro m², netto</span>
+          <Preiswert min={ergebnis.preis.proM2Min} max={ergebnis.preis.proM2Max} color="text-coffee" />
+        </div>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-sm text-ink-faint">
+            Monat gesamt für {ergebnis.preis.flaeche.toLocaleString('de-AT')} m²
+          </span>
+          <Preiswert min={ergebnis.preis.monatlichMin} max={ergebnis.preis.monatlichMax} />
+        </div>
+        {ergebnis.preis.bestandteile && ergebnis.preis.bestandteile.length > 0 && (
+          <div className="border-t border-line pt-2">
+            <Collapsible title="Aufschlüsselung">
+              <ul className="space-y-1 text-sm">
+                {ergebnis.preis.bestandteile.map((b) => (
+                  <li key={b.label} className="flex justify-between gap-4 border-b border-line pb-1 text-ink-soft">
+                    <span>{b.label}</span>
+                    <span className={`font-medium tabular-nums ${b.wert < 0 ? 'text-accent' : 'text-ink'}`}>
+                      {b.wert > 0 ? '+' : ''}
+                      {formatEuro(b.wert)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </Collapsible>
+          </div>
+        )}
+      </div>
+
+      {/* Drei Sichten auf dieselbe Wohnung */}
+      {ergebnis.preis.sichten && ergebnis.preis.sichten.length > 0 && (
+        <div className="rounded-xl bg-surface px-4 py-3 ring-1 ring-line">
+          <Collapsible title="Judikatur · Schlichtungsstelle · Markt">
+            <div className="space-y-4">
+              {ergebnis.preis.sichten.map((si) => (
+                <div key={si.name}>
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+                    <span className="text-sm font-semibold text-ink">{si.titel}</span>
+                    <span className="tabular-nums text-base font-semibold text-coffee">
+                      {formatEuro(si.proM2Min)} — {formatEuro(si.proM2Max)} €/m²
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-[12px] leading-relaxed text-ink-faint">{si.erklaerung}</p>
+                </div>
+              ))}
+            </div>
+          </Collapsible>
+        </div>
+      )}
+
+      {/* Herleitung des Lagezuschlags */}
+      {ergebnis.lagezuschlag && ergebnis.lagezuschlag.schritte.length > 1 && (
+        <div className="rounded-xl bg-surface px-4 py-3 ring-1 ring-line">
+          <Collapsible title="Lagezuschlag – wie er zustande kommt">
+            <div className="space-y-3">
+              {ergebnis.lagezuschlag.schritte.map((sch) => (
+                <div key={sch.was}>
+                  <p className="text-sm font-medium text-ink">{sch.was}</p>
+                  <p className="text-sm text-ink-soft">{sch.ergebnis}</p>
+                  <p className="text-[12px] text-ink-faint">Quelle: {sch.quelle}</p>
+                </div>
+              ))}
+            </div>
+          </Collapsible>
+        </div>
+      )}
+
+      {freierPreis && (
+        <p className="px-1 text-sm text-ink-soft">
+          Es gibt keine gesetzliche Obergrenze – die Werte zeigen, was in dieser Gegend üblich ist.
+        </p>
+      )}
     </div>
   )
 }

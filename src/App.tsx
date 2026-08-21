@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Formular } from './components/Formular'
 import { Hero } from './components/Hero'
-import { Werkzeuge } from './components/Werkzeuge'
 import { Profis } from './components/Profis'
 import { Vergleich } from './components/Vergleich'
 import { Faq } from './components/Faq'
 import { Ergebnis } from './components/Ergebnis'
+import { ErgebnisReiter } from './components/ErgebnisReiter'
 import { Ergebnisleiste } from './components/Ergebnisleiste'
 import { SprachSchalter } from './components/SprachSchalter'
 import { UeberKontakt } from './components/UeberKontakt'
@@ -171,9 +171,10 @@ function Startseite() {
             />
           </section>
 
-          {/* Rechts: Ergebnis + Aktionen (Export, Verlauf) */}
-          <section className="lg:sticky lg:top-6">
+          {/* Rechts: Ergebnis, die darauf aufbauenden Rechner, dann die Aktionen */}
+          <section>
             <Ergebnis ergebnis={ergebnis} />
+            <ErgebnisReiter ergebnis={ergebnis} />
             <Ergebnisleiste
               ergebnis={ergebnis}
               adresse={input.anschrift}
@@ -185,7 +186,6 @@ function Startseite() {
         </div>
       </main>
 
-      <Werkzeuge />
       <Profis />
       <Vergleich />
       <Faq />

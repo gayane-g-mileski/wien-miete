@@ -74,7 +74,7 @@ export function Wertsicherung() {
         Zuletzt stieg der Richtwert am 1.4.2026 um 1 %; für 2027 lässt das Gesetz höchstens 2 % zu.
       </p>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 @sm:grid-cols-2">
         <SelectField label="Mietzinsart" id="ws-art" value={art} onChange={(e) => setArt(e.target.value as MietzinsArt)}>
           {ARTEN.map((a) => (
             <option key={a.wert} value={a.wert}>
@@ -152,7 +152,7 @@ export function Wertsicherung() {
 
       <div className="border-t border-line pt-6">
         <p className="mb-4 text-base font-semibold text-ink">Erhöhungsschreiben erstellen</p>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 @sm:grid-cols-2 @lg:grid-cols-3">
           <TextField label="Anschrift des Objekts" id="ws-anschrift" value={anschrift} onChange={(e) => setAnschrift(e.target.value)} />
           <TextField label="Mieter:in" id="ws-mieter" value={mieter} onChange={(e) => setMieter(e.target.value)} />
           <TextField label="Vermieter:in" id="ws-vermieter" value={vermieter} onChange={(e) => setVermieter(e.target.value)} />
