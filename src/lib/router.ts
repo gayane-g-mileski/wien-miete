@@ -37,7 +37,23 @@ export function useRoute(): Route {
   useEffect(() => {
     const aktualisieren = () => {
       setRoute(routeFuer())
-      window.scrollTo({ top: 0 })
+      // Trägt die Adresse einen Anker, gehört der Sprung dorthin – auch wenn
+      // der Abschnitt erst nach dem Seitenwechsel gezeichnet wird.
+      const anker = location.hash
+      if (!anker) {
+        window.scrollTo({ top: 0 })
+        return
+      }
+      let versuche = 0
+      const springen = () => {
+        const ziel = document.querySelector(anker)
+        if (ziel) {
+          ziel.scrollIntoView()
+        } else if (versuche++ < 10) {
+          requestAnimationFrame(springen)
+        }
+      }
+      requestAnimationFrame(springen)
     }
     window.addEventListener('popstate', aktualisieren)
     window.addEventListener(WECHSEL, aktualisieren)

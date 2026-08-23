@@ -92,13 +92,13 @@ function Navigation({ imHero }: { imHero: boolean }) {
       </a>
       <div className="flex shrink-0 items-center gap-3 text-sm font-medium text-ink sm:gap-5">
         {/* Auf dem Handy bleiben oben nur die beiden Icons */}
-        <a className="hidden transition-colors hover:text-accent sm:inline" href={imHero ? '#rechner' : href('')}>
+        <a className="hidden transition-colors hover:text-accent sm:inline" href={`${href('')}#rechner`}>
           Rechner
         </a>
         <a className="hidden transition-colors hover:text-accent sm:inline" href={href('ratgeber/')}>
           Ratgeber
         </a>
-        <a className="hidden transition-colors hover:text-accent sm:inline" href={imHero ? '#profis' : href('')}>
+        <a className="hidden transition-colors hover:text-accent sm:inline" href={`${href('')}#profis`}>
           Für Profis
         </a>
         {API_SICHTBAR && (
@@ -106,7 +106,7 @@ function Navigation({ imHero }: { imHero: boolean }) {
             API
           </a>
         )}
-        <a className="hidden transition-colors hover:text-accent sm:inline" href={imHero ? '#preise' : `${href('')}#preise`}>
+        <a className="hidden transition-colors hover:text-accent sm:inline" href={`${href('')}#preise`}>
           Preise
         </a>
         <button
