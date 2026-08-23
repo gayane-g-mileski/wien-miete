@@ -40,8 +40,8 @@ export function KontaktInhalt() {
   const senden = async () => {
     // Jede Meldung steht bei dem Feld, zu dem sie gehört.
     const neu: Fehler = {}
-    if (!name.trim()) neu.name = 'Bitte gib deinen Namen an.'
-    if (!email.trim()) neu.email = 'Bitte gib deine E-Mail-Adresse an.'
+    if (!name.trim()) neu.name = 'Bitte geben Sie Ihren Namen an.'
+    if (!email.trim()) neu.email = 'Bitte geben Sie Ihre E-Mail-Adresse an.'
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) neu.email = 'Bitte gib eine gültige E-Mail-Adresse an.'
     if (!nachricht.trim()) neu.nachricht = 'Bitte schreib eine Nachricht.'
     setFehler(neu)
@@ -118,7 +118,7 @@ export function KontaktInhalt() {
             {status === 'sendet' ? 'Wird gesendet …' : 'Senden'}
           </button>
 
-          {status === 'ok' && <p className="text-base font-medium text-accent">Danke, deine Nachricht ist angekommen.</p>}
+          {status === 'ok' && <p className="text-base font-medium text-accent">Danke, Ihre Nachricht ist angekommen.</p>}
         </div>
     </div>
   )

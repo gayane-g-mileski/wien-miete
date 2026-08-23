@@ -72,7 +72,7 @@ export function evaluateFoerderung(
         begruendung: [
           'Die Wohnung gehört einer gemeinnützigen Bauvereinigung (Genossenschaft). Dafür gelten eigene, meist günstigere Miet-Obergrenzen statt der normalen Regeln.',
         ],
-        hinweise: ['Den genauen Betrag nennt dir die Bauvereinigung (er setzt sich u.a. aus Grund-, Bau- und Erhaltungskosten zusammen).'],
+        hinweise: ['Den genauen Betrag nennt die Bauvereinigung (er setzt sich u.a. aus Grund-, Bau- und Erhaltungskosten zusammen).'],
       }
 
     case 'wfg1954':

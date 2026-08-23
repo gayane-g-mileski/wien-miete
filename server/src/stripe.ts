@@ -23,6 +23,16 @@ async function stripe(env: Umgebung, pfad: string, felder?: Record<string, strin
 }
 
 export type Produkt = 'bericht' | 'profi' | 'api'
+export type Zahlungsart = 'applepay' | 'paypal' | 'karte'
+
+/**
+ * Apple Pay und Google Pay laufen bei Stripe über die Kartenzahlung: Ist die
+ * Domain freigeschaltet, blendet die Bezahlseite die Wallet-Schaltfläche von
+ * selbst ein. Nur PayPal ist eine eigene Zahlungsart.
+ */
+function zahlungsarten(art: Zahlungsart | undefined): string[] {
+  return art === 'paypal' ? ['paypal'] : ['card']
+}
 
 function preisId(env: Umgebung, produkt: Produkt): string {
   if (produkt === 'bericht') return env.STRIPE_PREIS_BERICHT
@@ -42,6 +52,8 @@ export async function checkoutAnlegen(
     email: string
     produkt: Produkt
     sofortStart: boolean
+    zahlungsart?: Zahlungsart
+    kaeuferName?: string
     erfolg: string
     abbruch: string
   },
@@ -59,13 +71,23 @@ export async function checkoutAnlegen(
     'metadata[konto]': optionen.kontoId,
     'metadata[produkt]': optionen.produkt,
     'metadata[sofort_start]': optionen.sofortStart ? 'ja' : 'nein',
+    'metadata[name]': optionen.kaeuferName ?? '',
+    'metadata[zahlungsart]': optionen.zahlungsart ?? 'karte',
     'metadata[zustimmung_am]': new Date().toISOString(),
     'automatic_tax[enabled]': 'true',
     'tax_id_collection[enabled]': 'true',
   }
+  zahlungsarten(optionen.zahlungsart).forEach((a, i) => {
+    felder[`payment_method_types[${i}]`] = a
+  })
   if (!abo) felder['invoice_creation[enabled]'] = 'true'
   const sitzung = await stripe(env, '/checkout/sessions', felder)
   return sitzung.url as string
+}
+
+/** Bezahlvorgang nachlesen – zur Prüfung, ob wirklich bezahlt wurde. */
+export async function sitzungLesen(env: Umgebung, id: string): Promise<Record<string, unknown>> {
+  return stripe(env, `/checkout/sessions/${encodeURIComponent(id)}`)
 }
 
 export async function rechnungen(env: Umgebung, kundeId: string): Promise<Record<string, unknown>[]> {

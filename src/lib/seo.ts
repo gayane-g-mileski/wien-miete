@@ -150,7 +150,7 @@ export function metaFuer(route: Route, startFaq: { frage: string; antwort: strin
       pfad: 'ratgeber/',
       titel: `Ratgeber Mietrecht Wien: Richtwert, Lagezuschlag, Betriebskosten | ${MARKE}`,
       beschreibung:
-        'Verständlich erklärt: Richtwertmietzins, Lagezuschlag, angemessener Mietzins, Befristung, Betriebskosten nach § 21 MRG, Wertsicherung und die Rendite von Vorsorgewohnungen.',
+        'Für die Praxis der Hausverwaltung: Richtwertmietzins, Lagezuschlag, angemessener Mietzins, Befristung, Betriebskosten nach § 21 MRG, Wertsicherung und die Rendite von Vorsorgewohnungen.',
       ld: [
         ORGANISATION,
         brotkrumen(),
@@ -168,9 +168,9 @@ export function metaFuer(route: Route, startFaq: { frage: string; antwort: strin
   }
   return {
     pfad: '',
-    titel: `${MARKE}: Richtwert, MRG-Prüfung und Preisbandbreite`,
+    titel: `${MARKE}: Mietzinsprüfung für Hausverwaltungen`,
     beschreibung:
-      'Automatisierte Ersteinschätzung für Wiener Mietobjekte: zulässige Mietzinsart, Anwendungsbereich des MRG und realistische Preisbandbreite – mit Herleitung, Fundstellen und Prüfbericht.',
+      'Mietzinsprüfung für Hausverwaltungen und Immobilientreuhänder in Wien: Mietzinsart, Anwendungsbereich des MRG und Bandbreite je Einheit – mit Herleitung, Fundstellen, Prüfbericht und Bestandsauswertung.',
     ld: [ORGANISATION, anwendung(), brotkrumen(), ...(startFaq.length ? [faqLd(startFaq)] : [])],
   }
 }

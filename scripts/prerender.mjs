@@ -24,10 +24,14 @@ const PORT = 4321
 const { seiten } = JSON.parse(await readFile(join(WURZEL, 'src/inhalte/seiten.json'), 'utf8'))
 
 /** Alle Adressen, die als eigene Datei ausgeliefert werden. */
+// Muss zu API_SICHTBAR in src/lib/flags.ts passen: solange die Schnittstelle
+// nicht gezeigt wird, gehört ihre Seite weder ins HTML noch in die Sitemap.
+const API_SICHTBAR = false
+
 const ROUTEN = [
   { pfad: '', prioritaet: '1.0', aenderung: 'weekly' },
   { pfad: 'ratgeber/', prioritaet: '0.7', aenderung: 'monthly' },
-  { pfad: 'api/', prioritaet: '0.8', aenderung: 'monthly' },
+  ...(API_SICHTBAR ? [{ pfad: 'api/', prioritaet: '0.8', aenderung: 'monthly' }] : []),
   ...seiten.map((s) => ({ pfad: `${s.pfad}/`, prioritaet: '0.9', aenderung: 'monthly' })),
 ]
 

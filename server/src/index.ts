@@ -1,5 +1,5 @@
 import { cors, fehler, gleich, hash, istEmail, json, tokenBauen, tokenPruefen, zufall, type Umgebung } from './hilfen'
-import { checkoutAnlegen, ereignisPruefen, rechnungen, type Produkt } from './stripe'
+import { checkoutAnlegen, ereignisPruefen, rechnungen, sitzungLesen, type Produkt, type Zahlungsart } from './stripe'
 import { evaluateMrg } from '../../src/lib/mrgEngine'
 import { alsApiAntwort } from '../../src/lib/api'
 import { berechneIndex } from '../../src/lib/wertsicherung'
@@ -63,15 +63,27 @@ async function angemeldetesKonto(env: Umgebung, anfrage: Request): Promise<Konto
   return env.DB.prepare('SELECT * FROM konten WHERE id = ?').bind(nutzlast.konto).first<KontoZeile>()
 }
 
-async function mailSenden(env: Umgebung, an: string, betreff: string, text: string): Promise<void> {
+interface Anhang {
+  filename: string
+  /** Inhalt als Base64 – so nehmen es die gängigen Versanddienste entgegen. */
+  content: string
+}
+
+async function mailSenden(env: Umgebung, an: string, betreff: string, text: string, anhang?: Anhang): Promise<void> {
   if (!env.MAIL_ENDPUNKT) {
-    console.log(`[mail an ${an}] ${betreff}\n${text}`)
+    console.log(`[mail an ${an}] ${betreff}${anhang ? ` (+ ${anhang.filename})` : ''}\n${text}`)
     return
   }
   await fetch(env.MAIL_ENDPUNKT, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.MAIL_SCHLUESSEL}` },
-    body: JSON.stringify({ from: env.MAIL_ABSENDER, to: [an], subject: betreff, text }),
+    body: JSON.stringify({
+      from: env.MAIL_ABSENDER,
+      to: [an],
+      subject: betreff,
+      text,
+      ...(anhang ? { attachments: [anhang] } : {}),
+    }),
   })
 }
 
@@ -261,16 +273,26 @@ export default {
 
       // ---- Zahlung ------------------------------------------------------
       if (pfad === '/zahlung/checkout' && anfrage.method === 'POST') {
-        const konto = await angemeldetesKonto(env, anfrage)
-        if (!konto) return fehler('nicht_angemeldet', 'Bitte melde dich an.', 401, kopf)
         const daten = (await anfrage.json()) as {
           produkt?: Produkt
           sofortStart?: boolean
+          zahlungsart?: Zahlungsart
+          name?: string
+          email?: string
           erfolg?: string
           abbruch?: string
         }
         if (!daten.produkt || !['bericht', 'profi', 'api'].includes(daten.produkt)) {
           return fehler('eingabe_ungueltig', 'Unbekannte Leistung.', 422, kopf)
+        }
+        // Gekauft wird auch ohne Anmeldung: Die E-Mail-Adresse aus dem
+        // Bestellfenster legt bei Bedarf das Konto an, an das der Kauf hängt.
+        let konto = await angemeldetesKonto(env, anfrage)
+        if (!konto) {
+          if (!istEmail(daten.email)) {
+            return fehler('eingabe_ungueltig', 'Bitte gib eine gültige E-Mail-Adresse an.', 422, kopf)
+          }
+          konto = await kontoNachEmail(env, daten.email)
         }
         const ziel = (wert: string | undefined, ersatz: string) =>
           typeof wert === 'string' && erlaubt.some((h) => wert.startsWith(h)) ? wert : ersatz
@@ -279,10 +301,42 @@ export default {
           email: konto.email,
           produkt: daten.produkt,
           sofortStart: Boolean(daten.sofortStart),
+          zahlungsart: daten.zahlungsart,
+          kaeuferName: (daten.name ?? '').slice(0, 120),
           erfolg: ziel(daten.erfolg, `${erlaubt[0]}?kauf=ok`),
           abbruch: ziel(daten.abbruch, `${erlaubt[0]}?kauf=abbruch`),
         })
         return json({ url }, 200, kopf)
+      }
+
+      // Prüfbericht zustellen. Der Bericht entsteht im Browser der Käuferin;
+      // verschickt wird er erst, wenn Stripe die Zahlung bestätigt.
+      if (pfad === '/bericht/senden' && anfrage.method === 'POST') {
+        const daten = (await anfrage.json()) as {
+          sitzung?: string
+          email?: string
+          name?: string
+          dateiname?: string
+          pdf?: string
+        }
+        if (!daten.sitzung || !istEmail(daten.email) || !daten.pdf) {
+          return fehler('eingabe_ungueltig', 'Angaben unvollständig.', 422, kopf)
+        }
+        if (daten.pdf.length > 8_000_000) {
+          return fehler('eingabe_ungueltig', 'Die Datei ist zu groß.', 422, kopf)
+        }
+        const sitzung = await sitzungLesen(env, daten.sitzung)
+        if (sitzung.payment_status !== 'paid') {
+          return fehler('nicht_bezahlt', 'Zu diesem Vorgang liegt keine abgeschlossene Zahlung vor.', 402, kopf)
+        }
+        await mailSenden(
+          env,
+          daten.email,
+          'Dein Prüfbericht',
+          `Hallo${daten.name ? ` ${daten.name}` : ''},\n\nanbei der bestellte Prüfbericht als PDF. Die Rechnung kommt separat vom Zahlungsdienstleister.\n\nDer Bericht ist eine automatisierte Ersteinschätzung – kein Gutachten und keine Rechtsauskunft.\n\nMietzins-Check in Wien`,
+          { filename: daten.dateiname ?? 'Pruefbericht.pdf', content: daten.pdf },
+        )
+        return json({ ok: true }, 200, kopf)
       }
 
       if (pfad === '/zahlung/rechnungen' && anfrage.method === 'GET') {

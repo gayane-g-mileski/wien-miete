@@ -82,16 +82,16 @@ export function Ratgeber({ seite }: { seite: RatgeberSeite }) {
         </section>
 
         <div className="mt-12 rounded-2xl border border-accent/40 bg-accent/5 p-6">
-          <p className="text-lg font-semibold text-ink">Für die eigene Wohnung nachrechnen</p>
+          <p className="text-lg font-semibold text-ink">Für eine Einheit im Bestand nachrechnen</p>
           <p className="mt-2 text-base leading-relaxed text-ink-soft">
-            Der Rechner ordnet Mietzinsart und Anwendungsbereich des MRG ein und zeigt die Preisbandbreite mit
-            Herleitung – kostenlos und ohne Konto.
+            Die Prüfung ordnet Mietzinsart und Anwendungsbereich des MRG ein und zeigt die Bandbreite mit Herleitung –
+            die Einzelprüfung kostenlos und ohne Konto.
           </p>
           <a
             href={href('')}
             className="mt-5 inline-block rounded-lg bg-accent px-5 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong"
           >
-            Zum Rechner
+            Zur Prüfung
           </a>
         </div>
 

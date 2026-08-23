@@ -131,17 +131,28 @@ export type Produkt = 'bericht' | 'profi' | 'api'
  * vorzeitigen Beginn und die Kenntnisnahme des Verlusts des Rücktrittsrechts
  * fest (§ 18 Abs 1 Z 11 FAGG); der Server speichert sie zum Kauf.
  */
-export async function bezahlenStarten(produkt: Produkt, sofortStart: boolean): Promise<void> {
+export interface KaufAngaben {
+  /** Gewählte Zahlungsart – bestimmt, was die Bezahlseite anbietet. */
+  zahlungsart?: 'applepay' | 'paypal' | 'karte'
+  /** Name und E-Mail für Rechnung und Zustellung, wenn ohne Konto gekauft wird. */
+  name?: string
+  email?: string
+}
+
+export async function bezahlenStarten(produkt: Produkt, sofortStart: boolean, angaben: KaufAngaben = {}): Promise<void> {
   const { url } = await anfrage<{ url: string }>('/zahlung/checkout', {
     method: 'POST',
     body: JSON.stringify({
       produkt,
       sofortStart,
-      erfolg: `${location.origin}${location.pathname}?kauf=ok`,
+      ...angaben,
+      // Die Kennung des Bezahlvorgangs kommt zurück, damit der Server die
+      // Zahlung prüfen kann, bevor er den Bericht verschickt.
+      erfolg: `${location.origin}${location.pathname}?kauf=ok&sitzung={CHECKOUT_SESSION_ID}`,
       abbruch: `${location.origin}${location.pathname}?kauf=abbruch`,
     }),
   })
-  ereignis('checkout_gestartet', { produkt })
+  ereignis('checkout_gestartet', { produkt, zahlungsart: angaben.zahlungsart ?? 'karte' })
   location.href = url
 }
 
@@ -184,22 +195,34 @@ export function useKonto(): { konto: Konto | null; laedt: boolean } {
  * Bezahlvorgang die Adresszeile wieder aufräumen.
  */
 export async function anmeldungAusUrlUebernehmen(): Promise<void> {
-  if (!serverVorhanden()) return
   const p = new URLSearchParams(location.search)
   const token = p.get('anmeldung')
   const kauf = p.get('kauf')
+  const sitzung = p.get('sitzung')
   if (!token && !kauf) return
   try {
-    if (token) await anmeldenMitToken(token)
+    if (token && serverVorhanden()) await anmeldenMitToken(token)
     if (kauf === 'ok') {
       ereignis('kauf_abgeschlossen')
-      await kontoLaden()
+      if (serverVorhanden() && tokenLesen()) await kontoLaden()
+      // Gekaufter Prüfbericht: erzeugen, ausliefern, Bescheid geben.
+      const { kaufAbholen, berichtAusliefern, kaufFertigMelden } = await import('./kauf')
+      const offen = kaufAbholen()
+      if (offen) {
+        const weg = await berichtAusliefern(offen, sitzung)
+        kaufFertigMelden(
+          weg === 'gesendet'
+            ? `Danke, der Bericht wurde an ${offen.email} gesendet.`
+            : 'Danke, der Bericht wurde erstellt und gespeichert.',
+        )
+      }
     }
   } catch {
     // Fehlgeschlagene Anmeldung führt zurück in den abgemeldeten Zustand.
   }
   p.delete('anmeldung')
   p.delete('kauf')
+  p.delete('sitzung')
   const rest = p.toString()
   history.replaceState({}, '', `${location.pathname}${rest ? `?${rest}` : ''}`)
 }

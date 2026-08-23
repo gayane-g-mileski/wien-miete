@@ -298,7 +298,7 @@ function lageInfo(input: MietobjektInput, art: MietzinsArt, lz: LagezuschlagHerl
       bezirk: null,
       koords,
       adresse,
-      text: 'Du hast keine Anschrift angegeben – die Lage fließt daher nicht in die Berechnung ein. Gib eine Wiener Adresse ein, um zu sehen, ob die Lage die Miete erhöht oder senkt.',
+      text: 'Ohne Anschrift fließt die Lage nicht in die Berechnung ein. Mit einer Wiener Adresse wird sichtbar, ob die Lage den Mietzins hebt oder senkt.',
     }
   }
 
@@ -318,12 +318,12 @@ function lageInfo(input: MietobjektInput, art: MietzinsArt, lz: LagezuschlagHerl
   if (zuschlag > 0) {
     const spanne = `${lz.min.toFixed(2).replace('.', ',')} bis ${lz.max.toFixed(2).replace('.', ',')}`
     let text = `Die Adresse liegt in einer gefragten Gegend (${nr}. Bezirk, ${b.name}). Für so eine gute Lage darf die Miete höher sein – hier rund ${spanne} € pro m² zusätzlich. Der Zuschlag gilt je Liegenschaft; maßgeblich ist die Lagezuschlagskarte der Stadt Wien.`
-    if (laut) text += ' Weil du "laute Lage/Straßenlärm" angehakt hast, wird das mit einem Abzug gegengerechnet.'
+    if (laut) text += ' Weil "laute Lage/Straßenlärm" angehakt ist, wird das mit einem Abzug gegengerechnet.'
     return { status: laut ? 'abschlag' : 'zuschlag', bezirk: nr, koords, adresse, text }
   }
 
   let text = `Die Adresse liegt im ${nr}. Bezirk (${b.name}). Diese Lage gilt im Schnitt als durchschnittlich – dafür gibt es keinen Aufschlag, aber auch keinen Abzug.`
-  if (laut) text = `Die Adresse liegt im ${nr}. Bezirk (${b.name}). Weil du "laute Lage/Straßenlärm" angehakt hast, wird die Miete etwas nach unten korrigiert.`
+  if (laut) text = `Die Adresse liegt im ${nr}. Bezirk (${b.name}). Weil "laute Lage/Straßenlärm" angehakt ist, wird die Miete etwas nach unten korrigiert.`
   return { status: laut ? 'abschlag' : 'neutral', bezirk: nr, koords, adresse, text }
 }
 

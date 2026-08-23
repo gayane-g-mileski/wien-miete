@@ -41,7 +41,7 @@ const ZEILEN: Zeile[] = [
     anderer: 'Nein',
   },
   {
-    frage: 'Ergebnis als PDF, Verlauf mehrerer Adressen, offline nutzbar',
+    frage: 'Prüfbericht als PDF, Verlauf mehrerer Objekte, offline nutzbar',
     hier: 'Ja',
     stadt: 'Nein',
     anderer: 'selbst prüfen',

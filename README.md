@@ -1,8 +1,7 @@
 # Mietzins-Check in Wien
 
-Web-App für Vermieter:innen, Mieter:innen und Immobilienfachleute in Wien.
-Anhand weniger Angaben zum Mietobjekt liefert sie eine automatisierte
-Ersteinschätzung zu:
+Web-App für Hausverwaltungen und Immobilientreuhänder in Wien. Anhand weniger
+Angaben zur Einheit liefert sie eine automatisierte Ersteinschätzung zu:
 
 1. **Mietzinsart** – Richtwertmietzins, Kategoriemietzins, Kategorie-D-Hauptmietzins,
    angemessener Hauptmietzins, freier Mietzins, WGG- oder förderungsrechtlicher

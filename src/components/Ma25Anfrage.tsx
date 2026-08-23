@@ -54,8 +54,8 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
   const senden = () => {
     const ohneName = !name.trim()
     const ohneMail = !email.trim()
-    setNameFehler(ohneName ? 'Bitte gib deinen Namen an.' : undefined)
-    setEmailFehler(ohneMail ? 'Bitte gib deine E-Mail-Adresse an.' : undefined)
+    setNameFehler(ohneName ? 'Bitte geben Sie Ihren Namen an.' : undefined)
+    setEmailFehler(ohneMail ? 'Bitte geben Sie Ihre E-Mail-Adresse an.' : undefined)
     if (ohneName || ohneMail) return
     setFehler(null)
     const body = `${text}\n\n---\nName: ${name}\nE-Mail: ${email}`
@@ -72,8 +72,8 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
       <p className="text-sm font-semibold text-accent">Diese Anfrage ist kostenlos</p>
 
       <p className="text-base text-ink-soft">
-        Die MA 25 kann dir das Jahr der Baubewilligung nennen. Wenn du alle Infos beisammen hast, komm einfach zurück und
-        lass die Miete hier neu berechnen.
+        Die MA 25 nennt das Jahr der Baubewilligung. Sobald die Auskunft vorliegt, geht es hier weiter – die Prüfung
+        lässt sich dann mit dem Baujahr neu rechnen.
       </p>
 
       <TextField
@@ -149,7 +149,7 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
 
       {gesendet && (
         <p className="text-base text-ink-soft">
-          Deine E-Mail an die MA 25 wurde vorbereitet und in deinem E-Mail-Programm geöffnet. Bitte hänge die ausgewählten
+          Die E-Mail an die MA 25 wurde vorbereitet und im E-Mail-Programm geöffnet. Bitte hänge die ausgewählten
           Dateien dort noch an und schick sie ab.
         </p>
       )}

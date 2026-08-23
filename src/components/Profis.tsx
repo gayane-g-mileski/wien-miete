@@ -1,11 +1,12 @@
-import { kontoOeffnen } from '../lib/kontoEvent'
+import { kaufOeffnen } from '../lib/kaufEvent'
+import { API_SICHTBAR } from '../lib/flags'
 import { href } from '../lib/seo'
 import { Portfolio } from './Portfolio'
 
 const PUNKTE = [
   {
     titel: '400 Einheiten in 20 Minuten prüfen',
-    text: 'Lade deine Bestandsliste hoch – die Auswertung sagt dir, welche Einheiten mutmaßlich über der Grenze liegen. Gleich hier ausprobieren.',
+    text: 'Bestandsliste hochladen – die Auswertung zeigt, welche Einheiten mutmaßlich über der Grenze liegen. Gleich hier ausprobieren.',
   },
   {
     titel: 'CSV-Import',
@@ -17,7 +18,7 @@ const PUNKTE = [
   },
   {
     titel: 'Team-Zugänge',
-    text: 'Mehrere Personen, gemeinsame Objektlisten, nachvollziehbare Prüfberichte für Hausverwaltung und Eigentümer:innen.',
+    text: 'Mehrere Mitarbeitende, gemeinsame Objektlisten, nachvollziehbare Prüfberichte für Eigentümerinnen und Eigentümer.',
   },
   {
     titel: 'Schnittstelle für die eigene Software',
@@ -33,12 +34,13 @@ export function Profis() {
   return (
     <section id="profis" className="scroll-mt-4 border-t border-line bg-surface-2">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">Für Profis</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">Bestand statt Einzelfall</p>
         <h2 className="mt-3 max-w-2xl text-[2rem] font-semibold leading-tight tracking-tight text-ink">
-          Hausverwaltung, Bestandshalter, Makler:innen
+          Für Hausverwaltungen und Immobilientreuhänder
         </h2>
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink-soft">
-          Dieselbe Logik wie im kostenlosen Rechner, nur für viele Einheiten auf einmal.
+          Dieselbe Prüflogik wie in der Einzelprüfung, nur für ganze Häuser und Bestände auf einmal – mit
+          nachvollziehbaren Prüfberichten für Akt, Eigentümerversammlung und Schlichtungsstelle.
         </p>
 
         <div className="mt-9 grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -57,17 +59,19 @@ export function Profis() {
         <div className="mt-9 flex flex-wrap items-center gap-4">
           <button
             type="button"
-            onClick={() => kontoOeffnen('Der Profi-Zugang kostet ab 49,00 € pro Monat inklusive Umsatzsteuer.', 'registrieren', 'profi')}
+            onClick={() => kaufOeffnen('profi')}
             className="rounded-lg bg-accent px-5 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong"
           >
             Profi-Zugang bestellen
           </button>
-          <a
-            href={href('api/')}
-            className="rounded-lg border border-accent/50 px-5 py-2.5 text-base font-semibold text-accent transition-colors hover:bg-accent/10"
-          >
-            Schnittstelle und White-Label
-          </a>
+          {API_SICHTBAR && (
+            <a
+              href={href('api/')}
+              className="rounded-lg border border-accent/50 px-5 py-2.5 text-base font-semibold text-accent transition-colors hover:bg-accent/10"
+            >
+              Schnittstelle und White-Label
+            </a>
+          )}
         </div>
         <p className="mt-3 text-sm text-ink-faint">
           Monatlich kündbar, Preise inklusive Umsatzsteuer. Für Bestände mit personenbezogenen Daten Dritter liegt ein

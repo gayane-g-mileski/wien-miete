@@ -84,8 +84,8 @@ export function Konto() {
   const emailGueltig = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
 
   const anmeldelinkSchicken = async () => {
-    if (!email.trim()) return setFehler({ email: 'Bitte gib deine E-Mail-Adresse an.' })
-    if (!emailGueltig) return setFehler({ email: 'Bitte gib eine gültige E-Mail-Adresse an.' })
+    if (!email.trim()) return setFehler({ email: 'Bitte geben Sie Ihre E-Mail-Adresse an.' })
+    if (!emailGueltig) return setFehler({ email: 'Bitte geben Sie eine gültige E-Mail-Adresse an.' })
     setFehler({})
     setLaeuft(true)
     try {
@@ -101,7 +101,7 @@ export function Konto() {
   const kaufen = async () => {
     if (!produkt) return
     if (!sofortStart || !agbOk) {
-      return setFehler({ zustimmung: 'Bitte bestätige beide Punkte, dann geht es weiter zur Zahlung.' })
+      return setFehler({ zustimmung: 'Bitte bestätigen Sie beide Punkte, dann geht es weiter zur Zahlung.' })
     }
     setFehler({})
     setLaeuft(true)
@@ -121,7 +121,7 @@ export function Konto() {
     )
   }
 
-  const kopf = konto ? 'Dein Konto' : produkt ? 'Bestellung' : modus === 'anmelden' ? 'Anmelden' : 'Konto anlegen'
+  const kopf = konto ? 'Ihr Konto' : produkt ? 'Bestellung' : modus === 'anmelden' ? 'Anmelden' : 'Konto anlegen'
 
   return (
     <div
@@ -242,7 +242,7 @@ export function Konto() {
           <div className="mt-6 space-y-4">
             <p className="text-base leading-relaxed text-ink-soft">
               Wir haben einen Anmeldelink an <strong className="text-ink">{email.trim()}</strong> geschickt. Der Link
-              gilt 15 Minuten und meldet dich ohne Passwort an.
+              gilt 15 Minuten und meldet Sie ohne Passwort an.
             </p>
             <button
               type="button"
@@ -258,7 +258,7 @@ export function Konto() {
             {tarif && <Bestellangaben tarifName={tarif.name} brutto={tarif.brutto} einheit={tarif.einheit} laufzeit={tarif.laufzeit} />}
             <p className="text-base leading-relaxed text-ink-soft">
               Konten und Zahlung sind noch nicht freigeschaltet – der Rechner bleibt ohne Anmeldung vollständig nutzbar.
-              Trag dich ein, dann melden wir uns, sobald es losgeht.
+              Tragen Sie sich ein, dann melden wir uns, sobald es losgeht.
             </p>
             <TextField
               label="E-Mail-Adresse"

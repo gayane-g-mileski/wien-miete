@@ -4,7 +4,8 @@ import { flaechenwidmungLink, laerminfoLink, lagezuschlagLink } from '../lib/geo
 import { Collapsible } from './ui'
 import { RICHTWERT_WIEN } from '../lib/pricingData'
 import { ENGINE_VERSION, RECHTSGRUNDLAGE, RICHTWERT_QUELLE } from '../lib/version'
-import { kontoOeffnen } from '../lib/kontoEvent'
+import { pruefberichtOeffnen } from '../lib/kaufEvent'
+import type { MietobjektInput } from '../lib/types'
 
 const LAGE_STYLE: Record<LageStatus, string> = {
   unbekannt: 'text-ink-soft',
@@ -49,7 +50,16 @@ function Preiswert({ min, max, color = 'text-accent' }: { min: number; max: numb
   )
 }
 
-export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
+export function Ergebnis({
+  ergebnis,
+  input,
+  adresse,
+}: {
+  ergebnis: MrgErgebnis
+  /** Ohne Eingabe – etwa im eingebetteten Rechner – wird nichts verkauft. */
+  input?: MietobjektInput
+  adresse?: string
+}) {
   const { lage } = ergebnis
   const [erklaerungOffen, setErklaerungOffen] = useState(false)
   // Lage nur zeigen, wenn tatsächlich eine Anschrift eingegeben wurde.
@@ -58,7 +68,7 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
   return (
     <div>
       <h2 className="mb-1 px-1 text-[2rem] font-semibold leading-tight tracking-tight text-accent">Ergebnis</h2>
-      <p className="mb-5 px-1 text-sm font-semibold text-ink-faint">Ersteinschätzung nach den eingegebenen Angaben</p>
+      <p className="mb-5 px-1 text-sm font-semibold text-ink-faint">Ersteinschätzung nach den erfassten Angaben</p>
 
       <div className="rounded-2xl border border-line bg-surface-2 p-5 shadow-sm ring-1 ring-accent/15 sm:p-6">
         <div className="space-y-1">
@@ -171,23 +181,21 @@ export function Ergebnis({ ergebnis }: { ergebnis: MrgErgebnis }) {
           Engine v{ENGINE_VERSION}
         </p>
 
-        <button
-          type="button"
-          onClick={() =>
-            kontoOeffnen(
-              'Der Prüfbericht PRO kostet 24,00 € inklusive Umsatzsteuer und wird über ein Konto abgerechnet. Die kostenlose Ersteinschätzung bleibt ohne Anmeldung nutzbar.',
-              'registrieren',
-              'bericht',
-            )
-          }
-          className="mt-4 w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong"
-        >
-          Prüfbericht PRO als PDF – 24,00 € inkl. USt
-        </button>
-        <p className="mt-2 px-1 text-[12px] leading-relaxed text-ink-faint">
-          Der Prüfbericht ordnet die Wohnung Punkt für Punkt ein, mit Fundstellen und Rechenweg. Die kostenlose
-          Ersteinschätzung lässt sich unverändert als PDF sichern.
-        </p>
+        {input && (
+          <>
+            <button
+              type="button"
+              onClick={() => pruefberichtOeffnen(input, adresse ?? input.anschrift)}
+              className="mt-4 w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong"
+            >
+              Prüfbericht PRO als PDF – 24,00 € inkl. USt
+            </button>
+            <p className="mt-2 px-1 text-[12px] leading-relaxed text-ink-faint">
+              Der Prüfbericht ordnet das Objekt Punkt für Punkt ein, mit Fundstellen und Rechenweg. Die kostenlose
+              Ersteinschätzung lässt sich unverändert als PDF sichern.
+            </p>
+          </>
+        )}
       </div>
     </div>
   )

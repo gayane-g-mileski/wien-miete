@@ -98,7 +98,7 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
 
         {/* Bezirk links, Anschrift rechts + gemeinsamer Hinweis */}
         <div>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-[1fr_2fr]">
+          <div className="grid grid-cols-1 gap-5">
             <SelectField
               label="Bezirk"
               id="bezirk"
@@ -144,7 +144,7 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
           </div>
           <p className="mt-1 px-1 text-[12px] text-ink-faint">
             {anschriftFehler
-              ? 'Adresssuche gerade nicht erreichbar – du kannst die Adresse trotzdem eintippen (mit Wiener PLZ wird die Lage erkannt).'
+              ? 'Adresssuche gerade nicht erreichbar – die Adresse lässt sich trotzdem eintippen (mit Wiener PLZ wird die Lage erkannt).'
               : 'Nach dem 3. Zeichen erscheinen Vorschläge für die Anschrift. Ohne Anschrift wird die Lage nicht berücksichtigt.'}
           </p>
         </div>

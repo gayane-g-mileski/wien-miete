@@ -68,7 +68,7 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
       <p className="text-sm font-semibold text-accent">Diese Anfrage ist kostenlos</p>
 
       <div>
-        <p>Diese Auskunft bekommst du über eine Anfrage an die</p>
+        <p>Diese Auskunft gibt auf Anfrage die</p>
         <address translate="no" className="my-4 border-l-2 border-accent pl-3 not-italic leading-relaxed text-accent">
           <span className="font-semibold">Verwaltungsstelle Bundeswohnbaufonds</span>
           <br />
@@ -103,7 +103,7 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
       </div>
 
       <div className="border-t border-line pt-4">
-        <Collapsible title="Was die Antwort für deine Miete bedeutet">
+        <Collapsible title="Was die Antwort für den Mietzins bedeutet">
           <div className="space-y-3">
             {FAELLE.map((f) => (
               <div key={f.titel} className="rounded-lg border border-line bg-surface-2 p-3">
@@ -113,7 +113,7 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
               </div>
             ))}
             <p className="text-sm leading-relaxed text-ink-faint">
-              Das gilt aber nur, wenn gerade deine Wohnung mit Mitteln des Wiederaufbaufonds saniert wurde. Wurde das
+              Das gilt aber nur, wenn genau diese Einheit mit Mitteln des Wiederaufbaufonds saniert wurde. Wurde das
               Darlehen nach dem 31.8.1952 bewilligt, genügt es, dass allgemeine Teile des Hauses wiederhergestellt wurden
               – zum Beispiel Stiegenhaus, Dach oder Außenmauern. Ist diese Voraussetzung erfüllt, gilt einer der drei
               Fälle oben. Ist sie nicht erfüllt, wird die Wohnung wie ein gewöhnlicher Altbau behandelt – dann gilt der{' '}

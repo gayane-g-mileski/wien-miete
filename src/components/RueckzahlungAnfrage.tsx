@@ -100,7 +100,7 @@ export function RueckzahlungAnfrage({ anschrift, programm }: { anschrift: string
       </div>
 
       <div className="border-t border-line pt-4">
-        <Collapsible title="Was die Antwort für deine Miete bedeutet">
+        <Collapsible title="Was die Antwort für den Mietzins bedeutet">
           <div className="space-y-3">
             {FAELLE.map((f) => (
               <div key={f.titel} className="rounded-lg border border-line bg-surface-2 p-3">

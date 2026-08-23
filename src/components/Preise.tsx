@@ -1,4 +1,5 @@
-import { kontoOeffnen } from '../lib/kontoEvent'
+import { kaufOeffnen } from '../lib/kaufEvent'
+import { API_SICHTBAR } from '../lib/flags'
 import { TARIFE, euro, netto, preisText } from '../lib/tarife'
 import { BASIS, href } from '../lib/seo'
 
@@ -12,12 +13,12 @@ export function Preise() {
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
         <h2 className="text-[2rem] font-semibold leading-tight tracking-tight text-ink">Preise</h2>
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink-soft">
-          Der Rechner bleibt kostenlos. Bezahlt wird nur, was darüber hinausgeht – der ausführliche Prüfbericht, die
-          Arbeit mit vielen Einheiten und der Zugang über die Schnittstelle.
+          Die Einzelprüfung bleibt kostenlos. Bezahlt wird, was in der täglichen Arbeit zählt: der Prüfbericht für den
+          Akt und die Arbeit mit ganzen Beständen.
         </p>
 
-        <div className="mt-9 grid grid-cols-1 gap-6 lg:grid-cols-4">
-          {TARIFE.map((t) => (
+        <div className={`mt-9 grid grid-cols-1 gap-6 ${API_SICHTBAR ? 'lg:grid-cols-4' : 'lg:grid-cols-3'}`}>
+          {TARIFE.filter((t) => API_SICHTBAR || t.id !== 'api').map((t) => (
             <div
               key={t.id}
               className={`flex flex-col rounded-2xl border bg-surface p-5 shadow-sm sm:p-6 ${
@@ -52,8 +53,10 @@ export function Preise() {
               <button
                 type="button"
                 onClick={() =>
-                  t.produkt
-                    ? kontoOeffnen(t.anlass, 'registrieren', t.produkt)
+                  // Der Prüfbericht gehört zu einem konkreten Objekt – dafür
+                  // geht es zuerst zum Rechner, gekauft wird dort im Ergebnis.
+                  t.produkt && t.produkt !== 'bericht'
+                    ? kaufOeffnen(t.produkt)
                     : document.getElementById('rechner')?.scrollIntoView({ behavior: 'smooth' })
                 }
                 className={`mt-6 w-full rounded-lg px-4 py-2.5 text-base font-semibold transition-colors ${
@@ -85,13 +88,15 @@ export function Preise() {
             </a>
             .
           </p>
-          <p>
-            Schnittstelle und eingebetteter Rechner sind unter{' '}
-            <a className="text-accent underline" href={href('api/')}>
-              Schnittstelle und White-Label
-            </a>{' '}
-            beschrieben.
-          </p>
+          {API_SICHTBAR && (
+            <p>
+              Schnittstelle und eingebetteter Rechner sind unter{' '}
+              <a className="text-accent underline" href={href('api/')}>
+                Schnittstelle und White-Label
+              </a>{' '}
+              beschrieben.
+            </p>
+          )}
         </div>
       </div>
     </section>

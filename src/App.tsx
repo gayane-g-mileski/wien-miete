@@ -11,6 +11,7 @@ import { SprachSchalter } from './components/SprachSchalter'
 import { UeberKontakt } from './components/UeberKontakt'
 import { Preise } from './components/Preise'
 import { Konto } from './components/Konto'
+import { Kaufdialog } from './components/Kaufdialog'
 import { ThemaSchalter } from './components/ThemaSchalter'
 import { Ratgeber, RatgeberIndex } from './components/Ratgeber'
 import { ApiSeite } from './components/ApiSeite'
@@ -21,10 +22,36 @@ import { ladeVerlauf, speichereVerlauf, type VerlaufEintrag } from './lib/verlau
 import { useRoute } from './lib/router'
 import { BASIS, MARKE, RATGEBER, href } from './lib/seo'
 import { analytikStarten, ereignis, seitenaufruf } from './lib/analytics'
+import { API_SICHTBAR } from './lib/flags'
 import { anmeldungAusUrlUebernehmen, useKonto } from './lib/konto'
+import { aufKaufFertig } from './lib/kauf'
 import type { MietobjektInput } from './lib/types'
 
 const quelleLink = 'text-accent underline hover:text-accent-strong'
+
+/** Datenquellen der Anwendung – die Bezeichnung selbst ist der Link. */
+const QUELLEN = [
+  {
+    text: 'Adressdienst der Stadt Wien (OGDAddressService)',
+    url: 'https://www.data.gv.at/katalog/dataset/c223b93a-2634-4f06-ac73-8709b9e16888',
+  },
+  { text: 'Gebäudedaten Wien mit Baujahr', url: 'https://www.wien.gv.at/kultur/kulturgut-gebaeudedaten' },
+  {
+    text: 'Grundstücksgrenzen und Katastralgemeinden (BEV-Kataster)',
+    url: 'https://kataster.bev.gv.at/#/center/13.35,47.77/zoom/7.6/vermv/0.6',
+  },
+  {
+    text: 'Lagezuschlagskarte der Stadt Wien',
+    url: 'https://mein.wien.gv.at/Richtwert/ui/lagezuschlag/#/LagezuschlagImInternet/Adresse',
+  },
+  { text: 'Flächenwidmungs- und Bebauungsplan Wien', url: 'https://www.wien.gv.at/flaechenwidmung/public/' },
+  { text: 'Lärmkarte Österreich', url: 'https://www.laerminfo.at/' },
+  {
+    text: 'Mietrechtsgesetz im Rechtsinformationssystem des Bundes',
+    url: 'https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10002531',
+  },
+  { text: 'Marktmiet- und Zuschlagswerte der Mietervereinigung', url: 'https://mietervereinigung.at/' },
+]
 
 const initialInput: MietobjektInput = {
   objektart: 'wohnung',
@@ -74,9 +101,11 @@ function Navigation({ imHero }: { imHero: boolean }) {
         <a className="hidden transition-colors hover:text-accent sm:inline" href={imHero ? '#profis' : href('')}>
           Für Profis
         </a>
-        <a className="hidden transition-colors hover:text-accent sm:inline" href={href('api/')}>
-          API
-        </a>
+        {API_SICHTBAR && (
+          <a className="hidden transition-colors hover:text-accent sm:inline" href={href('api/')}>
+            API
+          </a>
+        )}
         <a className="hidden transition-colors hover:text-accent sm:inline" href={imHero ? '#preise' : `${href('')}#preise`}>
           Preise
         </a>
@@ -91,6 +120,31 @@ function Navigation({ imHero }: { imHero: boolean }) {
         <ThemaSchalter />
       </div>
     </nav>
+  )
+}
+
+/** Kurze Bestätigung unter dem Hero, nachdem ein Kauf abgeschlossen wurde. */
+function Kaufmeldung() {
+  const [text, setText] = useState<string | null>(null)
+  useEffect(() => aufKaufFertig(setText), [])
+  if (!text) return null
+  return (
+    <div className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
+      <div
+        role="status"
+        className="flex items-start justify-between gap-4 rounded-xl border border-accent/40 bg-accent/10 px-4 py-3"
+      >
+        <p className="text-base leading-relaxed text-ink">{text}</p>
+        <button
+          type="button"
+          onClick={() => setText(null)}
+          aria-label="Meldung schließen"
+          className="shrink-0 rounded-lg px-2 text-ink-faint transition-colors hover:text-accent"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
   )
 }
 
@@ -159,8 +213,10 @@ function Startseite() {
         />
       </header>
 
+      <Kaufmeldung />
+
       <main id="rechner" className="mx-auto max-w-6xl scroll-mt-4 px-4 py-10 sm:px-6">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_2fr] lg:items-start">
           {/* Links: alle Eingaben untereinander */}
           <section>
             <Formular
@@ -173,7 +229,7 @@ function Startseite() {
 
           {/* Rechts: Ergebnis, die darauf aufbauenden Rechner, dann die Aktionen */}
           <section>
-            <Ergebnis ergebnis={ergebnis} />
+            <Ergebnis ergebnis={ergebnis} input={input} adresse={input.anschrift} />
             <ErgebnisReiter ergebnis={ergebnis} />
             <Ergebnisleiste
               ergebnis={ergebnis}
@@ -216,63 +272,24 @@ function Fusszeile() {
                 {s.kicker}
               </a>
             ))}
-            <a className={quelleLink} href={href('api/')}>
-              Schnittstelle
-            </a>
+            {API_SICHTBAR && (
+              <a className={quelleLink} href={href('api/')}>
+                Schnittstelle
+              </a>
+            )}
           </p>
         </div>
 
         <div className="pt-6">
           <p className="mb-1 font-semibold text-ink">Genutzte Schnittstellen (APIs) &amp; Datenquellen</p>
           <ul className="space-y-0.5">
-            <li>
-              Adressdienst der Stadt Wien – OGDAddressService:{' '}
-              <a className={quelleLink} href="https://www.data.gv.at/katalog/dataset/c223b93a-2634-4f06-ac73-8709b9e16888" target="_blank" rel="noreferrer">
-                data.gv.at
-              </a>
-            </li>
-            <li>
-              Gebäudedaten Wien (Baujahr, zum Nachschlagen):{' '}
-              <a className={quelleLink} href="https://www.wien.gv.at/kultur/kulturgut-gebaeudedaten" target="_blank" rel="noreferrer">
-                wien.gv.at
-              </a>
-            </li>
-            <li>
-              Grundstücksgrenzen und Katastralgemeinden (BEV-Kataster):{' '}
-              <a className={quelleLink} href="https://kataster.bev.gv.at/#/center/13.35,47.77/zoom/7.6/vermv/0.6" target="_blank" rel="noreferrer">
-                kataster.bev.gv.at
-              </a>
-            </li>
-            <li>
-              Lagezuschlagskarte Wien (Lagezuschlag je Liegenschaft):{' '}
-              <a className={quelleLink} href="https://mein.wien.gv.at/Richtwert/ui/lagezuschlag/#/LagezuschlagImInternet/Adresse" target="_blank" rel="noreferrer">
-                mein.wien.gv.at
-              </a>
-            </li>
-            <li>
-              Flächenwidmungs- und Bebauungsplan Wien:{' '}
-              <a className={quelleLink} href="https://www.wien.gv.at/flaechenwidmung/public/" target="_blank" rel="noreferrer">
-                wien.gv.at
-              </a>
-            </li>
-            <li>
-              Lärmkarte Wien:{' '}
-              <a className={quelleLink} href="https://www.laerminfo.at/" target="_blank" rel="noreferrer">
-                laerminfo.at
-              </a>
-            </li>
-            <li>
-              Rechtsinformationssystem des Bundes – MRG:{' '}
-              <a className={quelleLink} href="https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10002531" target="_blank" rel="noreferrer">
-                RIS (MRG)
-              </a>
-            </li>
-            <li>
-              Marktmiet- und Zuschlagswerte:{' '}
-              <a className={quelleLink} href="https://mietervereinigung.at/" target="_blank" rel="noreferrer">
-                mietervereinigung.at
-              </a>
-            </li>
+            {QUELLEN.map((q) => (
+              <li key={q.url}>
+                <a className={quelleLink} href={q.url} target="_blank" rel="noreferrer">
+                  {q.text}
+                </a>
+              </li>
+            ))}
           </ul>
         </div>
 
@@ -325,6 +342,7 @@ function App() {
       {route.art === 'api' && <ApiSeite />}
       <Fusszeile />
       <Konto />
+      <Kaufdialog />
     </div>
   )
 }

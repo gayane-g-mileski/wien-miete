@@ -20,10 +20,11 @@ export function Hero({ anschrift, onAnschrift, onGemeindebau, onBaujahr, onBauja
       <div className="hero-rise">
         <div className="max-w-2xl">
         <h1 className="text-4xl font-bold leading-[1.1] tracking-tight text-ink sm:text-5xl">
-          Zahlen Sie in Wien den zulässigen Mietzins?
+          Jede Einheit im Bestand sauber eingeordnet.
         </h1>
         <p className="mt-4 max-w-xl text-base leading-relaxed text-ink-soft">
-          Richtwert, Kategorie, angemessen oder frei — in 60 Sekunden, mit Paragraf und Herleitung. Stand 1. April 2026:{' '}
+          Für Hausverwaltungen und Immobilientreuhänder in Wien: Richtwert, Kategorie, angemessen oder frei — in einer
+          Minute, mit Paragraf, Herleitung und Prüfbericht für den Akt. Richtwert seit 1. April 2026:{' '}
           <span className="font-semibold text-ink">{richtwert} €/m²</span>.
         </p>
 
@@ -49,13 +50,13 @@ export function Hero({ anschrift, onAnschrift, onGemeindebau, onBaujahr, onBauja
               href="#rechner"
               className="block w-full rounded-lg bg-accent px-4 py-3.5 text-center text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong"
             >
-              Mietzins einschätzen
+              Einheit prüfen
             </a>
           </div>
         </div>
 
         <p className="mt-5 text-sm font-medium text-ink-soft">
-          Kostenlos · kein Konto · Berechnung läuft auf Ihrem Gerät
+          Einzelprüfung kostenlos · kein Konto nötig · Berechnung läuft im Browser, Objektdaten bleiben im Haus
         </p>
       </div>
     </div>
