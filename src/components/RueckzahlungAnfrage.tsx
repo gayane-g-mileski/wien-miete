@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Collapsible, TextareaField } from './ui'
+import { Collapsible, TextareaField, TextField } from './ui'
+import { anfrageSenden, direktVersandMoeglich } from '../lib/anfrage'
 import { FOERDERUNG_PROGRAMM_LABEL } from '../lib/foerderung'
 import type { FoerderungProgramm } from '../lib/types'
 
@@ -59,14 +60,37 @@ export function RueckzahlungAnfrage({
 }: {
   anschrift: string
   programm: FoerderungProgramm
-  onGesendet?: () => void
+  onGesendet?: (weg: 'direkt' | 'mailprogramm') => void
 }) {
   const [text, setText] = useState(() => anfrageText(anschrift, programm))
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [emailFehler, setEmailFehler] = useState<string | undefined>()
+  const [fehler, setFehler] = useState<string | null>(null)
+  const [laeuft, setLaeuft] = useState(false)
+  const direkt = direktVersandMoeglich('ma50')
+  const betreff = 'Anfrage: Stand der Rückzahlung des Förderungsdarlehens'
 
-  const senden = () => {
-    const href = `mailto:${MA50_EMAIL}?subject=${encodeURIComponent('Anfrage: Stand der Rückzahlung des Förderungsdarlehens')}&body=${encodeURIComponent(text)}`
-    window.location.href = href
-    onGesendet?.()
+  const senden = async () => {
+    if (direkt) {
+      const gueltig = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+      setEmailFehler(gueltig ? undefined : 'Bitte geben Sie eine gültige E-Mail-Adresse an – dorthin antwortet die MA 50.')
+      if (!gueltig) return
+      setFehler(null)
+      setLaeuft(true)
+      try {
+        await anfrageSenden({ art: 'ma50', name: name.trim(), email: email.trim(), betreff, text })
+        onGesendet?.('direkt')
+      } catch (e) {
+        setFehler(e instanceof Error ? e.message : 'Die Anfrage ließ sich nicht versenden.')
+      } finally {
+        setLaeuft(false)
+      }
+      return
+    }
+
+    window.location.href = `mailto:${MA50_EMAIL}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(text)}`
+    onGesendet?.('mailprogramm')
   }
 
   return (
@@ -99,12 +123,32 @@ export function RueckzahlungAnfrage({
             onChange={(e) => setText(e.target.value)}
           />
         </div>
+        {direkt && (
+          <div className="mt-6 space-y-6">
+            <TextField label="Name" id="ma50-name" value={name} onChange={(e) => setName(e.target.value)} />
+            <TextField
+              label="Ihre E-Mail-Adresse"
+              id="ma50-email"
+              type="email"
+              value={email}
+              fehler={emailFehler}
+              hint="Die Antwort der MA 50 geht an diese Adresse; eine Kopie der Anfrage ebenso."
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+        )}
+        {fehler && (
+          <p role="alert" className="mt-3 text-sm text-danger">
+            {fehler}
+          </p>
+        )}
         <button
           type="button"
-          onClick={senden}
-          className="mt-3 w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent hover:bg-accent-strong"
+          onClick={() => void senden()}
+          disabled={laeuft}
+          className="mt-3 w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent hover:bg-accent-strong disabled:opacity-60"
         >
-          Anfrage per E-Mail senden
+          {laeuft ? 'Wird gesendet …' : direkt ? 'Anfrage senden' : 'Anfrage im E-Mail-Programm öffnen'}
         </button>
       </div>
 

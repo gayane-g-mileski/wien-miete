@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { TextareaField, TextField } from './ui'
+import { alsAnhang, anfrageSenden, direktVersandMoeglich } from '../lib/anfrage'
 
 const MA25_EMAIL = 'post@ma25.wien.gv.at'
 const MAX_MB = 5
@@ -18,7 +19,14 @@ function standardText(anschrift: string): string {
   )
 }
 
-export function Ma25Anfrage({ anschrift, onGesendet }: { anschrift: string; onGesendet?: () => void }) {
+export function Ma25Anfrage({
+  anschrift,
+  onGesendet,
+}: {
+  anschrift: string
+  /** 'direkt' = von uns verschickt, 'mailprogramm' = im Mailprogramm geöffnet. */
+  onGesendet?: (weg: 'direkt' | 'mailprogramm') => void
+}) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [text, setText] = useState(() => standardText(anschrift))
@@ -27,6 +35,8 @@ export function Ma25Anfrage({ anschrift, onGesendet }: { anschrift: string; onGe
   const [nameFehler, setNameFehler] = useState<string | undefined>()
   const [emailFehler, setEmailFehler] = useState<string | undefined>()
   const [fehler, setFehler] = useState<string | null>(null)
+  const [laeuft, setLaeuft] = useState(false)
+  const direkt = direktVersandMoeglich('ma25')
 
   const addDateien = (list: FileList | null) => {
     if (!list) return
@@ -50,17 +60,46 @@ export function Ma25Anfrage({ anschrift, onGesendet }: { anschrift: string; onGe
 
   const entferne = (i: number) => setDateien((d) => d.filter((_, idx) => idx !== i))
 
-  const senden = () => {
+  const betreff = 'Anfrage: Jahr der Baubewilligung'
+
+  const senden = async () => {
     const ohneName = !name.trim()
     const ohneMail = !email.trim()
     setNameFehler(ohneName ? 'Bitte geben Sie Ihren Namen an.' : undefined)
-    setEmailFehler(ohneMail ? 'Bitte geben Sie Ihre E-Mail-Adresse an.' : undefined)
-    if (ohneName || ohneMail) return
+    setEmailFehler(
+      ohneMail
+        ? 'Bitte geben Sie Ihre E-Mail-Adresse an.'
+        : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+          ? 'Bitte geben Sie eine gültige E-Mail-Adresse an.'
+          : undefined,
+    )
+    if (ohneName || ohneMail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return
     setFehler(null)
+
+    if (direkt) {
+      setLaeuft(true)
+      try {
+        await anfrageSenden({
+          art: 'ma25',
+          name: name.trim(),
+          email: email.trim(),
+          betreff,
+          text,
+          anhaenge: await Promise.all(dateien.map(alsAnhang)),
+        })
+        onGesendet?.('direkt')
+      } catch (e) {
+        setFehler(e instanceof Error ? e.message : 'Die Anfrage ließ sich nicht versenden.')
+      } finally {
+        setLaeuft(false)
+      }
+      return
+    }
+
+    // Ohne Server bleibt der Weg über das E-Mail-Programm.
     const body = `${text}\n\n---\nName: ${name}\nE-Mail: ${email}`
-    const href = `mailto:${MA25_EMAIL}?subject=${encodeURIComponent('Anfrage: Jahr der Baubewilligung')}&body=${encodeURIComponent(body)}`
-    window.location.href = href
-    onGesendet?.()
+    window.location.href = `mailto:${MA25_EMAIL}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(body)}`
+    onGesendet?.('mailprogramm')
   }
 
   const btnUpload =
@@ -140,10 +179,11 @@ export function Ma25Anfrage({ anschrift, onGesendet }: { anschrift: string; onGe
 
       <button
         type="button"
-        onClick={senden}
-        className="w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent hover:bg-accent-strong"
+        onClick={() => void senden()}
+        disabled={laeuft}
+        className="w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent hover:bg-accent-strong disabled:opacity-60"
       >
-        Anfrage senden
+        {laeuft ? 'Wird gesendet …' : direkt ? 'Anfrage senden' : 'Anfrage im E-Mail-Programm öffnen'}
       </button>
     </div>
   )

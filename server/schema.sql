@@ -47,5 +47,16 @@ CREATE TABLE IF NOT EXISTS verbrauch (
   PRIMARY KEY (konto, monat)
 );
 
+-- Verschickte Anfragen an die Ämter: begrenzt den Versand je Adresse und
+-- dokumentiert, was hinausgegangen ist. Löschfrist: 90 Tage.
+CREATE TABLE IF NOT EXISTS anfragen (
+  id TEXT PRIMARY KEY,
+  email TEXT NOT NULL,
+  art TEXT NOT NULL,
+  erstellt TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS anfragen_email ON anfragen(email, erstellt);
+
 CREATE INDEX IF NOT EXISTS anmeldungen_ablauf ON anmeldungen(ablauf);
 CREATE INDEX IF NOT EXISTS kaeufe_konto ON kaeufe(konto);

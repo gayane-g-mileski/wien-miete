@@ -299,7 +299,8 @@ function Fusszeile({ ohneRatgeberliste }: { ohneRatgeberliste: boolean }) {
           </ul>
         </div>
 
-        <div className="border-t border-line pt-4 text-ink-faint">
+        {/* Die Trennlinie liegt zwischen den Rechtstexten und dem Vermerk. */}
+        <div className="pt-4 text-ink-faint">
           <p className="flex flex-wrap gap-x-4 gap-y-1">
             <a className={quelleLink} href={`${BASIS}impressum.html`} target="_blank" rel="noreferrer">
               Impressum
@@ -320,7 +321,7 @@ function Fusszeile({ ohneRatgeberliste }: { ohneRatgeberliste: boolean }) {
               Kontakt
             </a>
           </p>
-          <p className="mt-2">© 2026 Gayane G. Mileski. Alle Rechte vorbehalten.</p>
+          <p className="mt-4 border-t border-line pt-4">© 2026 Gayane G. Mileski. Alle Rechte vorbehalten.</p>
         </div>
       </div>
     </footer>
@@ -347,7 +348,7 @@ function App() {
       {route.art === 'ratgeberIndex' && <RatgeberIndex />}
       {route.art === 'api' && <ApiSeite />}
       {route.art === 'widerruf' && <Widerruf />}
-      <Fusszeile ohneRatgeberliste={route.art === 'ratgeberIndex'} />
+      <Fusszeile ohneRatgeberliste={route.art === 'ratgeberIndex' || route.art === 'start'} />
       <Konto />
       <Kaufdialog />
     </div>

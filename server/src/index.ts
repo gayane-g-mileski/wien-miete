@@ -69,12 +69,26 @@ interface Anhang {
   content: string
 }
 
-async function mailSenden(env: Umgebung, an: string, betreff: string, text: string, anhang?: Anhang): Promise<void> {
+interface MailOptionen {
+  /** Antworten der Behörde gehen an die anfragende Person. */
+  antwortAn?: string
+  kopieAn?: string
+  anhaenge?: Anhang[]
+}
+
+async function mailSenden(
+  env: Umgebung,
+  an: string,
+  betreff: string,
+  text: string,
+  optionen: MailOptionen = {},
+): Promise<void> {
+  const anhaenge = optionen.anhaenge ?? []
   if (!env.MAIL_ENDPUNKT) {
-    console.log(`[mail an ${an}] ${betreff}${anhang ? ` (+ ${anhang.filename})` : ''}\n${text}`)
+    console.log(`[mail an ${an}] ${betreff}${anhaenge.length ? ` (+ ${anhaenge.length} Anhänge)` : ''}\n${text}`)
     return
   }
-  await fetch(env.MAIL_ENDPUNKT, {
+  const antwort = await fetch(env.MAIL_ENDPUNKT, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.MAIL_SCHLUESSEL}` },
     body: JSON.stringify({
@@ -82,9 +96,12 @@ async function mailSenden(env: Umgebung, an: string, betreff: string, text: stri
       to: [an],
       subject: betreff,
       text,
-      ...(anhang ? { attachments: [anhang] } : {}),
+      ...(optionen.antwortAn ? { reply_to: optionen.antwortAn } : {}),
+      ...(optionen.kopieAn ? { cc: [optionen.kopieAn] } : {}),
+      ...(anhaenge.length ? { attachments: anhaenge } : {}),
     }),
   })
+  if (!antwort.ok) throw new Error('Der Mailversand hat die Nachricht abgelehnt.')
 }
 
 /** Objektdaten der Schnittstelle in die Eingabe der Rechenlogik umwandeln. */
@@ -255,6 +272,57 @@ export default {
         return json({ sitzung, konto: alsKonto(konto) }, 200, kopf)
       }
 
+      // ---- Anfragen an die Ämter ----------------------------------------
+      // Die Empfängeradressen stehen hier, nicht im Browser: So lässt sich der
+      // Versand nicht für fremde Post missbrauchen.
+      if (pfad === '/anfrage' && anfrage.method === 'POST') {
+        const EMPFAENGER: Record<string, string> = {
+          ma25: 'post@ma25.wien.gv.at',
+          ma50: 'post@ma50.wien.gv.at',
+        }
+        const daten = (await anfrage.json()) as {
+          art?: string
+          name?: string
+          email?: string
+          betreff?: string
+          text?: string
+          anhaenge?: Anhang[]
+        }
+        const an = EMPFAENGER[daten.art ?? '']
+        if (!an) return fehler('eingabe_ungueltig', 'Für diese Stelle ist kein Direktversand hinterlegt.', 422, kopf)
+        if (!istEmail(daten.email)) {
+          return fehler('eingabe_ungueltig', 'Bitte geben Sie eine gültige E-Mail-Adresse an.', 422, kopf)
+        }
+        if (!daten.text || daten.text.length < 20 || daten.text.length > 20000) {
+          return fehler('eingabe_ungueltig', 'Der Text der Anfrage fehlt oder ist zu lang.', 422, kopf)
+        }
+        const anhaenge = (daten.anhaenge ?? []).slice(0, 5)
+        const groesse = anhaenge.reduce((summe, a) => summe + a.content.length, 0)
+        if (groesse > 8_000_000) return fehler('eingabe_ungueltig', 'Die Anhänge sind zusammen zu groß.', 422, kopf)
+
+        // Höchstens fünf Anfragen je Adresse und Tag.
+        const seit = new Date(Date.now() - 24 * 3600 * 1000).toISOString()
+        const bisher = await env.DB.prepare('SELECT COUNT(*) AS anzahl FROM anfragen WHERE email = ? AND erstellt > ?')
+          .bind(daten.email, seit)
+          .first<{ anzahl: number }>()
+        if ((bisher?.anzahl ?? 0) >= 5) {
+          return fehler('zu_viele_anfragen', 'Für heute sind genug Anfragen von dieser Adresse verschickt.', 429, kopf)
+        }
+
+        const name = (daten.name ?? '').slice(0, 120)
+        await mailSenden(
+          env,
+          an,
+          (daten.betreff ?? 'Anfrage').slice(0, 200),
+          `${daten.text}\n\n---\nDiese Anfrage wurde über mietzins-check.at gestellt.\nAbsenderin/Absender: ${name || 'ohne Namen'} <${daten.email}>\nAntworten Sie bitte direkt an diese Adresse.`,
+          { antwortAn: daten.email, kopieAn: daten.email, anhaenge },
+        )
+        await env.DB.prepare('INSERT INTO anfragen (id, email, art, erstellt) VALUES (?, ?, ?, ?)')
+          .bind(zufall(12), daten.email, daten.art ?? '', new Date().toISOString())
+          .run()
+        return json({ ok: true }, 200, kopf)
+      }
+
       // ---- Konto --------------------------------------------------------
       if (pfad === '/konto') {
         const konto = await angemeldetesKonto(env, anfrage)
@@ -334,7 +402,7 @@ export default {
           daten.email,
           'Dein Prüfbericht',
           `Hallo${daten.name ? ` ${daten.name}` : ''},\n\nanbei der bestellte Prüfbericht als PDF. Die Rechnung kommt separat vom Zahlungsdienstleister.\n\nDer Bericht ist eine automatisierte Ersteinschätzung – kein Gutachten und keine Rechtsauskunft.\n\nMietzins-Check in Wien`,
-          { filename: daten.dateiname ?? 'Pruefbericht.pdf', content: daten.pdf },
+          { anhaenge: [{ filename: daten.dateiname ?? 'Pruefbericht.pdf', content: daten.pdf }] },
         )
         return json({ ok: true }, 200, kopf)
       }

@@ -421,86 +421,86 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
             )}
 
             {/* MA25-Anfrage: Baujahr (und bei Wohnungen auch die Förderung) unbekannt */}
-            <button type="button" onClick={() => setMa25Offen(true)} className={zweitKnopf}>
-              {zeigeFoerderung(value.objektart)
-                ? 'Baujahr und öffentliche Förderung unbekannt? Kostenlos bei der MA 25 anfragen'
-                : 'Baujahr unbekannt? Kostenlos bei der MA 25 anfragen'}
-            </button>
+            <div className="space-y-2">
+              <p className="px-1 text-sm text-ink-soft">Baubewilligungsjahr unbekannt?</p>
+              <button type="button" onClick={() => setMa25Offen(true)} className={zweitKnopf}>
+                Kostenlos bei der MA 25 anfragen
+              </button>
+            </div>
           </div>
-        </Section>
-      )}
-
-      {/* --- Förderung: nur bei Wohnungen relevant, und erst wenn das Baujahr feststeht --- */}
-      {zeigeFoerderung(value.objektart) && !baujahrOffen && (
-        <Section title="Förderung">
-          <>
-            {value.baubewilligungGebaeude === 'vor_1945' ? (
-              <p className="rounded-md bg-surface-2 px-3 py-2 text-sm text-ink-soft">
-                Bei einem Altbau (Baubewilligung bis 8.5.1945) ist die öffentliche Förderung für die Einstufung ohne
-                Bedeutung.
-              </p>
-            ) : (
+          {/* --- Förderung: gehört zum Gebäude, erscheint nur, wenn sie für die
+                 Einstufung etwas bedeutet: Wohnung, Baujahr bekannt und kein
+                 Altbau vor dem 9.5.1945. --- */}
+        {zeigeFoerderung(value.objektart) && !baujahrOffen && value.baubewilligungGebaeude !== 'vor_1945' && (
+          <div className="border-t border-line pt-6">
+            <p className="mb-5 text-sm font-semibold text-ink-faint">Förderung</p>
+            <div className="space-y-8">
               <>
-                <SelectField
-                  label="Öffentliche Wohnbauförderung"
-                  id="foerderung"
-                  hint='Datensätze laut Unterlage „Förderungen".'
-                  value={value.foerderungProgramm}
-                  onChange={(e) => set('foerderungProgramm', e.target.value as MietobjektInput['foerderungProgramm'])}
-                >
-                  {foerderungenFuer(value.baubewilligungGebaeude).map((k) => (
-                    <option key={k} value={k}>
-                      {FOERDERUNG_PROGRAMM_LABEL[k]}
-                    </option>
-                  ))}
-                </SelectField>
-
-                {/* Stand der Rückzahlung: Dropdown sofort sichtbar (wenn relevant) */}
-                {statusRelevant(value.foerderungProgramm) && (
                   <SelectField
-                    label="Stand der Rückzahlung"
-                    id="tilgung"
-                    value={value.tilgungsstatus}
-                    onChange={(e) => set('tilgungsstatus', e.target.value as MietobjektInput['tilgungsstatus'])}
+                    label="Öffentliche Wohnbauförderung"
+                    id="foerderung"
+                    hint='Datensätze laut Unterlage „Förderungen".'
+                    value={value.foerderungProgramm}
+                    onChange={(e) => set('foerderungProgramm', e.target.value as MietobjektInput['foerderungProgramm'])}
                   >
-                    {(Object.keys(TILGUNGSSTATUS_LABEL) as (keyof typeof TILGUNGSSTATUS_LABEL)[]).map((k) => (
+                    {foerderungenFuer(value.baubewilligungGebaeude).map((k) => (
                       <option key={k} value={k}>
-                        {TILGUNGSSTATUS_LABEL[k]}
+                        {FOERDERUNG_PROGRAMM_LABEL[k]}
                       </option>
                     ))}
                   </SelectField>
-                )}
 
+                  {/* Stand der Rückzahlung: Dropdown sofort sichtbar (wenn relevant) */}
+                  {statusRelevant(value.foerderungProgramm) && (
+                    <SelectField
+                      label="Stand der Rückzahlung"
+                      id="tilgung"
+                      value={value.tilgungsstatus}
+                      onChange={(e) => set('tilgungsstatus', e.target.value as MietobjektInput['tilgungsstatus'])}
+                    >
+                      {(Object.keys(TILGUNGSSTATUS_LABEL) as (keyof typeof TILGUNGSSTATUS_LABEL)[]).map((k) => (
+                        <option key={k} value={k}>
+                          {TILGUNGSSTATUS_LABEL[k]}
+                        </option>
+                      ))}
+                    </SelectField>
+                  )}
               </>
-            )}
 
-            {/* Alle Checkboxen dieses Abschnitts in einer Gruppe: 16px Abstand */}
-            <div className="space-y-4">
-              {/* Nur bei laufender Förderung 1968/1984 ändert die
-                  Eigentumswohnung das Ergebnis – sonst ausgeblendet. */}
-              {!baujahrOffen && value.baubewilligungGebaeude !== 'vor_1945' && eigentumswohnungRelevant && (
-                <Checkbox
-                  checked={value.eigentumswohnung}
-                  onChange={(v) => set('eigentumswohnung', v)}
-                  label="Eigentumswohnung"
-                />
-              )}
-
-              {/* Unbekannter Rückzahlungsstand: Anfrage bei der zuständigen Stelle.
-                  WWG 1948 → Bundeswohnbaufonds, Landesförderung → MA 50. */}
-              {value.baubewilligungGebaeude !== 'vor_1945' &&
-                statusRelevant(value.foerderungProgramm) &&
-                (
-                  <button type="button" onClick={() => setRueckzahlungOffen(true)} className={zweitKnopf}>
-                    {value.foerderungProgramm === 'wwg1948'
-                      ? 'Stand der Rückzahlung unbekannt? Beim Bundeswohnbaufonds anfragen'
-                      : 'Stand der Rückzahlung unbekannt? Bei der MA 50 anfragen'}
-                  </button>
+              {/* Alle Checkboxen dieses Abschnitts in einer Gruppe: 16px Abstand */}
+              <div className="space-y-4">
+                {/* Nur bei laufender Förderung 1968/1984 ändert die
+                    Eigentumswohnung das Ergebnis – sonst ausgeblendet. */}
+                {eigentumswohnungRelevant && (
+                  <Checkbox
+                    checked={value.eigentumswohnung}
+                    onChange={(v) => set('eigentumswohnung', v)}
+                    label="Eigentumswohnung"
+                  />
                 )}
+
+                {/* Eigene Anfrage zur Förderung: Besteht ein Förderungsdarlehen,
+                    und wie steht es um die Rückzahlung? WWG 1948 →
+                    Bundeswohnbaufonds, Landesförderung → MA 50. */}
+                <div className="space-y-2">
+                  <p className="px-1 text-sm text-ink-soft">
+                      {statusRelevant(value.foerderungProgramm)
+                        ? 'Stand der Rückzahlung unbekannt?'
+                        : 'Öffentliche Förderung unbekannt?'}
+                    </p>
+                    <button type="button" onClick={() => setRueckzahlungOffen(true)} className={zweitKnopf}>
+                      {value.foerderungProgramm === 'wwg1948'
+                        ? 'Kostenlos beim Bundeswohnbaufonds anfragen'
+                        : 'Kostenlos bei der MA 50 anfragen'}
+                    </button>
+                </div>
+              </div>
             </div>
-          </>
+          </div>
+        )}
         </Section>
       )}
+
       </div>
 
 
