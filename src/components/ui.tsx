@@ -212,10 +212,16 @@ export function Collapsible({
   title,
   children,
   defaultOpen = false,
+  immerImDom = false,
 }: {
   title: string
   children: ReactNode
   defaultOpen?: boolean
+  /**
+   * Inhalt auch im zugeklappten Zustand im Dokument lassen – für Texte, die
+   * Suchmaschinen lesen sollen (Ratgeberseiten).
+   */
+  immerImDom?: boolean
 }) {
   const [offen, setOffen] = useState(defaultOpen)
   return (
@@ -239,7 +245,13 @@ export function Collapsible({
           <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
-      {offen && <div className="mt-3">{children}</div>}
+      {immerImDom ? (
+        <div className="mt-3" hidden={!offen}>
+          {children}
+        </div>
+      ) : (
+        offen && <div className="mt-3">{children}</div>
+      )}
     </div>
   )
 }

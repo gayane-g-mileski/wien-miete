@@ -258,7 +258,7 @@ function Startseite() {
   )
 }
 
-function Fusszeile() {
+function Fusszeile({ ohneRatgeberliste }: { ohneRatgeberliste: boolean }) {
   return (
     <footer id="quellen" className="scroll-mt-4 border-t border-line bg-surface-2">
       <div className="mx-auto max-w-6xl space-y-3 px-4 py-8 text-xs leading-relaxed text-ink-soft sm:px-6">
@@ -273,23 +273,27 @@ function Fusszeile() {
         </div>
 
         {/* 36px Abstand zum Disclaimer (24px Padding + 12px space-y) */}
-        <div className="pt-6">
-          <p className="mb-1 font-semibold text-ink">Ratgeber</p>
-          <p className="flex flex-wrap gap-x-4 gap-y-1">
-            {RATGEBER.map((s) => (
-              <a key={s.pfad} className={quelleLink} href={href(`${s.pfad}/`)}>
-                {s.kicker}
-              </a>
-            ))}
-            {API_SICHTBAR && (
-              <a className={quelleLink} href={href('api/')}>
-                Schnittstelle
-              </a>
-            )}
-          </p>
-        </div>
+        {/* Auf der Ratgeberübersicht stehen dieselben Verweise schon im Inhalt. */}
+        {!ohneRatgeberliste && (
+          <div className="pt-6">
+            <p className="mb-1 font-semibold text-ink">Ratgeber</p>
+            <p className="flex flex-wrap gap-x-4 gap-y-1">
+              {RATGEBER.map((s) => (
+                <a key={s.pfad} className={quelleLink} href={href(`${s.pfad}/`)}>
+                  {s.kicker}
+                </a>
+              ))}
+              {API_SICHTBAR && (
+                <a className={quelleLink} href={href('api/')}>
+                  Schnittstelle
+                </a>
+              )}
+            </p>
+          </div>
+        )}
 
-        <div className="pt-6">
+        {/* Eigene, deckende Fläche – hebt die Quellenliste vom Fuß ab. */}
+        <div className="mt-6 rounded-xl border border-line bg-surface p-4">
           <p className="mb-1 font-semibold text-ink">Genutzte Schnittstellen (APIs) &amp; Datenquellen</p>
           <ul className="space-y-0.5">
             {QUELLEN.map((q) => (
@@ -350,7 +354,7 @@ function App() {
       {route.art === 'ratgeberIndex' && <RatgeberIndex />}
       {route.art === 'api' && <ApiSeite />}
       {route.art === 'widerruf' && <Widerruf />}
-      <Fusszeile />
+      <Fusszeile ohneRatgeberliste={route.art === 'ratgeberIndex'} />
       <Konto />
       <Kaufdialog />
     </div>

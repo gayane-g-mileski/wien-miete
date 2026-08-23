@@ -1,3 +1,4 @@
+import { Collapsible } from './ui'
 import { RATGEBER, href, type RatgeberSeite } from '../lib/seo'
 
 // Ratgeberseiten: eigener Pfad, eigener Titel, eigene strukturierte Daten.
@@ -71,11 +72,14 @@ export function Ratgeber({ seite }: { seite: RatgeberSeite }) {
 
         <section className="mt-12">
           <h2 className="text-[1.6rem] font-semibold leading-tight tracking-tight text-ink">Häufige Fragen</h2>
-          <div className="mt-6 space-y-6">
+          {/* Ausklappbare Karten wie auf der Startseite; der Text bleibt im
+              Dokument, damit Suchmaschinen ihn lesen. */}
+          <div className="mt-6 space-y-4">
             {seite.faq.map((f) => (
-              <div key={f.frage}>
-                <h3 className="text-base font-semibold text-ink">{f.frage}</h3>
-                <p className="mt-2 text-base leading-relaxed text-ink-soft">{f.antwort}</p>
+              <div key={f.frage} className="rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6">
+                <Collapsible title={f.frage} immerImDom>
+                  <p className="text-sm leading-relaxed text-ink-soft">{f.antwort}</p>
+                </Collapsible>
               </div>
             ))}
           </div>
