@@ -1,30 +1,18 @@
 import { useEffect, useState } from 'react'
-import { Checkbox, TextField } from './ui'
+import { TextField } from './ui'
 import { aufKontoOeffnen, type KontoAnlass } from '../lib/kontoEvent'
 import { kontaktVorbelegen } from '../lib/kontaktEvent'
-import {
-  abmelden,
-  bezahlenStarten,
-  kontoAktualisieren,
-  magicLinkAnfordern,
-  serverVorhanden,
-  useKonto,
-  type Produkt,
-} from '../lib/konto'
-import { euro, netto, tarifFuer } from '../lib/tarife'
+import { abmelden, kontoAktualisieren, magicLinkAnfordern, serverVorhanden, useKonto } from '../lib/konto'
 import { BASIS } from '../lib/seo'
 
-// Anmeldung ohne Passwort (Magic-Link) und Bezahlung.
+// Anmeldung ohne Passwort (Magic-Link) und Kontoverwaltung.
 //
-// Vor einem kostenpflichtigen Schritt stehen die Angaben, die das
-// Fern- und Auswärtsgeschäfte-Gesetz verlangt: Leistung, Gesamtpreis inklusive
-// Umsatzsteuer, Laufzeit, Kündigung – und die ausdrückliche Zustimmung zum
-// sofortigen Beginn samt Kenntnisnahme, dass damit das Rücktrittsrecht erlischt
-// (§ 18 Abs 1 Z 11 FAGG). Ohne diese Zustimmung bleibt der Bestellknopf gesperrt.
+// Gekauft wird nicht hier, sondern im Kaufdialog (Kaufdialog.tsx) – für
+// Prüfbericht und Zugänge auf demselben Weg, mit denselben Pflichtangaben nach
+// dem Fern- und Auswärtsgeschäfte-Gesetz.
 
 interface Fehler {
   email?: string
-  zustimmung?: string
   allgemein?: string
 }
 
@@ -34,12 +22,9 @@ export function Konto() {
   const [offen, setOffen] = useState(false)
   const [modus, setModus] = useState<KontoAnlass['modus']>('anmelden')
   const [anlass, setAnlass] = useState<string | undefined>()
-  const [produkt, setProdukt] = useState<Produkt | undefined>()
   const [email, setEmail] = useState('')
   const [firma, setFirma] = useState('')
   const [uid, setUid] = useState('')
-  const [sofortStart, setSofortStart] = useState(false)
-  const [agbOk, setAgbOk] = useState(false)
   const [fehler, setFehler] = useState<Fehler>({})
   const [linkGeschickt, setLinkGeschickt] = useState(false)
   const [laeuft, setLaeuft] = useState(false)
@@ -50,11 +35,8 @@ export function Konto() {
       aufKontoOeffnen((a) => {
         setModus(a.modus)
         setAnlass(a.anlass)
-        setProdukt(a.produkt)
         setFehler({})
         setLinkGeschickt(false)
-        setSofortStart(false)
-        setAgbOk(false)
         setOffen(true)
       }),
     [],
@@ -80,7 +62,6 @@ export function Konto() {
 
   if (!offen) return null
 
-  const tarif = produkt ? tarifFuer(produkt) : undefined
   const emailGueltig = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
 
   const anmeldelinkSchicken = async () => {
@@ -98,22 +79,6 @@ export function Konto() {
     }
   }
 
-  const kaufen = async () => {
-    if (!produkt) return
-    if (!sofortStart || !agbOk) {
-      return setFehler({ zustimmung: 'Bitte bestätigen Sie beide Punkte, dann geht es weiter zur Zahlung.' })
-    }
-    setFehler({})
-    setLaeuft(true)
-    try {
-      if (firma.trim() || uid.trim()) await kontoAktualisieren({ firma: firma.trim(), uid: uid.trim(), land: 'AT' })
-      await bezahlenStarten(produkt, sofortStart)
-    } catch (e) {
-      setFehler({ allgemein: e instanceof Error ? e.message : 'Der Bezahlvorgang ließ sich nicht starten.' })
-      setLaeuft(false)
-    }
-  }
-
   const zurWarteliste = () => {
     setOffen(false)
     kontaktVorbelegen(
@@ -121,7 +86,7 @@ export function Konto() {
     )
   }
 
-  const kopf = konto ? 'Ihr Konto' : produkt ? 'Bestellung' : modus === 'anmelden' ? 'Anmelden' : 'Konto anlegen'
+  const kopf = konto ? 'Ihr Konto' : modus === 'anmelden' ? 'Anmelden' : 'Konto anlegen'
 
   return (
     <div
@@ -176,53 +141,21 @@ export function Konto() {
               onChange={(e) => setUid(e.target.value)}
             />
 
-            {tarif && (
-              <>
-                <Bestellangaben tarifName={tarif.name} brutto={tarif.brutto} einheit={tarif.einheit} laufzeit={tarif.laufzeit} />
-                <div className="space-y-4">
-                  <Checkbox
-                    checked={sofortStart}
-                    onChange={setSofortStart}
-                    label={
-                      <span className="text-sm leading-relaxed text-ink-soft">
-                        Ich verlange ausdrücklich, dass mit der Leistung sofort begonnen wird, und nehme zur Kenntnis,
-                        dass ich mit vollständiger Erfüllung mein Rücktrittsrecht verliere.
-                      </span>
-                    }
-                  />
-                  <Checkbox
-                    checked={agbOk}
-                    onChange={setAgbOk}
-                    label={
-                      <span className="text-sm leading-relaxed text-ink-soft">
-                        Ich habe die{' '}
-                        <a className={linkStil} href={`${BASIS}agb.html`} target="_blank" rel="noreferrer">
-                          AGB
-                        </a>
-                        , die{' '}
-                        <a className={linkStil} href={`${BASIS}widerruf.html`} target="_blank" rel="noreferrer">
-                          Rücktrittsbelehrung
-                        </a>{' '}
-                        und die{' '}
-                        <a className={linkStil} href={`${BASIS}datenschutz.html`} target="_blank" rel="noreferrer">
-                          Datenschutzerklärung
-                        </a>{' '}
-                        gelesen.
-                      </span>
-                    }
-                  />
-                </div>
-                {fehler.zustimmung && <p className="text-sm text-danger">{fehler.zustimmung}</p>}
-                <button
-                  type="button"
-                  onClick={() => void kaufen()}
-                  disabled={laeuft}
-                  className="w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong disabled:opacity-60"
-                >
-                  {laeuft ? 'Einen Moment …' : 'Zahlungspflichtig bestellen'}
-                </button>
-              </>
-            )}
+            <button
+              type="button"
+              disabled={laeuft}
+              onClick={() => {
+                setLaeuft(true)
+                void kontoAktualisieren({ firma: firma.trim(), uid: uid.trim(), land: 'AT' })
+                  .catch((e: unknown) =>
+                    setFehler({ allgemein: e instanceof Error ? e.message : 'Speichern hat nicht geklappt.' }),
+                  )
+                  .finally(() => setLaeuft(false))
+              }}
+              className="w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong disabled:opacity-60"
+            >
+              {laeuft ? 'Einen Moment …' : 'Rechnungsangaben speichern'}
+            </button>
 
             {fehler.allgemein && <p className="text-sm text-danger">{fehler.allgemein}</p>}
 
@@ -255,7 +188,6 @@ export function Konto() {
         ) : !serverVorhanden() ? (
           /* 3. Vorschau-Betrieb: kein Server hinterlegt */
           <div className="mt-6 space-y-5">
-            {tarif && <Bestellangaben tarifName={tarif.name} brutto={tarif.brutto} einheit={tarif.einheit} laufzeit={tarif.laufzeit} />}
             <p className="text-base leading-relaxed text-ink-soft">
               Konten und Zahlung sind noch nicht freigeschaltet – der Rechner bleibt ohne Anmeldung vollständig nutzbar.
               Tragen Sie sich ein, dann melden wir uns, sobald es losgeht.
@@ -280,7 +212,6 @@ export function Konto() {
         ) : (
           /* 4. Anmeldung per Magic-Link */
           <div className="mt-6 space-y-6">
-            {tarif && <Bestellangaben tarifName={tarif.name} brutto={tarif.brutto} einheit={tarif.einheit} laufzeit={tarif.laufzeit} />}
             <TextField
               label="E-Mail-Adresse"
               id="konto-email"
@@ -314,31 +245,6 @@ export function Konto() {
           </div>
         )}
       </div>
-    </div>
-  )
-}
-
-/** Pflichtangaben vor der Bestellung (§ 4 FAGG, § 6 Abs 1 KSchG, § 4 PrAG). */
-function Bestellangaben({
-  tarifName,
-  brutto,
-  einheit,
-  laufzeit,
-}: {
-  tarifName: string
-  brutto: number
-  einheit: string
-  laufzeit?: string
-}) {
-  return (
-    <div className="rounded-xl border border-line bg-surface-2 p-4 text-sm leading-relaxed text-ink-soft">
-      <p className="font-semibold text-ink">{tarifName}</p>
-      <p className="mt-1">
-        Gesamtpreis {euro(brutto)} {einheit} – inklusive 20 % Umsatzsteuer ({euro(netto(brutto))} netto). Keine
-        weiteren Kosten.
-      </p>
-      {laufzeit && <p className="mt-1">{laufzeit}</p>}
-      <p className="mt-1">Leistung: automatisierte Ersteinschätzung als digitaler Inhalt, sofort verfügbar.</p>
     </div>
   )
 }

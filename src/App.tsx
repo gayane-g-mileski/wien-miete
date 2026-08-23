@@ -255,12 +255,14 @@ function Fusszeile() {
   return (
     <footer id="quellen" className="scroll-mt-4 border-t border-line bg-surface-2">
       <div className="mx-auto max-w-6xl space-y-3 px-4 py-8 text-xs leading-relaxed text-ink-soft sm:px-6">
-        <div className="rounded-xl border border-danger/30 bg-danger/5 p-4 text-sm leading-relaxed text-ink-soft">
-          <strong className="text-base font-bold text-danger">Kein Rechtsrat.</strong> Dieses Informationswerkzeug
-          liefert eine automatisierte Ersteinschätzung auf Basis vereinfachter Regeln und hinterlegter Näherungswerte
-          für Marktmiete und Lagezuschlag je Bezirk. Es ersetzt keine rechtliche oder immobilienwirtschaftliche
-          Beratung im Einzelfall (z.B. Mietervereinigung, Rechtsanwält:in, Sachverständige) und keine verbindliche
-          Auskunft der Schlichtungsstelle.
+        <div className="overflow-hidden rounded-xl border border-danger/30 bg-surface">
+          <div className="bg-danger/10 p-4 text-sm leading-relaxed text-ink-soft">
+            <strong className="text-base font-bold text-danger">Kein Rechtsrat.</strong> Dieses Informationswerkzeug
+            liefert eine automatisierte Ersteinschätzung auf Basis vereinfachter Regeln und hinterlegter
+            Näherungswerte für Marktmiete und Lagezuschlag je Bezirk. Es ersetzt keine rechtliche oder
+            immobilienwirtschaftliche Beratung im Einzelfall (z.B. Mietervereinigung, Rechtsanwält:in,
+            Sachverständige) und keine verbindliche Auskunft der Schlichtungsstelle.
+          </div>
         </div>
 
         {/* 36px Abstand zum Disclaimer (24px Padding + 12px space-y) */}

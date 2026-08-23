@@ -72,10 +72,12 @@ export function EmbedApp({ wl }: { wl: WhiteLabel }) {
           </div>
         </div>
 
-        <div className="mt-10 rounded-xl border border-danger/30 bg-danger/5 p-4 text-sm leading-relaxed text-ink-soft">
-          <strong className="font-bold text-danger">Kein Rechtsrat.</strong> Automatisierte Ersteinschätzung auf Basis
-          vereinfachter Regeln und hinterlegter Näherungswerte. Sie ersetzt keine rechtliche oder
-          immobilienwirtschaftliche Beratung im Einzelfall und keine verbindliche Auskunft der Schlichtungsstelle.
+        <div className="mt-10 overflow-hidden rounded-xl border border-danger/30 bg-surface">
+          <div className="bg-danger/10 p-4 text-sm leading-relaxed text-ink-soft">
+            <strong className="font-bold text-danger">Kein Rechtsrat.</strong> Automatisierte Ersteinschätzung auf
+            Basis vereinfachter Regeln und hinterlegter Näherungswerte. Sie ersetzt keine rechtliche oder
+            immobilienwirtschaftliche Beratung im Einzelfall und keine verbindliche Auskunft der Schlichtungsstelle.
+          </div>
         </div>
 
         {!wl.ohneHinweis && (

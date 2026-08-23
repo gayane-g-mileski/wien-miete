@@ -3,7 +3,7 @@ import { ENDPUNKTE, FEHLERCODES, apiBasis, beispielAntwort, beispielAufruf } fro
 import { einbettungsSchnipsel, einbettungsUrl } from '../lib/whitelabel'
 import { leereMerkmale } from '../lib/pricingData'
 import { BASIS, HERKUNFT, href } from '../lib/seo'
-import { kontoOeffnen } from '../lib/kontoEvent'
+import { kaufOeffnen } from '../lib/kaufEvent'
 import { TextField } from './ui'
 import type { MietobjektInput } from '../lib/types'
 
@@ -206,10 +206,10 @@ export function ApiSeite() {
         </p>
         <button
           type="button"
-          onClick={() => kontoOeffnen('Zugang zu Schnittstelle und White-Label', 'registrieren', 'api')}
+          onClick={() => kaufOeffnen('api')}
           className="mt-5 rounded-lg bg-accent px-5 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong"
         >
-          Zugang anfragen
+          Zugang bestellen
         </button>
       </div>
     </main>
