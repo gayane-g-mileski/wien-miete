@@ -401,7 +401,7 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
       {/* --- Ausstattung, Zustand & Zu-/Abschläge – nur wenn ein Richtwert
              (bzw. die Kategorie) die Miethöhe bestimmt --- */}
       {zeigeAusstattung(value.objektart) && (zeigeKat || ueber130) && (
-        <Section title="Ausstattung, Zustand & Zu-/Abschläge" className="md:col-span-2 xl:col-span-3">
+        <Section title="Ausstattung, Zustand & Zu-/Abschläge">
           {ueber130 && (
             <p className="rounded-md bg-surface-2 px-3 py-2 text-sm text-ink-soft">
               Für diese Wohnung gilt <strong className="text-ink">kein Richtwert</strong>: Sie liegt in einem Altbau, ist
@@ -410,7 +410,6 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
               Abschläge sind deshalb hier nicht anzugeben; sie stecken bereits im Marktpreis.
             </p>
           )}
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
           {zeigeKategorie(value.objektart) && (
             <SelectField
               label="Ausstattungskategorie"
@@ -455,7 +454,6 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
               </SelectField>
             </>
           )}
-          </div>
 
           {istRichtwert && (
             <>
@@ -465,7 +463,6 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
                 label="Zentral- oder Etagenheizung"
               />
 
-              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-4">
               {MERKMAL_GRUPPEN.map((gruppe) => (
                 <div key={gruppe} className="space-y-2">
                   <p className="text-sm font-semibold text-ink-faint">{gruppe}</p>
@@ -492,7 +489,6 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
                   </div>
                 </div>
               ))}
-              </div>
             </>
           )}
         </Section>

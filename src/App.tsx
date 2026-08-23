@@ -218,8 +218,7 @@ function Startseite() {
       <main id="rechner" className="mx-auto max-w-6xl scroll-mt-4 px-4 py-10 sm:px-6">
         {/* Zuerst die Angaben zum Objekt, mehrspaltig über die ganze Breite */}
         <section>
-          <h2 className="mb-1 px-1 text-[2rem] font-semibold leading-tight tracking-tight text-accent">Mietobjekt</h2>
-          <p className="mb-6 px-1 text-sm font-semibold text-ink-faint">Angaben zur Einheit</p>
+          <h2 className="mb-6 px-1 text-[2rem] font-semibold leading-tight tracking-tight text-accent">Mietobjekt</h2>
           <Formular
             value={input}
             onChange={setInput}
