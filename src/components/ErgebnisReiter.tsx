@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { Preisbandbreite } from './Ergebnis'
+import { ErgebnisArt, ErgebnisDetails, Preisbandbreite } from './Ergebnis'
 import { Wertsicherung } from './Wertsicherung'
 import { Rendite } from './Rendite'
 import { Betriebskosten } from './Betriebskosten'
 import { ereignis } from '../lib/analytics'
-import type { MrgErgebnis } from '../lib/types'
+import type { MietobjektInput, MrgErgebnis } from '../lib/types'
 
 // Alles, was auf dem Ergebnis aufbaut, über der Ergebniskarte: Preisbandbreite,
 // Wertsicherung, Rendite und Betriebskosten als Reiter.
@@ -23,7 +23,15 @@ const REITER = [
 
 type ReiterId = (typeof REITER)[number]['id']
 
-export function ErgebnisReiter({ ergebnis }: { ergebnis: MrgErgebnis }) {
+export function ErgebnisReiter({
+  ergebnis,
+  input,
+  adresse,
+}: {
+  ergebnis: MrgErgebnis
+  input?: MietobjektInput
+  adresse?: string
+}) {
   const [aktiv, setAktiv] = useState<ReiterId>('preis')
   const gewaehlt = REITER.find((r) => r.id === aktiv)!
 
@@ -58,8 +66,13 @@ export function ErgebnisReiter({ ergebnis }: { ergebnis: MrgErgebnis }) {
         ))}
       </div>
 
+      {/* Oben, was die Einheit ist – dann die Zahlen, dann der Schutzumfang. */}
+      <div className="mt-6">
+        <ErgebnisArt ergebnis={ergebnis} />
+      </div>
+
       <div id={`tafel-${aktiv}`} role="tabpanel" aria-labelledby={`reiter-${aktiv}`} className="@container">
-        <p className="mb-4 mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-ink-faint">{gewaehlt.unter}</p>
+        <p className="mb-4 mt-6 text-xs font-semibold uppercase tracking-[0.12em] text-ink-faint">{gewaehlt.unter}</p>
         {aktiv === 'preis' ? (
           <Preisbandbreite ergebnis={ergebnis} />
         ) : (
@@ -69,6 +82,10 @@ export function ErgebnisReiter({ ergebnis }: { ergebnis: MrgErgebnis }) {
             {aktiv === 'betriebskosten' && <Betriebskosten />}
           </div>
         )}
+      </div>
+
+      <div className="mt-6">
+        <ErgebnisDetails ergebnis={ergebnis} input={input} adresse={adresse} />
       </div>
     </section>
   )

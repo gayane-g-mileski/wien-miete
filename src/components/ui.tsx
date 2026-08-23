@@ -188,9 +188,18 @@ export function Checkbox({
 }
 
 /** Abschnitts-Container – Titel steht außerhalb, oberhalb des Rahmens (20px Abstand). */
-export function Section({ title, children }: { title: string; children: ReactNode }) {
+export function Section({
+  title,
+  children,
+  className = '',
+}: {
+  title: string
+  children: ReactNode
+  /** Zusätzliche Klassen für die Platzierung im Raster. */
+  className?: string
+}) {
   return (
-    <section>
+    <section className={className}>
       <h3 className="mb-5 px-1 text-sm font-semibold text-ink-faint">{title}</h3>
       <div className="space-y-8 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6">{children}</div>
     </section>

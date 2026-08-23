@@ -4,7 +4,6 @@ import { Hero } from './components/Hero'
 import { Profis } from './components/Profis'
 import { Vergleich } from './components/Vergleich'
 import { Faq } from './components/Faq'
-import { Ergebnis } from './components/Ergebnis'
 import { ErgebnisReiter } from './components/ErgebnisReiter'
 import { Ergebnisleiste } from './components/Ergebnisleiste'
 import { SprachSchalter } from './components/SprachSchalter'
@@ -217,36 +216,31 @@ function Startseite() {
       <Kaufmeldung />
 
       <main id="rechner" className="mx-auto max-w-6xl scroll-mt-4 px-4 py-10 sm:px-6">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_2fr] lg:items-start">
-          {/* Links: alle Eingaben untereinander */}
-          <section>
-            <Formular
-              value={input}
-              onChange={setInput}
-              mietzinsArt={ergebnis.mietzinsArt}
-              adressWechsel={adressWechsel}
-            />
-          </section>
+        {/* Zuerst die Angaben zum Objekt, mehrspaltig über die ganze Breite */}
+        <section>
+          <h2 className="mb-1 px-1 text-[2rem] font-semibold leading-tight tracking-tight text-accent">Mietobjekt</h2>
+          <p className="mb-6 px-1 text-sm font-semibold text-ink-faint">Angaben zur Einheit</p>
+          <Formular
+            value={input}
+            onChange={setInput}
+            mietzinsArt={ergebnis.mietzinsArt}
+            adressWechsel={adressWechsel}
+          />
+        </section>
 
-          {/* Rechts: die Rechner zum Ergebnis, darunter die Einordnung und die Aktionen */}
-          <section>
-            <h2 className="mb-1 px-1 text-[2rem] font-semibold leading-tight tracking-tight text-accent">Ergebnis</h2>
-            <p className="mb-5 px-1 text-sm font-semibold text-ink-faint">
-              Ersteinschätzung nach den erfassten Angaben
-            </p>
-            <ErgebnisReiter ergebnis={ergebnis} />
-            <div className="mt-8">
-              <Ergebnis ergebnis={ergebnis} input={input} adresse={input.anschrift} />
-            </div>
-            <Ergebnisleiste
-              ergebnis={ergebnis}
-              adresse={input.anschrift}
-              verlauf={verlauf}
-              onSelect={(e) => setInput(e.input)}
-              onClear={() => setVerlauf([])}
-            />
-          </section>
-        </div>
+        {/* Darunter das Ergebnis mit den Reitern */}
+        <section className="mt-12 border-t border-line pt-10">
+          <h2 className="mb-1 px-1 text-[2rem] font-semibold leading-tight tracking-tight text-accent">Ergebnis</h2>
+          <p className="mb-6 px-1 text-sm font-semibold text-ink-faint">Ersteinschätzung nach den erfassten Angaben</p>
+          <ErgebnisReiter ergebnis={ergebnis} input={input} adresse={input.anschrift} />
+          <Ergebnisleiste
+            ergebnis={ergebnis}
+            adresse={input.anschrift}
+            verlauf={verlauf}
+            onSelect={(e) => setInput(e.input)}
+            onClear={() => setVerlauf([])}
+          />
+        </section>
       </main>
 
       <Profis />

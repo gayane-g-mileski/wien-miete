@@ -16,7 +16,7 @@ import { FOERDERUNG_PROGRAMM_LABEL, TILGUNGSSTATUS_LABEL, foerderungenFuer, stat
 import { BEZIRKE, MERKMAL_GRUPPEN, MERKMAL_KATALOG, bezirkAusAnschrift } from '../lib/pricingData'
 import { bauperiodenLink } from '../lib/geo'
 import type { BaujahrInfo } from '../lib/geo'
-import { Checkbox, DateField, NumberField, Section, SelectField, SpaltenTitel } from './ui'
+import { Checkbox, DateField, NumberField, Section, SelectField } from './ui'
 import { AnschriftFeld } from './AnschriftFeld'
 import { Ma25Anfrage } from './Ma25Anfrage'
 import { WwafHinweis } from './WwafHinweis'
@@ -74,10 +74,11 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
   const setMerkmal = (key: MerkmalKey, v: boolean) => onChange({ ...value, merkmale: { ...value.merkmale, [key]: v } })
 
   return (
-    <div className="flex flex-col gap-9">
+    // Mehrspaltig: jeder Abschnitt eine Zelle, jede behält ihre eigene Höhe.
+    <div className="grid grid-cols-1 items-start gap-9 md:grid-cols-2 xl:grid-cols-3">
       {/* --- Mietobjekt / Angaben --- */}
       <section>
-        <SpaltenTitel titel="Mietobjekt" unterzeile="Angaben" />
+        <h3 className="mb-5 px-1 text-sm font-semibold text-ink-faint">Mietgegenstand</h3>
         <div className="space-y-8 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6">
         <SelectField
           label="Art des Mietgegenstands"
@@ -400,7 +401,7 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
       {/* --- Ausstattung, Zustand & Zu-/Abschläge – nur wenn ein Richtwert
              (bzw. die Kategorie) die Miethöhe bestimmt --- */}
       {zeigeAusstattung(value.objektart) && (zeigeKat || ueber130) && (
-        <Section title="Ausstattung, Zustand & Zu-/Abschläge">
+        <Section title="Ausstattung, Zustand & Zu-/Abschläge" className="md:col-span-2 xl:col-span-3">
           {ueber130 && (
             <p className="rounded-md bg-surface-2 px-3 py-2 text-sm text-ink-soft">
               Für diese Wohnung gilt <strong className="text-ink">kein Richtwert</strong>: Sie liegt in einem Altbau, ist
@@ -409,6 +410,7 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
               Abschläge sind deshalb hier nicht anzugeben; sie stecken bereits im Marktpreis.
             </p>
           )}
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
           {zeigeKategorie(value.objektart) && (
             <SelectField
               label="Ausstattungskategorie"
@@ -451,13 +453,19 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
                   </option>
                 ))}
               </SelectField>
+            </>
+          )}
+          </div>
 
+          {istRichtwert && (
+            <>
               <Checkbox
                 checked={value.heizung === 'zentral_etage'}
                 onChange={(v) => set('heizung', v ? 'zentral_etage' : 'keine')}
                 label="Zentral- oder Etagenheizung"
               />
 
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-4">
               {MERKMAL_GRUPPEN.map((gruppe) => (
                 <div key={gruppe} className="space-y-2">
                   <p className="text-sm font-semibold text-ink-faint">{gruppe}</p>
@@ -484,6 +492,7 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
                   </div>
                 </div>
               ))}
+              </div>
             </>
           )}
         </Section>
