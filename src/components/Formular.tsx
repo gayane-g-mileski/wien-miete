@@ -62,11 +62,15 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
   const eigentumswohnungRelevant =
     (value.foerderungProgramm === 'wfg1968' || value.foerderungProgramm === 'wfg1984') &&
     value.tilgungsstatus === 'offen'
+  // Wirken sich Kategorie, Zustand und Merkmale auf das Ergebnis aus?
+  // (Definition unten, sobald ueber130 feststeht.)
   const ueber130 =
     value.baubewilligungGebaeude === 'vor_1945' &&
     value.flaeche > 130 &&
     (value.kategorie === 'A' || value.kategorie === 'B') &&
     mietzinsArt === 'angemessen'
+  const ausstattungWirkt = zeigeAusstattung(value.objektart) && !baujahrOffen && (zeigeKat || ueber130)
+
   // Bezirk aus der Anschrift (gewählte Adresse oder erkannte PLZ)
   const bezirkErkannt = value.anschriftBezirk ?? bezirkAusAnschrift(value.anschrift)
 
@@ -176,14 +180,20 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
           )}
           </div>
 
-        {/* --- Ausstattung, Zustand & Zu-/Abschläge – erscheint erst, wenn die
-               Angaben etwas bewirken: Das Baujahr muss feststehen, und die
-               Mietzinsart muss Kategorie, Zustand oder Merkmale überhaupt
-               heranziehen. Bei freiem Mietzins, Altvertrag, WGG oder
-               förderungsrechtlichem Mietzins bleibt der Abschnitt weg. --- */}
-        {zeigeAusstattung(value.objektart) && !baujahrOffen && (zeigeKat || ueber130) && (
-          <div className="border-t border-line pt-6">
-            <Collapsible title="Ausstattung, Zustand & Zu-/Abschläge">
+        {/* --- Ausstattung, Zustand & Zu-/Abschläge – immer sichtbar, aber
+               zugeklappt. Die Felder erscheinen darin nur, wenn sie etwas
+               bewirken: Das Baujahr muss feststehen, und die Mietzinsart muss
+               Kategorie, Zustand oder Merkmale überhaupt heranziehen. Sonst
+               steht dort, warum gerade nichts zu tun ist. --- */}
+        <div className="border-t border-line pt-6">
+          <Collapsible title="Ausstattung, Zustand & Zu-/Abschläge">
+            {!ausstattungWirkt ? (
+              <p className="pt-2 text-sm leading-relaxed text-ink-soft">
+                {baujahrOffen
+                  ? 'Sobald die Baubewilligung des Gebäudes feststeht, wirken sich Ausstattungskategorie, Erhaltungszustand und die einzelnen Merkmale hier aus.'
+                  : 'Bei dieser Einstufung wirken sich Ausstattung, Zustand und Zu- oder Abschläge nicht auf die Obergrenze aus – die Bandbreite folgt dem Markt.'}
+              </p>
+            ) : (
               <div className="space-y-8 pt-2">
             {ueber130 && (
               <p className="rounded-md bg-surface-2 px-3 py-2 text-sm text-ink-soft">
@@ -281,9 +291,9 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
               </>
             )}
               </div>
-            </Collapsible>
-          </div>
-        )}
+            )}
+          </Collapsible>
+        </div>
         </div>
       </section>
 
