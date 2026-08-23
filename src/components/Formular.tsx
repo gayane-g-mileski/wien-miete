@@ -175,113 +175,118 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
             <Checkbox checked={value.befristet} onChange={(v) => set('befristet', v)} label="Befristeter Mietvertrag" />
           )}
           </div>
+
+        {/* --- Ausstattung, Zustand & Zu-/Abschläge – erscheint erst, wenn die
+               Angaben etwas bewirken: Das Baujahr muss feststehen, und die
+               Mietzinsart muss Kategorie, Zustand oder Merkmale überhaupt
+               heranziehen. Bei freiem Mietzins, Altvertrag, WGG oder
+               förderungsrechtlichem Mietzins bleibt der Abschnitt weg. --- */}
+        {zeigeAusstattung(value.objektart) && !baujahrOffen && (zeigeKat || ueber130) && (
+          <div className="border-t border-line pt-6">
+            <Collapsible title="Ausstattung, Zustand & Zu-/Abschläge">
+              <div className="space-y-8 pt-2">
+            {ueber130 && (
+              <p className="rounded-md bg-surface-2 px-3 py-2 text-sm text-ink-soft">
+                Für diese Wohnung gilt <strong className="text-ink">kein Richtwert</strong>: Sie liegt in einem Altbau, ist
+                gut ausgestattet (Kategorie A oder B) und mit über 130 m² größer als die gesetzliche Grenze. In diesem Fall
+                erlaubt das Gesetz den angemessenen Mietzins – also die ortsübliche Miete vergleichbarer Wohnungen. Zu- und
+                Abschläge sind deshalb hier nicht anzugeben; sie stecken bereits im Marktpreis.
+              </p>
+            )}
+            {zeigeKategorie(value.objektart) && (
+              <SelectField
+                label="Ausstattungskategorie"
+                id="kategorie"
+                value={value.kategorie}
+                onChange={(e) => set('kategorie', e.target.value as MietobjektInput['kategorie'])}
+              >
+                {(Object.keys(KATEGORIE_LABEL) as (keyof typeof KATEGORIE_LABEL)[]).map((k) => (
+                  <option key={k} value={k}>
+                    {KATEGORIE_LABEL[k]}
+                  </option>
+                ))}
+              </SelectField>
+            )}
+
+            {istRichtwert && (
+              <>
+                <SelectField
+                  label="Erhaltungszustand des Hauses"
+                  id="zustand"
+                  value={value.zustandHaus}
+                  onChange={(e) => set('zustandHaus', e.target.value as MietobjektInput['zustandHaus'])}
+                >
+                  {(Object.keys(ZUSTAND_HAUS_LABEL) as (keyof typeof ZUSTAND_HAUS_LABEL)[]).map((k) => (
+                    <option key={k} value={k}>
+                      {ZUSTAND_HAUS_LABEL[k]}
+                    </option>
+                  ))}
+                </SelectField>
+
+                <SelectField
+                  label="Geschoss"
+                  id="stockwerk"
+                  value={value.stockwerk}
+                  onChange={(e) => set('stockwerk', e.target.value as MietobjektInput['stockwerk'])}
+                >
+                  {(Object.keys(STOCKWERK_LABEL) as (keyof typeof STOCKWERK_LABEL)[]).map((k) => (
+                    <option key={k} value={k}>
+                      {STOCKWERK_LABEL[k]}
+                    </option>
+                  ))}
+                </SelectField>
+              </>
+            )}
+
+            {istRichtwert && (
+              <>
+                <Checkbox
+                  checked={value.heizung === 'zentral_etage'}
+                  onChange={(v) => set('heizung', v ? 'zentral_etage' : 'keine')}
+                  label="Zentral- oder Etagenheizung"
+                />
+
+                {MERKMAL_GRUPPEN.map((gruppe) => {
+                  // Gewählte Merkmale der Gruppe: zugeklappt bleiben sie so sichtbar,
+                  // und eine Gruppe mit Auswahl steht beim Laden offen.
+                  const gewaehlt = MERKMAL_KATALOG.filter((m) => m.gruppe === gruppe && value.merkmale[m.key]).length
+                  return (
+                  <div key={gruppe}>
+                    <Collapsible title={gewaehlt > 0 ? `${gruppe} (${gewaehlt})` : gruppe} defaultOpen={gewaehlt > 0}>
+                    <div className="flex flex-col gap-2">
+                      {MERKMAL_KATALOG.filter((m) => m.gruppe === gruppe).map((m) => (
+                        <div key={m.key}>
+                          <Checkbox
+                            checked={value.merkmale[m.key]}
+                            onChange={(v) => setMerkmal(m.key, v)}
+                            label={m.label}
+                          />
+                          {/* Denkmalschutz kann den Richtwert ganz verdrängen */}
+                          {m.key === 'denkmalschutz' && value.merkmale.denkmalschutz && (
+                            <div className="mt-3 ml-6">
+                              <Checkbox
+                                checked={value.denkmalschutzAufwand}
+                                onChange={(v) => set('denkmalschutzAufwand', v)}
+                                label="Erhebliche eigene Aufwendungen für die Erhaltung (§ 16 Abs 1 Z 3 MRG)"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    </Collapsible>
+                  </div>
+                  )
+                })}
+              </>
+            )}
+              </div>
+            </Collapsible>
+          </div>
+        )}
         </div>
       </section>
 
-      {/* --- Ausstattung, Zustand & Zu-/Abschläge – erscheint erst, wenn die
-             Angaben etwas bewirken: Das Baujahr muss feststehen, und die
-             Mietzinsart muss Kategorie, Zustand oder Merkmale überhaupt
-             heranziehen. Bei freiem Mietzins, Altvertrag, WGG oder
-             förderungsrechtlichem Mietzins bleibt der Abschnitt weg. --- */}
-      {zeigeAusstattung(value.objektart) && !baujahrOffen && (zeigeKat || ueber130) && (
-        <Section title="Ausstattung, Zustand & Zu-/Abschläge">
-          {ueber130 && (
-            <p className="rounded-md bg-surface-2 px-3 py-2 text-sm text-ink-soft">
-              Für diese Wohnung gilt <strong className="text-ink">kein Richtwert</strong>: Sie liegt in einem Altbau, ist
-              gut ausgestattet (Kategorie A oder B) und mit über 130 m² größer als die gesetzliche Grenze. In diesem Fall
-              erlaubt das Gesetz den angemessenen Mietzins – also die ortsübliche Miete vergleichbarer Wohnungen. Zu- und
-              Abschläge sind deshalb hier nicht anzugeben; sie stecken bereits im Marktpreis.
-            </p>
-          )}
-          {zeigeKategorie(value.objektart) && (
-            <SelectField
-              label="Ausstattungskategorie"
-              id="kategorie"
-              value={value.kategorie}
-              onChange={(e) => set('kategorie', e.target.value as MietobjektInput['kategorie'])}
-            >
-              {(Object.keys(KATEGORIE_LABEL) as (keyof typeof KATEGORIE_LABEL)[]).map((k) => (
-                <option key={k} value={k}>
-                  {KATEGORIE_LABEL[k]}
-                </option>
-              ))}
-            </SelectField>
-          )}
-
-          {istRichtwert && (
-            <>
-              <SelectField
-                label="Erhaltungszustand des Hauses"
-                id="zustand"
-                value={value.zustandHaus}
-                onChange={(e) => set('zustandHaus', e.target.value as MietobjektInput['zustandHaus'])}
-              >
-                {(Object.keys(ZUSTAND_HAUS_LABEL) as (keyof typeof ZUSTAND_HAUS_LABEL)[]).map((k) => (
-                  <option key={k} value={k}>
-                    {ZUSTAND_HAUS_LABEL[k]}
-                  </option>
-                ))}
-              </SelectField>
-
-              <SelectField
-                label="Geschoss"
-                id="stockwerk"
-                value={value.stockwerk}
-                onChange={(e) => set('stockwerk', e.target.value as MietobjektInput['stockwerk'])}
-              >
-                {(Object.keys(STOCKWERK_LABEL) as (keyof typeof STOCKWERK_LABEL)[]).map((k) => (
-                  <option key={k} value={k}>
-                    {STOCKWERK_LABEL[k]}
-                  </option>
-                ))}
-              </SelectField>
-            </>
-          )}
-
-          {istRichtwert && (
-            <>
-              <Checkbox
-                checked={value.heizung === 'zentral_etage'}
-                onChange={(v) => set('heizung', v ? 'zentral_etage' : 'keine')}
-                label="Zentral- oder Etagenheizung"
-              />
-
-              {MERKMAL_GRUPPEN.map((gruppe) => {
-                // Gewählte Merkmale der Gruppe: zugeklappt bleiben sie so sichtbar,
-                // und eine Gruppe mit Auswahl steht beim Laden offen.
-                const gewaehlt = MERKMAL_KATALOG.filter((m) => m.gruppe === gruppe && value.merkmale[m.key]).length
-                return (
-                <div key={gruppe}>
-                  <Collapsible title={gewaehlt > 0 ? `${gruppe} (${gewaehlt})` : gruppe} defaultOpen={gewaehlt > 0}>
-                  <div className="flex flex-col gap-2">
-                    {MERKMAL_KATALOG.filter((m) => m.gruppe === gruppe).map((m) => (
-                      <div key={m.key}>
-                        <Checkbox
-                          checked={value.merkmale[m.key]}
-                          onChange={(v) => setMerkmal(m.key, v)}
-                          label={m.label}
-                        />
-                        {/* Denkmalschutz kann den Richtwert ganz verdrängen */}
-                        {m.key === 'denkmalschutz' && value.merkmale.denkmalschutz && (
-                          <div className="mt-3 ml-6">
-                            <Checkbox
-                              checked={value.denkmalschutzAufwand}
-                              onChange={(v) => set('denkmalschutzAufwand', v)}
-                              label="Erhebliche eigene Aufwendungen für die Erhaltung (§ 16 Abs 1 Z 3 MRG)"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  </Collapsible>
-                </div>
-                )
-              })}
-            </>
-          )}
-        </Section>
-      )}
       </div>
 
       {/* --- Gebäude und, sobald das Baujahr feststeht, die Förderung darunter:
