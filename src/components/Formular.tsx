@@ -114,7 +114,7 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
 
         {/* Bezirk links, Anschrift rechts + gemeinsamer Hinweis */}
         <div>
-          <div className="grid grid-cols-1 gap-5">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-[1fr_2fr]">
             <SelectField
               label="Bezirk"
               id="bezirk"
