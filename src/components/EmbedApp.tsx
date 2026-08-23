@@ -60,6 +60,7 @@ export function EmbedApp({ wl }: { wl: WhiteLabel }) {
         <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
           <Formular value={input} onChange={setInput} mietzinsArt={ergebnis.mietzinsArt} adressWechsel={0} />
           <div className="lg:sticky lg:top-6">
+            <h2 className="mb-5 px-1 text-[1.6rem] font-semibold leading-tight tracking-tight text-accent">Ergebnis</h2>
             <Ergebnis ergebnis={ergebnis} />
             {wl.kontakt && (
               <a

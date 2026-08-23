@@ -227,10 +227,16 @@ function Startseite() {
             />
           </section>
 
-          {/* Rechts: Ergebnis, die darauf aufbauenden Rechner, dann die Aktionen */}
+          {/* Rechts: die Rechner zum Ergebnis, darunter die Einordnung und die Aktionen */}
           <section>
-            <Ergebnis ergebnis={ergebnis} input={input} adresse={input.anschrift} />
+            <h2 className="mb-1 px-1 text-[2rem] font-semibold leading-tight tracking-tight text-accent">Ergebnis</h2>
+            <p className="mb-5 px-1 text-sm font-semibold text-ink-faint">
+              Ersteinschätzung nach den erfassten Angaben
+            </p>
             <ErgebnisReiter ergebnis={ergebnis} />
+            <div className="mt-8">
+              <Ergebnis ergebnis={ergebnis} input={input} adresse={input.anschrift} />
+            </div>
             <Ergebnisleiste
               ergebnis={ergebnis}
               adresse={input.anschrift}

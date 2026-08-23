@@ -6,12 +6,13 @@ import { Betriebskosten } from './Betriebskosten'
 import { ereignis } from '../lib/analytics'
 import type { MrgErgebnis } from '../lib/types'
 
-// Alles, was auf dem Ergebnis aufbaut, in einer Karte unter dem Ergebnis:
-// Preisbandbreite, Wertsicherung, Rendite und Betriebskosten als Reiter.
+// Alles, was auf dem Ergebnis aufbaut, über der Ergebniskarte: Preisbandbreite,
+// Wertsicherung, Rendite und Betriebskosten als Reiter.
 //
-// Die Karte trägt `@container`, damit die Rechner sich nach der Breite dieser
-// Spalte richten und nicht nach der Breite des Fensters – rechts neben dem
-// Formular ist es enger als auf dem Handy im Hochformat.
+// Die Preisbandbreite bringt ihre eigenen Karten mit und steht deshalb ohne
+// zusätzlichen Rahmen; die drei Rechner bekommen einen. Die Tafel trägt
+// `@container`, damit sich die Rechner nach der Breite dieser Spalte richten
+// und nicht nach der Breite des Fensters.
 
 const REITER = [
   { id: 'preis', titel: 'Preisbandbreite', unter: '§ 16 MRG' },
@@ -27,9 +28,13 @@ export function ErgebnisReiter({ ergebnis }: { ergebnis: MrgErgebnis }) {
   const gewaehlt = REITER.find((r) => r.id === aktiv)!
 
   return (
-    <section id="werkzeuge" className="mt-8 scroll-mt-4">
-      {/* Zwei mal zwei – so bleibt die Reihe auf jeder Breite gleich hoch */}
-      <div className="mb-5 grid grid-cols-2 gap-2" role="tablist" aria-label="Rechner zum Ergebnis">
+    <section id="werkzeuge" className="scroll-mt-4">
+      {/* Auf schmalen Displays lässt sich die Reihe seitlich schieben. */}
+      <div
+        role="tablist"
+        aria-label="Rechner zum Ergebnis"
+        className="flex gap-6 overflow-x-auto border-b border-line"
+      >
         {REITER.map((r) => (
           <button
             key={r.id}
@@ -42,10 +47,10 @@ export function ErgebnisReiter({ ergebnis }: { ergebnis: MrgErgebnis }) {
               setAktiv(r.id)
               ereignis('rechner_gewechselt', { rechner: r.id })
             }}
-            className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+            className={`-mb-px shrink-0 whitespace-nowrap border-b-2 px-1 pb-3 text-base transition-colors ${
               aktiv === r.id
-                ? 'bg-accent text-on-accent'
-                : 'border border-line bg-surface text-ink hover:border-accent/50 hover:text-accent'
+                ? 'border-accent font-semibold text-accent'
+                : 'border-transparent text-ink hover:text-accent'
             }`}
           >
             {r.titel}
@@ -53,17 +58,17 @@ export function ErgebnisReiter({ ergebnis }: { ergebnis: MrgErgebnis }) {
         ))}
       </div>
 
-      <div
-        id={`tafel-${aktiv}`}
-        role="tabpanel"
-        aria-labelledby={`reiter-${aktiv}`}
-        className="@container rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6"
-      >
-        <p className="mb-5 text-xs font-semibold uppercase tracking-[0.12em] text-ink-faint">{gewaehlt.unter}</p>
-        {aktiv === 'preis' && <Preisbandbreite ergebnis={ergebnis} />}
-        {aktiv === 'wertsicherung' && <Wertsicherung />}
-        {aktiv === 'rendite' && <Rendite />}
-        {aktiv === 'betriebskosten' && <Betriebskosten />}
+      <div id={`tafel-${aktiv}`} role="tabpanel" aria-labelledby={`reiter-${aktiv}`} className="@container">
+        <p className="mb-4 mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-ink-faint">{gewaehlt.unter}</p>
+        {aktiv === 'preis' ? (
+          <Preisbandbreite ergebnis={ergebnis} />
+        ) : (
+          <div className="rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6">
+            {aktiv === 'wertsicherung' && <Wertsicherung />}
+            {aktiv === 'rendite' && <Rendite />}
+            {aktiv === 'betriebskosten' && <Betriebskosten />}
+          </div>
+        )}
       </div>
     </section>
   )
