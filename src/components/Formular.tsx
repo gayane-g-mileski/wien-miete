@@ -178,9 +178,12 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
         </div>
       </section>
 
-      {/* --- Ausstattung, Zustand & Zu-/Abschläge – nur wenn ein Richtwert
-             (bzw. die Kategorie) die Miethöhe bestimmt --- */}
-      {zeigeAusstattung(value.objektart) && (zeigeKat || ueber130) && (
+      {/* --- Ausstattung, Zustand & Zu-/Abschläge – erscheint erst, wenn die
+             Angaben etwas bewirken: Das Baujahr muss feststehen, und die
+             Mietzinsart muss Kategorie, Zustand oder Merkmale überhaupt
+             heranziehen. Bei freiem Mietzins, Altvertrag, WGG oder
+             förderungsrechtlichem Mietzins bleibt der Abschnitt weg. --- */}
+      {zeigeAusstattung(value.objektart) && !baujahrOffen && (zeigeKat || ueber130) && (
         <Section title="Ausstattung, Zustand & Zu-/Abschläge">
           {ueber130 && (
             <p className="rounded-md bg-surface-2 px-3 py-2 text-sm text-ink-soft">
