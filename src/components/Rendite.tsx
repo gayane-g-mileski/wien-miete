@@ -109,7 +109,8 @@ export function Rendite() {
         ))}
       </div>
 
-      <div className="space-y-3">
+      {/* Herleitung zweispaltig, sobald die Spalte breit genug ist */}
+      <div className="grid grid-cols-1 gap-x-8 gap-y-3 @sm:grid-cols-2">
         {r.schritte.map((s) => (
           <div key={s.was}>
             <p className="text-sm font-medium text-ink">{s.was}</p>
