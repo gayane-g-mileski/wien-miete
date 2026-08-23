@@ -50,7 +50,7 @@ Stand: August 2026. Änderungen werden in diesem Dokument nachgeführt.
 |---|---|
 | Zweck | Zugang zu kostenpflichtigen Leistungen, Zuordnung der Käufe |
 | Betroffene | Kundinnen und Kunden |
-| Datenarten | E-Mail-Adresse, Zeitpunkt der Anmeldung, Sitzungskennung, Anmelde-Token (gehasht) |
+| Datenarten | Name (Vor- und Nachname in einem Feld), E-Mail-Adresse, Zeitpunkt der Anmeldung, Sitzungskennung, Anmelde-Token (gehasht) |
 | Rechtsgrundlage | Art. 6 Abs 1 lit b – Vertragserfüllung |
 | Empfänger | Cloudflare (Betrieb), Mailversender für den Anmeldelink |
 | Drittland | nein, sofern EU-Region gewählt |

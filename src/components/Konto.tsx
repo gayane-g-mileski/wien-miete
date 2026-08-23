@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { TextField } from './ui'
-import { aufKontoOeffnen, type KontoAnlass } from '../lib/kontoEvent'
+import { aufKontoOeffnen } from '../lib/kontoEvent'
 import { kontaktVorbelegen } from '../lib/kontaktEvent'
 import { abmelden, kontoAktualisieren, magicLinkAnfordern, serverVorhanden, useKonto } from '../lib/konto'
 import { BASIS } from '../lib/seo'
@@ -12,6 +12,7 @@ import { BASIS } from '../lib/seo'
 // dem Fern- und Auswärtsgeschäfte-Gesetz.
 
 interface Fehler {
+  name?: string
   email?: string
   allgemein?: string
 }
@@ -20,8 +21,10 @@ const linkStil = 'text-accent underline'
 
 export function Konto() {
   const [offen, setOffen] = useState(false)
-  const [modus, setModus] = useState<KontoAnlass['modus']>('anmelden')
   const [anlass, setAnlass] = useState<string | undefined>()
+  // Vor- und Nachname in einem Feld: So steht der Name auf der Rechnung, ohne
+  // dass jemand zwei Felder ausfüllen muss.
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [firma, setFirma] = useState('')
   const [uid, setUid] = useState('')
@@ -33,7 +36,6 @@ export function Konto() {
   useEffect(
     () =>
       aufKontoOeffnen((a) => {
-        setModus(a.modus)
         setAnlass(a.anlass)
         setFehler({})
         setLinkGeschickt(false)
@@ -55,6 +57,7 @@ export function Konto() {
 
   useEffect(() => {
     if (konto) {
+      setName(konto.name ?? '')
       setFirma(konto.firma ?? '')
       setUid(konto.uid ?? '')
     }
@@ -65,12 +68,13 @@ export function Konto() {
   const emailGueltig = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
 
   const anmeldelinkSchicken = async () => {
+    if (!name.trim()) return setFehler({ name: 'Bitte geben Sie Ihren Vor- und Nachnamen an.' })
     if (!email.trim()) return setFehler({ email: 'Bitte geben Sie Ihre E-Mail-Adresse an.' })
     if (!emailGueltig) return setFehler({ email: 'Bitte geben Sie eine gültige E-Mail-Adresse an.' })
     setFehler({})
     setLaeuft(true)
     try {
-      await magicLinkAnfordern(email.trim(), anlass)
+      await magicLinkAnfordern(email.trim(), name.trim(), anlass)
       setLinkGeschickt(true)
     } catch (e) {
       setFehler({ allgemein: e instanceof Error ? e.message : 'Der Anmeldelink konnte nicht verschickt werden.' })
@@ -82,11 +86,12 @@ export function Konto() {
   const zurWarteliste = () => {
     setOffen(false)
     kontaktVorbelegen(
-      `Bitte informiert mich, sobald Konten freigeschaltet sind.${anlass ? ` Anlass: ${anlass}` : ''}\nE-Mail: ${email.trim() || '[E-Mail bitte ergänzen]'}`,
+      `Bitte informiert mich, sobald Konten freigeschaltet sind.${anlass ? ` Anlass: ${anlass}` : ''}\nName: ${name.trim() || '[Name bitte ergänzen]'}\nE-Mail: ${email.trim() || '[E-Mail bitte ergänzen]'}`,
     )
   }
 
-  const kopf = konto ? 'Ihr Konto' : modus === 'anmelden' ? 'Anmelden' : 'Konto anlegen'
+  // Registrieren und Anmelden führen über denselben Link – deshalb eine Überschrift.
+  const kopf = konto ? 'Ihr Konto' : 'Registrieren / Anmelden'
 
   return (
     <div
@@ -132,6 +137,7 @@ export function Konto() {
               )}
             </div>
 
+            <TextField label="Name" id="konto-name" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
             <TextField label="Firma (für die Rechnung)" id="konto-firma" value={firma} onChange={(e) => setFirma(e.target.value)} />
             <TextField
               label="UID-Nummer (optional)"
@@ -146,7 +152,7 @@ export function Konto() {
               disabled={laeuft}
               onClick={() => {
                 setLaeuft(true)
-                void kontoAktualisieren({ firma: firma.trim(), uid: uid.trim(), land: 'AT' })
+                void kontoAktualisieren({ name: name.trim(), firma: firma.trim(), uid: uid.trim(), land: 'AT' })
                   .catch((e: unknown) =>
                     setFehler({ allgemein: e instanceof Error ? e.message : 'Speichern hat nicht geklappt.' }),
                   )
@@ -187,11 +193,20 @@ export function Konto() {
           </div>
         ) : !serverVorhanden() ? (
           /* 3. Vorschau-Betrieb: kein Server hinterlegt */
-          <div className="mt-6 space-y-5">
+          <div className="mt-6 space-y-6">
             <p className="text-base leading-relaxed text-ink-soft">
               Konten und Zahlung sind noch nicht freigeschaltet – der Rechner bleibt ohne Anmeldung vollständig nutzbar.
-              Tragen Sie sich ein, dann melden wir uns, sobald es losgeht.
+              Ihre Angaben werden vorgemerkt, wir melden uns, sobald es losgeht.
             </p>
+            <TextField
+              label="Name"
+              id="konto-name"
+              autoComplete="name"
+              value={name}
+              fehler={fehler.name}
+              hint="Vor- und Nachname, wie er auf der Rechnung stehen soll."
+              onChange={(e) => setName(e.target.value)}
+            />
             <TextField
               label="E-Mail-Adresse"
               id="konto-email"
@@ -206,12 +221,24 @@ export function Konto() {
               onClick={zurWarteliste}
               className="w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong"
             >
-              Auf die Warteliste
+              Registrieren / Anmelden
             </button>
+            <p className="-mt-3 text-center text-[12px] text-ink-faint">
+              Bis zur Freischaltung wird die Registrierung vorgemerkt – der nächste Schritt führt zum Kontaktformular.
+            </p>
           </div>
         ) : (
-          /* 4. Anmeldung per Magic-Link */
+          /* 4. Registrieren und Anmelden – beides derselbe Weg per Magic-Link */
           <div className="mt-6 space-y-6">
+            <TextField
+              label="Name"
+              id="konto-name"
+              autoComplete="name"
+              value={name}
+              fehler={fehler.name}
+              hint="Vor- und Nachname, wie er auf der Rechnung stehen soll."
+              onChange={(e) => setName(e.target.value)}
+            />
             <TextField
               label="E-Mail-Adresse"
               id="konto-email"
@@ -229,8 +256,11 @@ export function Konto() {
               disabled={laeuft}
               className="w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong disabled:opacity-60"
             >
-              {laeuft ? 'Einen Moment …' : 'Anmeldelink schicken'}
+              {laeuft ? 'Einen Moment …' : 'Registrieren / Anmelden'}
             </button>
+            <p className="-mt-3 text-center text-[12px] text-ink-faint">
+              Ein Weg für beides: Ist noch kein Konto vorhanden, wird es mit dem Link angelegt.
+            </p>
             <p className="text-[12px] leading-relaxed text-ink-faint">
               Mit der Anmeldung gelten die{' '}
               <a className={linkStil} href={`${BASIS}agb.html`} target="_blank" rel="noreferrer">

@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS konten (
   id TEXT PRIMARY KEY,
   email TEXT NOT NULL UNIQUE,
   tarif TEXT NOT NULL DEFAULT 'frei',
+  name TEXT,
   firma TEXT,
   uid TEXT,
   land TEXT,
@@ -22,6 +23,8 @@ CREATE TABLE IF NOT EXISTS konten (
 CREATE TABLE IF NOT EXISTS anmeldungen (
   token_hash TEXT PRIMARY KEY,
   email TEXT NOT NULL,
+  -- Bei der ersten Anmeldung angegebener Name; wandert beim Einlösen ins Konto.
+  name TEXT,
   ablauf TEXT NOT NULL,
   verwendet INTEGER NOT NULL DEFAULT 0
 );
@@ -60,3 +63,7 @@ CREATE INDEX IF NOT EXISTS anfragen_email ON anfragen(email, erstellt);
 
 CREATE INDEX IF NOT EXISTS anmeldungen_ablauf ON anmeldungen(ablauf);
 CREATE INDEX IF NOT EXISTS kaeufe_konto ON kaeufe(konto);
+
+-- Nachträglich (bestehende Datenbanken): Namensfelder ergänzen.
+--   ALTER TABLE konten ADD COLUMN name TEXT;
+--   ALTER TABLE anmeldungen ADD COLUMN name TEXT;

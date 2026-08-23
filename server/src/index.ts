@@ -20,6 +20,7 @@ interface KontoZeile {
   id: string
   email: string
   tarif: string
+  name: string | null
   firma: string | null
   uid: string | null
   land: string | null
@@ -33,6 +34,7 @@ function alsKonto(zeile: KontoZeile) {
   return {
     email: zeile.email,
     tarif: zeile.tarif,
+    name: zeile.name ?? undefined,
     firma: zeile.firma ?? undefined,
     uid: zeile.uid ?? undefined,
     land: zeile.land ?? undefined,
@@ -42,14 +44,22 @@ function alsKonto(zeile: KontoZeile) {
   }
 }
 
-async function kontoNachEmail(env: Umgebung, email: string): Promise<KontoZeile> {
+async function kontoNachEmail(env: Umgebung, email: string, name?: string | null): Promise<KontoZeile> {
   const vorhanden = await env.DB.prepare('SELECT * FROM konten WHERE email = ?').bind(email).first<KontoZeile>()
-  if (vorhanden) return vorhanden
+  if (vorhanden) {
+    // Beim Anmelden angegebener Name: nur ergänzen, nie einen vorhandenen
+    // überschreiben – geändert wird er im Konto selbst.
+    if (name && !vorhanden.name) {
+      await env.DB.prepare('UPDATE konten SET name = ? WHERE id = ?').bind(name, vorhanden.id).run()
+      return { ...vorhanden, name }
+    }
+    return vorhanden
+  }
   const id = zufall(16)
   await env.DB.prepare(
-    'INSERT INTO konten (id, email, tarif, guthaben_berichte, erstellt) VALUES (?, ?, ?, 0, ?)',
+    'INSERT INTO konten (id, email, tarif, name, guthaben_berichte, erstellt) VALUES (?, ?, ?, ?, 0, ?)',
   )
-    .bind(id, email, 'frei', new Date().toISOString())
+    .bind(id, email, 'frei', name ?? null, new Date().toISOString())
     .run()
   return (await env.DB.prepare('SELECT * FROM konten WHERE id = ?').bind(id).first<KontoZeile>())!
 }
@@ -235,14 +245,15 @@ export default {
     try {
       // ---- Anmeldung ohne Passwort -------------------------------------
       if (pfad === '/auth/magic-link' && anfrage.method === 'POST') {
-        const daten = (await anfrage.json()) as { email?: string; ziel?: string; zweck?: string }
+        const daten = (await anfrage.json()) as { email?: string; name?: string; ziel?: string; zweck?: string }
         if (!istEmail(daten.email)) return fehler('eingabe_ungueltig', 'Bitte gib eine gültige E-Mail-Adresse an.', 422, kopf)
         const ziel = typeof daten.ziel === 'string' && erlaubt.some((h) => daten.ziel!.startsWith(h)) ? daten.ziel : erlaubt[0]
 
         const token = zufall(24)
         const ablauf = new Date(Date.now() + ANMELDUNG_GUELTIG_MINUTEN * 60_000).toISOString()
-        await env.DB.prepare('INSERT INTO anmeldungen (token_hash, email, ablauf, verwendet) VALUES (?, ?, ?, 0)')
-          .bind(await hash(token), daten.email, ablauf)
+        const name = typeof daten.name === 'string' ? daten.name.trim().slice(0, 120) : ''
+        await env.DB.prepare('INSERT INTO anmeldungen (token_hash, email, name, ablauf, verwendet) VALUES (?, ?, ?, ?, 0)')
+          .bind(await hash(token), daten.email, name || null, ablauf)
           .run()
 
         const link = `${ziel}?anmeldung=${token}`
@@ -261,13 +272,13 @@ export default {
         const gehasht = await hash(daten.token)
         const zeile = await env.DB.prepare('SELECT * FROM anmeldungen WHERE token_hash = ?')
           .bind(gehasht)
-          .first<{ token_hash: string; email: string; ablauf: string; verwendet: number }>()
+          .first<{ token_hash: string; email: string; name: string | null; ablauf: string; verwendet: number }>()
         if (!zeile || zeile.verwendet === 1 || new Date(zeile.ablauf) < new Date() || !gleich(zeile.token_hash, gehasht)) {
           return fehler('anmeldung_abgelaufen', 'Dieser Anmeldelink gilt nicht mehr. Bitte fordere einen neuen an.', 401, kopf)
         }
         await env.DB.prepare('DELETE FROM anmeldungen WHERE token_hash = ?').bind(gehasht).run()
 
-        const konto = await kontoNachEmail(env, zeile.email)
+        const konto = await kontoNachEmail(env, zeile.email, zeile.name)
         const sitzung = await tokenBauen({ konto: konto.id }, env.SITZUNG_GEHEIMNIS)
         return json({ sitzung, konto: alsKonto(konto) }, 200, kopf)
       }
@@ -329,9 +340,15 @@ export default {
         if (!konto) return fehler('nicht_angemeldet', 'Bitte melde dich an.', 401, kopf)
 
         if (anfrage.method === 'PATCH') {
-          const daten = (await anfrage.json()) as { firma?: string; uid?: string; land?: string }
-          await env.DB.prepare('UPDATE konten SET firma = ?, uid = ?, land = ? WHERE id = ?')
-            .bind((daten.firma ?? '').slice(0, 120), (daten.uid ?? '').slice(0, 20), (daten.land ?? 'AT').slice(0, 2), konto.id)
+          const daten = (await anfrage.json()) as { name?: string; firma?: string; uid?: string; land?: string }
+          await env.DB.prepare('UPDATE konten SET name = ?, firma = ?, uid = ?, land = ? WHERE id = ?')
+            .bind(
+              (daten.name ?? '').slice(0, 120) || null,
+              (daten.firma ?? '').slice(0, 120),
+              (daten.uid ?? '').slice(0, 20),
+              (daten.land ?? 'AT').slice(0, 2),
+              konto.id,
+            )
             .run()
           const neu = await env.DB.prepare('SELECT * FROM konten WHERE id = ?').bind(konto.id).first<KontoZeile>()
           return json(alsKonto(neu!), 200, kopf)

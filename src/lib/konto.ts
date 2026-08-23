@@ -16,6 +16,8 @@ export type Tarif = 'frei' | 'bericht' | 'profi' | 'api'
 export interface Konto {
   email: string
   tarif: Tarif
+  /** Vor- und Nachname in einem Feld, wie bei der Anmeldung angegeben. */
+  name?: string
   /** Firmendaten für die Rechnung (B2B). */
   firma?: string
   uid?: string
@@ -73,11 +75,14 @@ async function anfrage<T>(pfad: string, optionen: RequestInit = {}): Promise<T> 
   return (await antwort.json()) as T
 }
 
-/** Anmeldelink anfordern. Der Link führt zurück auf diese Seite. */
-export async function magicLinkAnfordern(email: string, zweck?: string): Promise<void> {
+/**
+ * Anmeldelink anfordern. Der Link führt zurück auf diese Seite. Derselbe Weg
+ * legt ein Konto an, wenn es noch keines gibt – der Name wird dabei übernommen.
+ */
+export async function magicLinkAnfordern(email: string, name: string, zweck?: string): Promise<void> {
   await anfrage('/auth/magic-link', {
     method: 'POST',
-    body: JSON.stringify({ email, ziel: location.href.split('?')[0], zweck }),
+    body: JSON.stringify({ email, name, ziel: location.href.split('?')[0], zweck }),
   })
   ereignis('anmeldelink_angefordert')
 }
@@ -113,6 +118,7 @@ export function abmelden(): void {
 }
 
 export interface KontoDaten {
+  name?: string
   firma?: string
   uid?: string
   land?: string
