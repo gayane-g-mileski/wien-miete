@@ -205,3 +205,13 @@ body {
 footer {
   padding-bottom: env(safe-area-inset-bottom);
 }
+
+/* Reiterreihe: seitlich schiebbar, aber ohne sichtbare Leiste. */
+.ohne-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.ohne-scrollbar::-webkit-scrollbar {
+  display: none;
+}

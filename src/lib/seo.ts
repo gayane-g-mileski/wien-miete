@@ -33,6 +33,7 @@ export type Route =
   | { art: 'ratgeber'; seite: RatgeberSeite }
   | { art: 'ratgeberIndex' }
   | { art: 'api' }
+  | { art: 'widerruf' }
 
 /** Pfad ohne Basis und ohne Schrägstriche, z.B. „richtwert-wien“. */
 export function pfadTeil(pfad: string = location.pathname): string {
@@ -45,6 +46,7 @@ export function routeFuer(pfad: string = location.pathname): Route {
   if (teil === '') return { art: 'start' }
   if (teil === 'api') return { art: 'api' }
   if (teil === 'ratgeber') return { art: 'ratgeberIndex' }
+  if (teil === 'widerruf') return { art: 'widerruf' }
   const seite = RATGEBER.find((s) => s.pfad === teil)
   if (seite) return { art: 'ratgeber', seite }
   return { art: 'start' }
@@ -56,6 +58,8 @@ export interface Meta {
   beschreibung: string
   /** Strukturierte Daten (JSON-LD) für diese Seite. */
   ld: unknown[]
+  /** Rechtstexte gehören nicht in den Index. */
+  nichtIndexieren?: boolean
 }
 
 const ORGANISATION = {
@@ -145,6 +149,16 @@ export function metaFuer(route: Route, startFaq: { frage: string; antwort: strin
       ld: [ORGANISATION, anwendung(), brotkrumen()],
     }
   }
+  if (route.art === 'widerruf') {
+    return {
+      pfad: 'widerruf/',
+      titel: `Rücktrittsrecht und Muster-Rücktrittsformular | ${MARKE}`,
+      beschreibung:
+        'Rücktrittsbelehrung nach dem Fern- und Auswärtsgeschäfte-Gesetz samt ausfüllbarem Muster-Rücktrittsformular.',
+      ld: [ORGANISATION, brotkrumen()],
+      nichtIndexieren: true,
+    }
+  }
   if (route.art === 'ratgeberIndex') {
     return {
       pfad: 'ratgeber/',
@@ -195,6 +209,12 @@ export function metaAnwenden(meta: Meta): void {
   metaTag('meta[property="og:url"]', 'property', 'og:url', url)
   metaTag('meta[name="twitter:title"]', 'name', 'twitter:title', meta.titel)
   metaTag('meta[name="twitter:description"]', 'name', 'twitter:description', meta.beschreibung)
+  metaTag(
+    'meta[name="robots"]',
+    'name',
+    'robots',
+    meta.nichtIndexieren ? 'noindex, follow' : 'index, follow, max-snippet:-1, max-image-preview:large',
+  )
 
   let kanonisch = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]')
   if (!kanonisch) {

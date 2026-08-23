@@ -5,7 +5,7 @@ import { kaufMerken, type Zahlungsart } from '../lib/kauf'
 import { aufKaufOeffnen, type KaufAnlass } from '../lib/kaufEvent'
 import { kontaktVorbelegen } from '../lib/kontaktEvent'
 import { euro, netto, tarifFuer } from '../lib/tarife'
-import { BASIS } from '../lib/seo'
+import { BASIS, href } from '../lib/seo'
 
 // Kauf des Prüfberichts in einem Fenster: Name und E-Mail, dann Apple Pay,
 // PayPal oder Karte. Bezahlt wird auf der gesicherten Seite des
@@ -216,7 +216,7 @@ export function Kaufdialog() {
                       AGB
                     </a>
                     , die{' '}
-                    <a className={linkStil} href={`${BASIS}widerruf.html`} target="_blank" rel="noreferrer">
+                    <a className={linkStil} href={href('widerruf/')} target="_blank" rel="noreferrer">
                       Rücktrittsbelehrung
                     </a>{' '}
                     und die{' '}

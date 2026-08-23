@@ -49,6 +49,8 @@ const ZEILEN: Zeile[] = [
 ]
 
 const zelle = 'px-3 py-3 align-top text-sm leading-relaxed'
+// Kleiner und einzeilig, damit jede Spaltenüberschrift in eine Zeile passt.
+const kopfZelle = 'px-3 py-3 align-bottom text-[13px] font-semibold leading-snug whitespace-nowrap'
 
 export function Vergleich() {
   return (
@@ -66,16 +68,16 @@ export function Vergleich() {
           <table className="w-full min-w-[46rem] border-collapse text-left">
             <thead>
               <tr className="border-b border-line bg-surface-2">
-                <th className={`${zelle} font-semibold text-ink`} scope="col">
+                <th className={`${kopfZelle} text-ink`} scope="col">
                   Frage
                 </th>
-                <th className={`${zelle} font-semibold text-accent`} scope="col">
+                <th className={`${kopfZelle} text-accent`} scope="col">
                   Mietzins-Check in Wien
                 </th>
-                <th className={`${zelle} font-semibold text-ink`} scope="col">
+                <th className={`${kopfZelle} text-ink`} scope="col">
                   Mietzinsrechner der Stadt Wien
                 </th>
-                <th className={`${zelle} font-semibold text-ink`} scope="col">
+                <th className={`${kopfZelle} text-ink`} scope="col">
                   wiener-mietenrechner.at
                 </th>
               </tr>
@@ -86,7 +88,7 @@ export function Vergleich() {
                   <th scope="row" className={`${zelle} font-medium text-ink`}>
                     {z.frage}
                   </th>
-                  <td className={`${zelle} text-ink-soft`}>{z.hier}</td>
+                  <td className={`${zelle} font-medium text-accent`}>{z.hier}</td>
                   <td className={`${zelle} text-ink-soft`}>{z.stadt}</td>
                   <td className={`${zelle} text-ink-faint`}>{z.anderer}</td>
                 </tr>

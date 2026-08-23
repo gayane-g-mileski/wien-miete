@@ -79,7 +79,7 @@ export function Preise() {
           <p>
             Für digitale Inhalte gilt ein Rücktrittsrecht von 14 Tagen; es erlischt, sobald die Leistung mit
             ausdrücklicher Zustimmung sofort erbracht wurde. Einzelheiten in der{' '}
-            <a className="text-accent underline" href={`${BASIS}widerruf.html`} target="_blank" rel="noreferrer">
+            <a className="text-accent underline" href={href('widerruf/')}>
               Rücktrittsbelehrung
             </a>{' '}
             und in den{' '}

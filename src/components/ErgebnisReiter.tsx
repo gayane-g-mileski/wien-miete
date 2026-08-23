@@ -33,7 +33,7 @@ export function ErgebnisReiter({ ergebnis }: { ergebnis: MrgErgebnis }) {
       <div
         role="tablist"
         aria-label="Rechner zum Ergebnis"
-        className="flex gap-6 overflow-x-auto border-b border-line"
+        className="ohne-scrollbar flex gap-6 overflow-x-auto border-b border-line"
       >
         {REITER.map((r) => (
           <button

@@ -42,8 +42,8 @@ export function KontaktInhalt() {
     const neu: Fehler = {}
     if (!name.trim()) neu.name = 'Bitte geben Sie Ihren Namen an.'
     if (!email.trim()) neu.email = 'Bitte geben Sie Ihre E-Mail-Adresse an.'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) neu.email = 'Bitte gib eine gültige E-Mail-Adresse an.'
-    if (!nachricht.trim()) neu.nachricht = 'Bitte schreib eine Nachricht.'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) neu.email = 'Bitte geben Sie eine gültige E-Mail-Adresse an.'
+    if (!nachricht.trim()) neu.nachricht = 'Bitte schreiben Sie eine Nachricht.'
     setFehler(neu)
     if (Object.keys(neu).length > 0) return
     setStatus('sendet')
@@ -68,7 +68,7 @@ export function KontaktInhalt() {
     } catch {
       setStatus('bereit')
       setFehler({
-        versand: `Senden hat gerade nicht geklappt. Bitte versuch es später noch einmal oder schreib an ${KONTAKT_EMAIL}.`,
+        versand: `Senden hat gerade nicht geklappt. Bitte versuchen Sie es später noch einmal oder schreiben Sie an ${KONTAKT_EMAIL}.`,
       })
     }
   }

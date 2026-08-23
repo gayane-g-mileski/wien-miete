@@ -33,6 +33,8 @@ const ROUTEN = [
   { pfad: 'ratgeber/', prioritaet: '0.7', aenderung: 'monthly' },
   ...(API_SICHTBAR ? [{ pfad: 'api/', prioritaet: '0.8', aenderung: 'monthly' }] : []),
   ...seiten.map((s) => ({ pfad: `${s.pfad}/`, prioritaet: '0.9', aenderung: 'monthly' })),
+  // Rechtstext: als Datei nötig, aber nichts für die Sitemap.
+  { pfad: 'widerruf/', ohneSitemap: true },
 ]
 
 const TYPEN = {
@@ -118,7 +120,7 @@ await writeFile(join(DIST, '404.html'), await readFile(join(DIST, 'index.html'),
 const heute = new Date().toISOString().slice(0, 10)
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${ROUTEN.map(
+${ROUTEN.filter((r) => !r.ohneSitemap).map(
   (r) => `  <url>
     <loc>${HERKUNFT}${BASIS}${r.pfad}</loc>
     <lastmod>${heute}</lastmod>

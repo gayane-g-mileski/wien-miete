@@ -15,6 +15,7 @@ import { Kaufdialog } from './components/Kaufdialog'
 import { ThemaSchalter } from './components/ThemaSchalter'
 import { Ratgeber, RatgeberIndex } from './components/Ratgeber'
 import { ApiSeite } from './components/ApiSeite'
+import { Widerruf } from './components/Widerruf'
 import { kontoOeffnen } from './lib/kontoEvent'
 import { evaluateMrg } from './lib/mrgEngine'
 import { leereMerkmale } from './lib/pricingData'
@@ -312,7 +313,7 @@ function Fusszeile() {
             <a className={quelleLink} href={`${BASIS}agb.html`} target="_blank" rel="noreferrer">
               AGB
             </a>
-            <a className={quelleLink} href={`${BASIS}widerruf.html`} target="_blank" rel="noreferrer">
+            <a className={quelleLink} href={href('widerruf/')}>
               Rücktrittsrecht
             </a>
             <a className={quelleLink} href={`${BASIS}avv.html`} target="_blank" rel="noreferrer">
@@ -348,6 +349,7 @@ function App() {
       {route.art === 'ratgeber' && <Ratgeber seite={route.seite} />}
       {route.art === 'ratgeberIndex' && <RatgeberIndex />}
       {route.art === 'api' && <ApiSeite />}
+      {route.art === 'widerruf' && <Widerruf />}
       <Fusszeile />
       <Konto />
       <Kaufdialog />
