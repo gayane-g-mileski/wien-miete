@@ -18,6 +18,7 @@ import { bauperiodenLink } from '../lib/geo'
 import type { BaujahrInfo } from '../lib/geo'
 import { Checkbox, Collapsible, DateField, NumberField, Section, SelectField } from './ui'
 import { AnschriftFeld } from './AnschriftFeld'
+import { AnfrageDialog } from './AnfrageDialog'
 import { Ma25Anfrage } from './Ma25Anfrage'
 import { WwafHinweis } from './WwafHinweis'
 import { RueckzahlungAnfrage } from './RueckzahlungAnfrage'
@@ -32,9 +33,17 @@ interface Props {
   adressWechsel?: number
 }
 
+// Zweitrangige Schaltfläche: leitet auf eine kostenlose Anfrage, ohne mit den
+// Eingaben zu konkurrieren.
+const zweitKnopf =
+  'w-full rounded-lg border border-accent/50 bg-surface px-4 py-2.5 text-left text-base font-medium text-accent transition-colors hover:bg-accent/10'
+
 export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Props) {
+  // Die beiden kostenlosen Anfragen laufen in einem eigenen Fenster.
   const [ma25Offen, setMa25Offen] = useState(false)
-  const [rueckzahlungUnbekannt, setRueckzahlungUnbekannt] = useState(false)
+  const [ma25Gesendet, setMa25Gesendet] = useState(false)
+  const [rueckzahlungOffen, setRueckzahlungOffen] = useState(false)
+  const [rueckzahlungGesendet, setRueckzahlungGesendet] = useState(false)
   const [anschriftFehler, setAnschriftFehler] = useState(false)
   // Keine Vorauswahl: Das Baujahr gilt erst als gesetzt, wenn es gewählt
   // (oder ausnahmsweise automatisch erkannt) wurde.
@@ -327,7 +336,6 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
               label="Baubewilligung des Gebäudes"
               id="baubewilligung"
               value={baujahrOffen ? '' : value.baubewilligungGebaeude}
-              disabled={ma25Offen}
               onChange={(e) => {
                 setBaujahrOffen(false)
                 const b = e.target.value as MietobjektInput['baubewilligungGebaeude']
@@ -413,22 +421,11 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
             )}
 
             {/* MA25-Anfrage: Baujahr (und bei Wohnungen auch die Förderung) unbekannt */}
-            <div>
-              <Checkbox
-                checked={ma25Offen}
-                onChange={setMa25Offen}
-                label={
-                  zeigeFoerderung(value.objektart)
-                    ? 'Baujahr und öffentliche Förderung unbekannt? Kostenlos bei der MA 25 anfragen'
-                    : 'Baujahr unbekannt? Kostenlos bei der MA 25 anfragen'
-                }
-              />
-              {ma25Offen && (
-                <div className="mt-6">
-                  <Ma25Anfrage anschrift={value.anschrift} />
-                </div>
-              )}
-            </div>
+            <button type="button" onClick={() => setMa25Offen(true)} className={zweitKnopf}>
+              {zeigeFoerderung(value.objektart)
+                ? 'Baujahr und öffentliche Förderung unbekannt? Kostenlos bei der MA 25 anfragen'
+                : 'Baujahr unbekannt? Kostenlos bei der MA 25 anfragen'}
+            </button>
           </div>
         </Section>
       )}
@@ -449,7 +446,6 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
                   id="foerderung"
                   hint='Datensätze laut Unterlage „Förderungen".'
                   value={value.foerderungProgramm}
-                  disabled={ma25Offen}
                   onChange={(e) => set('foerderungProgramm', e.target.value as MietobjektInput['foerderungProgramm'])}
                 >
                   {foerderungenFuer(value.baubewilligungGebaeude).map((k) => (
@@ -460,12 +456,11 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
                 </SelectField>
 
                 {/* Stand der Rückzahlung: Dropdown sofort sichtbar (wenn relevant) */}
-                {statusRelevant(value.foerderungProgramm) && !ma25Offen && (
+                {statusRelevant(value.foerderungProgramm) && (
                   <SelectField
                     label="Stand der Rückzahlung"
                     id="tilgung"
                     value={value.tilgungsstatus}
-                    disabled={rueckzahlungUnbekannt}
                     onChange={(e) => set('tilgungsstatus', e.target.value as MietobjektInput['tilgungsstatus'])}
                   >
                     {(Object.keys(TILGUNGSSTATUS_LABEL) as (keyof typeof TILGUNGSSTATUS_LABEL)[]).map((k) => (
@@ -483,7 +478,7 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
             <div className="space-y-4">
               {/* Nur bei laufender Förderung 1968/1984 ändert die
                   Eigentumswohnung das Ergebnis – sonst ausgeblendet. */}
-              {!baujahrOffen && value.baubewilligungGebaeude !== 'vor_1945' && eigentumswohnungRelevant && !ma25Offen && (
+              {!baujahrOffen && value.baubewilligungGebaeude !== 'vor_1945' && eigentumswohnungRelevant && (
                 <Checkbox
                   checked={value.eigentumswohnung}
                   onChange={(v) => set('eigentumswohnung', v)}
@@ -495,28 +490,12 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
                   WWG 1948 → Bundeswohnbaufonds, Landesförderung → MA 50. */}
               {value.baubewilligungGebaeude !== 'vor_1945' &&
                 statusRelevant(value.foerderungProgramm) &&
-                !ma25Offen && (
-                  <div>
-                    <Checkbox
-                      checked={rueckzahlungUnbekannt}
-                      onChange={setRueckzahlungUnbekannt}
-                      label={
-                        value.foerderungProgramm === 'wwg1948'
-                          ? 'Stand der Rückzahlung unbekannt? Beim Bundeswohnbaufonds anfragen'
-                          : 'Stand der Rückzahlung unbekannt? Bei der MA 50 anfragen'
-                      }
-                    />
-                    {rueckzahlungUnbekannt &&
-                      (value.foerderungProgramm === 'wwg1948' ? (
-                        <div className="mt-6">
-                          <WwafHinweis anschrift={value.anschrift} />
-                        </div>
-                      ) : (
-                        <div className="mt-6">
-                          <RueckzahlungAnfrage anschrift={value.anschrift} programm={value.foerderungProgramm} />
-                        </div>
-                      ))}
-                  </div>
+                (
+                  <button type="button" onClick={() => setRueckzahlungOffen(true)} className={zweitKnopf}>
+                    {value.foerderungProgramm === 'wwg1948'
+                      ? 'Stand der Rückzahlung unbekannt? Beim Bundeswohnbaufonds anfragen'
+                      : 'Stand der Rückzahlung unbekannt? Bei der MA 50 anfragen'}
+                  </button>
                 )}
             </div>
           </>
@@ -524,6 +503,44 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
       )}
       </div>
 
+
+      {/* Die beiden kostenlosen Anfragen – jede in ihrem eigenen Fenster */}
+      <AnfrageDialog
+        titel="Anfrage an die MA 25"
+        offen={ma25Offen}
+        gesendet={ma25Gesendet}
+        hinweis="bei der MA 25 bitte die ausgewählten Dateien dort noch anhängen."
+        onSchliessen={() => {
+          setMa25Offen(false)
+          setMa25Gesendet(false)
+        }}
+      >
+        <Ma25Anfrage anschrift={value.anschrift} onGesendet={() => setMa25Gesendet(true)} />
+      </AnfrageDialog>
+
+      <AnfrageDialog
+        titel={
+          value.foerderungProgramm === 'wwg1948'
+            ? 'Anfrage an den Bundeswohnbaufonds'
+            : 'Anfrage an die MA 50'
+        }
+        offen={rueckzahlungOffen}
+        gesendet={rueckzahlungGesendet}
+        onSchliessen={() => {
+          setRueckzahlungOffen(false)
+          setRueckzahlungGesendet(false)
+        }}
+      >
+        {value.foerderungProgramm === 'wwg1948' ? (
+          <WwafHinweis anschrift={value.anschrift} onGesendet={() => setRueckzahlungGesendet(true)} />
+        ) : (
+          <RueckzahlungAnfrage
+            anschrift={value.anschrift}
+            programm={value.foerderungProgramm}
+            onGesendet={() => setRueckzahlungGesendet(true)}
+          />
+        )}
+      </AnfrageDialog>
     </div>
   )
 }

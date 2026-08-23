@@ -18,7 +18,7 @@ function standardText(anschrift: string): string {
   )
 }
 
-export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
+export function Ma25Anfrage({ anschrift, onGesendet }: { anschrift: string; onGesendet?: () => void }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [text, setText] = useState(() => standardText(anschrift))
@@ -27,7 +27,6 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
   const [nameFehler, setNameFehler] = useState<string | undefined>()
   const [emailFehler, setEmailFehler] = useState<string | undefined>()
   const [fehler, setFehler] = useState<string | null>(null)
-  const [gesendet, setGesendet] = useState(false)
 
   const addDateien = (list: FileList | null) => {
     if (!list) return
@@ -61,14 +60,14 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
     const body = `${text}\n\n---\nName: ${name}\nE-Mail: ${email}`
     const href = `mailto:${MA25_EMAIL}?subject=${encodeURIComponent('Anfrage: Jahr der Baubewilligung')}&body=${encodeURIComponent(body)}`
     window.location.href = href
-    setGesendet(true)
+    onGesendet?.()
   }
 
   const btnUpload =
     'inline-flex cursor-pointer items-center gap-2 rounded-lg border border-accent/50 bg-surface px-3 py-2 text-base font-medium text-accent hover:bg-accent/10'
 
   return (
-    <div className="space-y-10 rounded-xl border border-accent/30 bg-surface p-6 shadow-sm sm:p-8">
+    <div className="space-y-10">
       <p className="text-sm font-semibold text-accent">Diese Anfrage ist kostenlos</p>
 
       <p className="text-base text-ink-soft">
@@ -146,13 +145,6 @@ export function Ma25Anfrage({ anschrift }: { anschrift: string }) {
       >
         Anfrage senden
       </button>
-
-      {gesendet && (
-        <p className="text-base text-ink-soft">
-          Die E-Mail an die MA 25 wurde vorbereitet und im E-Mail-Programm geöffnet. Bitte hänge die ausgewählten
-          Dateien dort noch an und schick sie ab.
-        </p>
-      )}
     </div>
   )
 }

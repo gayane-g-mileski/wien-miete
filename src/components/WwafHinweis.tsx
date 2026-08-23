@@ -41,7 +41,7 @@ const FAELLE = [
   },
 ]
 
-export function WwafHinweis({ anschrift }: { anschrift: string }) {
+export function WwafHinweis({ anschrift, onGesendet }: { anschrift: string; onGesendet?: () => void }) {
   const [text, setText] = useState(() => anfrageText(anschrift))
   const [kopiert, setKopiert] = useState(false)
 
@@ -51,6 +51,7 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
     // Ohne Empfänger: Das E-Mail-Programm öffnet den fertigen Text, die
     // Adresse trägt die nutzende Person nach aktuellem Stand selbst ein.
     window.location.href = `mailto:?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(text)}`
+    onGesendet?.()
   }
 
   const kopieren = async () => {
@@ -64,7 +65,7 @@ export function WwafHinweis({ anschrift }: { anschrift: string }) {
   }
 
   return (
-    <div className="space-y-10 rounded-xl border border-accent/30 bg-surface p-6 text-base text-ink-soft shadow-sm sm:p-8">
+    <div className="space-y-10 text-base text-ink-soft">
       <p className="text-sm font-semibold text-accent">Diese Anfrage ist kostenlos</p>
 
       <div>

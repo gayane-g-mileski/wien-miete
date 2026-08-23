@@ -52,16 +52,25 @@ const FAELLE = [
   },
 ]
 
-export function RueckzahlungAnfrage({ anschrift, programm }: { anschrift: string; programm: FoerderungProgramm }) {
+export function RueckzahlungAnfrage({
+  anschrift,
+  programm,
+  onGesendet,
+}: {
+  anschrift: string
+  programm: FoerderungProgramm
+  onGesendet?: () => void
+}) {
   const [text, setText] = useState(() => anfrageText(anschrift, programm))
 
   const senden = () => {
     const href = `mailto:${MA50_EMAIL}?subject=${encodeURIComponent('Anfrage: Stand der Rückzahlung des Förderungsdarlehens')}&body=${encodeURIComponent(text)}`
     window.location.href = href
+    onGesendet?.()
   }
 
   return (
-    <div className="space-y-10 rounded-xl border border-accent/30 bg-surface p-6 text-base text-ink-soft shadow-sm sm:p-8">
+    <div className="space-y-10 text-base text-ink-soft">
       <p className="text-sm font-semibold text-accent">Diese Anfrage ist kostenlos</p>
 
       <div>
