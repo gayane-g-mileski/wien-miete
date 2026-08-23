@@ -176,7 +176,9 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
         </div>
       </section>
 
-      {/* --- Baubewilligung des Gebäudes (gehört zum Objekt, nicht zur Förderung) --- */}
+      {/* --- Gebäude und, sobald das Baujahr feststeht, die Förderung darunter:
+             beide in derselben Spalte des Rasters --- */}
+      <div className="space-y-9">
       {zeigeBaujahr(value.objektart) && (
         <Section title="Gebäude">
           <div>
@@ -397,6 +399,7 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
           </>
         </Section>
       )}
+      </div>
 
       {/* --- Ausstattung, Zustand & Zu-/Abschläge – nur wenn ein Richtwert
              (bzw. die Kategorie) die Miethöhe bestimmt --- */}
