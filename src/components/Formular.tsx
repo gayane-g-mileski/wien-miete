@@ -16,7 +16,7 @@ import { FOERDERUNG_PROGRAMM_LABEL, TILGUNGSSTATUS_LABEL, foerderungenFuer, stat
 import { BEZIRKE, MERKMAL_GRUPPEN, MERKMAL_KATALOG, bezirkAusAnschrift } from '../lib/pricingData'
 import { bauperiodenLink } from '../lib/geo'
 import type { BaujahrInfo } from '../lib/geo'
-import { Checkbox, DateField, NumberField, Section, SelectField } from './ui'
+import { Checkbox, Collapsible, DateField, NumberField, Section, SelectField } from './ui'
 import { AnschriftFeld } from './AnschriftFeld'
 import { Ma25Anfrage } from './Ma25Anfrage'
 import { WwafHinweis } from './WwafHinweis'
@@ -463,9 +463,13 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
                 label="Zentral- oder Etagenheizung"
               />
 
-              {MERKMAL_GRUPPEN.map((gruppe) => (
-                <div key={gruppe} className="space-y-2">
-                  <p className="text-sm font-semibold text-ink-faint">{gruppe}</p>
+              {MERKMAL_GRUPPEN.map((gruppe) => {
+                // Gewählte Merkmale der Gruppe: zugeklappt bleiben sie so sichtbar,
+                // und eine Gruppe mit Auswahl steht beim Laden offen.
+                const gewaehlt = MERKMAL_KATALOG.filter((m) => m.gruppe === gruppe && value.merkmale[m.key]).length
+                return (
+                <div key={gruppe}>
+                  <Collapsible title={gewaehlt > 0 ? `${gruppe} (${gewaehlt})` : gruppe} defaultOpen={gewaehlt > 0}>
                   <div className="flex flex-col gap-2">
                     {MERKMAL_KATALOG.filter((m) => m.gruppe === gruppe).map((m) => (
                       <div key={m.key}>
@@ -487,8 +491,10 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
                       </div>
                     ))}
                   </div>
+                  </Collapsible>
                 </div>
-              ))}
+                )
+              })}
             </>
           )}
         </Section>
