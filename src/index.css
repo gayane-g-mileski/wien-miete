@@ -107,6 +107,22 @@ input[type='number'] {
   appearance: textfield;
 }
 
+/* Zeiger: Alles, was schaltet, zeigt die Hand. Browser tun das bei <button>,
+   <select> und Ankreuzfeldern von sich aus nicht – Links dagegen schon. */
+button:not(:disabled),
+summary,
+select:not(:disabled),
+input[type='checkbox']:not(:disabled),
+input[type='radio']:not(:disabled),
+[role='button']:not([aria-disabled='true']) {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled {
+  cursor: default;
+}
+
 /* Eigener Select-Chevron (24px, 12px Abstand rechts), passt sich dem Thema an. */
 .select-chevron {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232f6f68' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
