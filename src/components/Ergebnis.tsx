@@ -236,7 +236,7 @@ export function Preisbandbreite({ ergebnis }: { ergebnis: MrgErgebnis }) {
         {/* Label oben, Wert darunter – auf jeder Breite gleich */}
         <div className="flex flex-col gap-0.5">
           <span className="text-sm text-ink-faint">Monatlich pro m², netto</span>
-          <Preiswert min={ergebnis.preis.proM2Min} max={ergebnis.preis.proM2Max} color="text-coffee" />
+          <Preiswert min={ergebnis.preis.proM2Min} max={ergebnis.preis.proM2Max} color="text-wert" />
         </div>
         <div className="flex flex-col gap-0.5">
           <span className="text-sm text-ink-faint">
@@ -272,7 +272,7 @@ export function Preisbandbreite({ ergebnis }: { ergebnis: MrgErgebnis }) {
                 <div key={si.name}>
                   <div className="flex flex-wrap items-baseline justify-between gap-x-4">
                     <span className="text-sm font-semibold text-ink">{si.titel}</span>
-                    <span className="tabular-nums text-base font-semibold text-coffee">
+                    <span className="tabular-nums text-base font-semibold text-wert">
                       {formatEuro(si.proM2Min)} — {formatEuro(si.proM2Max)} €/m²
                     </span>
                   </div>

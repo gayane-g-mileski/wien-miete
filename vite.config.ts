@@ -30,8 +30,8 @@ export default defineConfig(() => {
           description:
             'Automatisierte Ersteinschätzung von Mietzinsart, MRG-Anwendungsbereich und Preisbandbreite für Wiener Mietobjekte.',
           lang: 'de-AT',
-          theme_color: '#607456',
-          background_color: '#f5f1ea',
+          theme_color: '#006c63',
+          background_color: '#ffffff',
           display: 'standalone',
           start_url: basis,
           scope: basis,

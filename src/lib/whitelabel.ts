@@ -76,7 +76,7 @@ export function whiteLabelAnwenden(wl: WhiteLabel): void {
   if (wl.farbe) {
     wurzel.style.setProperty('--color-accent', wl.farbe)
     wurzel.style.setProperty('--color-accent-strong', dunkler(wl.farbe))
-    wurzel.style.setProperty('--color-on-accent', hell(wl.farbe) ? '#1b1611' : '#ffffff')
+    wurzel.style.setProperty('--color-on-accent', hell(wl.farbe) ? '#04211f' : '#ffffff')
   }
 }
 

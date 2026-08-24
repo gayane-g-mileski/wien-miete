@@ -81,7 +81,7 @@ export function Rendite() {
       <div className="grid grid-cols-1 gap-4 @sm:grid-cols-2 @lg:grid-cols-3">
         {[
           { titel: 'Bruttorendite', wert: prozent(r.bruttorendite), farbe: 'text-ink' },
-          { titel: 'Nettorendite vor Steuer', wert: prozent(r.nettorendite), farbe: 'text-coffee' },
+          { titel: 'Nettorendite vor Steuer', wert: prozent(r.nettorendite), farbe: 'text-wert' },
           { titel: 'Rendite nach Steuer', wert: prozent(r.renditeNachSteuer), farbe: 'text-accent' },
         ].map((k) => (
           <div key={k.titel} className="rounded-xl bg-surface-2 px-4 py-3">

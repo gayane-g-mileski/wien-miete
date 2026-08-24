@@ -315,7 +315,7 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
         <Section title="Gebäude">
           <div>
             {baujahrOffen && (
-              <p className="mb-1 px-1 text-[12px] font-medium text-coffee">
+              <p className="mb-1 px-1 text-[12px] font-medium text-wert">
                 {baujahrQuelle != null
                   ? 'Bitte Baubewilligung auswählen.'
                   : 'Baubewilligungsjahr nicht automatisch erkannt, bitte auswählen.'}

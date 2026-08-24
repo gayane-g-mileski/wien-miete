@@ -129,7 +129,7 @@ export function Wertsicherung() {
 
       <div className="rounded-xl bg-surface-2 px-4 py-4">
         <p className="text-sm text-ink-faint">Zulässiger neuer Hauptmietzins</p>
-        <p className="mt-1 text-2xl font-bold tabular-nums text-coffee">{euro(ergebnis.neu)} €</p>
+        <p className="mt-1 text-2xl font-bold tabular-nums text-wert">{euro(ergebnis.neu)} €</p>
         <p className="mt-1 text-sm text-ink-soft">
           {ergebnis.schwelleOffen
             ? 'Keine Erhöhung möglich – siehe Rechnung unten.'
