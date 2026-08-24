@@ -14,7 +14,7 @@ export interface Abschnitt {
   tabelle?: { kopf: string[]; zeilen: string[][] }
 }
 
-export interface RatgeberSeite {
+export interface GlossarSeite {
   pfad: string
   titel: string
   beschreibung: string
@@ -26,12 +26,12 @@ export interface RatgeberSeite {
   verwandt: string[]
 }
 
-export const RATGEBER: RatgeberSeite[] = daten.seiten
+export const GLOSSAR: GlossarSeite[] = daten.seiten
 
 export type Route =
   | { art: 'start' }
-  | { art: 'ratgeber'; seite: RatgeberSeite }
-  | { art: 'ratgeberIndex' }
+  | { art: 'glossar'; seite: GlossarSeite }
+  | { art: 'glossarIndex' }
   | { art: 'api' }
   | { art: 'widerruf' }
 
@@ -45,10 +45,10 @@ export function routeFuer(pfad: string = location.pathname): Route {
   const teil = pfadTeil(pfad)
   if (teil === '') return { art: 'start' }
   if (teil === 'api') return { art: 'api' }
-  if (teil === 'ratgeber') return { art: 'ratgeberIndex' }
+  if (teil === 'glossar') return { art: 'glossarIndex' }
   if (teil === 'widerruf') return { art: 'widerruf' }
-  const seite = RATGEBER.find((s) => s.pfad === teil)
-  if (seite) return { art: 'ratgeber', seite }
+  const seite = GLOSSAR.find((s) => s.pfad === teil)
+  if (seite) return { art: 'glossar', seite }
   return { art: 'start' }
 }
 
@@ -87,14 +87,14 @@ function anwendung() {
   }
 }
 
-function brotkrumen(seite?: RatgeberSeite) {
+function brotkrumen(seite?: GlossarSeite) {
   const glieder = [{ '@type': 'ListItem', position: 1, name: 'Start', item: `${HERKUNFT}${BASIS}` }]
   if (seite) {
     glieder.push({
       '@type': 'ListItem',
       position: 2,
-      name: 'Ratgeber',
-      item: `${HERKUNFT}${BASIS}ratgeber/`,
+      name: 'Glossar',
+      item: `${HERKUNFT}${BASIS}glossar/`,
     })
     glieder.push({
       '@type': 'ListItem',
@@ -119,7 +119,7 @@ function faqLd(faq: { frage: string; antwort: string }[]) {
 
 /** Startseiten-FAQ kommt aus derselben Quelle wie die Oberfläche. */
 export function metaFuer(route: Route, startFaq: { frage: string; antwort: string }[] = []): Meta {
-  if (route.art === 'ratgeber') {
+  if (route.art === 'glossar') {
     const s = route.seite
     return {
       pfad: `${s.pfad}/`,
@@ -159,18 +159,18 @@ export function metaFuer(route: Route, startFaq: { frage: string; antwort: strin
       nichtIndexieren: true,
     }
   }
-  if (route.art === 'ratgeberIndex') {
+  if (route.art === 'glossarIndex') {
     return {
-      pfad: 'ratgeber/',
-      titel: `Ratgeber Mietrecht Wien: Richtwert, Lagezuschlag, Betriebskosten | ${MARKE}`,
+      pfad: 'glossar/',
+      titel: `Glossar Mietrecht Wien: Richtwert, Lagezuschlag, Betriebskosten | ${MARKE}`,
       beschreibung:
-        'Für die Praxis der Hausverwaltung: Richtwertmietzins, Lagezuschlag, angemessener Mietzins, Befristung, Betriebskosten nach § 21 MRG, Wertsicherung und die Rendite von Vorsorgewohnungen.',
+        'Begriffe für die Praxis der Hausverwaltung: Richtwertmietzins, Lagezuschlag, angemessener Mietzins, Befristung, Betriebskosten nach § 21 MRG, Wertsicherung und die Rendite von Vorsorgewohnungen.',
       ld: [
         ORGANISATION,
         brotkrumen(),
         {
           '@type': 'ItemList',
-          itemListElement: RATGEBER.map((s, i) => ({
+          itemListElement: GLOSSAR.map((s, i) => ({
             '@type': 'ListItem',
             position: i + 1,
             name: s.titel,

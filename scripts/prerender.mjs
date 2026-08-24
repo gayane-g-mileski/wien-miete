@@ -30,7 +30,7 @@ const API_SICHTBAR = false
 
 const ROUTEN = [
   { pfad: '', prioritaet: '1.0', aenderung: 'weekly' },
-  { pfad: 'ratgeber/', prioritaet: '0.7', aenderung: 'monthly' },
+  { pfad: 'glossar/', prioritaet: '0.7', aenderung: 'monthly' },
   ...(API_SICHTBAR ? [{ pfad: 'api/', prioritaet: '0.8', aenderung: 'monthly' }] : []),
   ...seiten.map((s) => ({ pfad: `${s.pfad}/`, prioritaet: '0.9', aenderung: 'monthly' })),
   // Rechtstext: als Datei nötig, aber nichts für die Sitemap.
@@ -115,6 +115,27 @@ server.close()
 // GitHub Pages liefert bei unbekannten Adressen 404.html aus. Wir legen dort
 // die Startseite ab, damit tiefe Links nicht ins Leere laufen.
 await writeFile(join(DIST, '404.html'), await readFile(join(DIST, 'index.html'), 'utf8'), 'utf8')
+
+// Der Abschnitt hieß früher „Ratgeber“. Damit alte Verweise nicht auf der
+// Startseite landen, bleibt unter der alten Adresse eine Weiterleitung stehen –
+// ohne Eintrag in der Sitemap und für Suchmaschinen als Umzug gekennzeichnet.
+const umzug = `<!doctype html>
+<html lang="de-AT">
+  <head>
+    <meta charset="utf-8" />
+    <title>Umgezogen: Glossar</title>
+    <link rel="canonical" href="${HERKUNFT}${BASIS}glossar/" />
+    <meta name="robots" content="noindex, follow" />
+    <meta http-equiv="refresh" content="0; url=${BASIS}glossar/" />
+  </head>
+  <body>
+    <p>Der Ratgeber heißt jetzt Glossar: <a href="${BASIS}glossar/">zum Glossar</a>.</p>
+  </body>
+</html>
+`
+await mkdir(join(DIST, 'ratgeber'), { recursive: true })
+await writeFile(join(DIST, 'ratgeber', 'index.html'), umzug, 'utf8')
+console.log('Weiterleitung /ratgeber/ → /glossar/ geschrieben')
 
 // Sitemap und robots.txt aus derselben Liste erzeugen.
 const heute = new Date().toISOString().slice(0, 10)

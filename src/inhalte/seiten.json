@@ -1,5 +1,5 @@
 {
-  "hinweis": "Inhalte der Ratgeberseiten. Quelle für die Oberfläche (src/lib/seo.ts) und für das Pre-Rendering (scripts/prerender.mjs). Sprache bewusst auf automatisierte Ersteinschätzung gehalten – nie Gutachten, nie Rechtsauskunft.",
+  "hinweis": "Inhalte der Glossarseiten. Quelle für die Oberfläche (src/lib/seo.ts) und für das Pre-Rendering (scripts/prerender.mjs). Sprache bewusst auf automatisierte Ersteinschätzung gehalten – nie Gutachten, nie Rechtsauskunft.",
   "seiten": [
     {
       "pfad": "richtwert-wien",

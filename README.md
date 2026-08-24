@@ -28,7 +28,7 @@ Arbeiterkammer, Rechtsanwält:innen oder Sachverständige zuständig.
 | Ordner | Inhalt |
 |---|---|
 | `src/` | Oberfläche und Rechenlogik (React, TypeScript, Tailwind) |
-| `src/inhalte/seiten.json` | Inhalte der Ratgeberseiten (Quelle für Oberfläche und Pre-Rendering) |
+| `src/inhalte/seiten.json` | Inhalte der Glossarseiten (Quelle für Oberfläche und Pre-Rendering) |
 | `server/` | Cloudflare Worker: Konto, Zahlung (Stripe), öffentliche Schnittstelle |
 | `scripts/prerender.mjs` | erzeugt fertiges HTML je Seite, Sitemap, robots.txt, Vorschaubild |
 | `public/` | Rechtstexte (Impressum, Datenschutz, AGB, Rücktritt, Auftragsverarbeitung) |

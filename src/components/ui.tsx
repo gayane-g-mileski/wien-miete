@@ -228,7 +228,7 @@ export function Collapsible({
   defaultOpen?: boolean
   /**
    * Inhalt auch im zugeklappten Zustand im Dokument lassen – für Texte, die
-   * Suchmaschinen lesen sollen (Ratgeberseiten).
+   * Suchmaschinen lesen sollen (Glossarseiten).
    */
   immerImDom?: boolean
 }) {

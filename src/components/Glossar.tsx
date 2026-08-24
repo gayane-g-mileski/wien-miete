@@ -1,16 +1,16 @@
 import { Collapsible } from './ui'
-import { RATGEBER, href, type RatgeberSeite } from '../lib/seo'
+import { GLOSSAR, href, type GlossarSeite } from '../lib/seo'
 
-// Ratgeberseiten: eigener Pfad, eigener Titel, eigene strukturierte Daten.
+// Glossarseiten: eigener Pfad, eigener Titel, eigene strukturierte Daten.
 // Der Inhalt kommt aus src/inhalte/seiten.json und wird beim Pre-Rendering in
 // fertiges HTML geschrieben, damit Suchmaschinen ihn ohne JavaScript lesen.
 
 const linkStil = 'text-accent underline hover:text-accent-strong'
 
-export function Ratgeber({ seite }: { seite: RatgeberSeite }) {
+export function Glossar({ seite }: { seite: GlossarSeite }) {
   const verwandt = seite.verwandt
-    .map((p) => RATGEBER.find((s) => s.pfad === p))
-    .filter((s): s is RatgeberSeite => Boolean(s))
+    .map((p) => GLOSSAR.find((s) => s.pfad === p))
+    .filter((s): s is GlossarSeite => Boolean(s))
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
@@ -19,8 +19,8 @@ export function Ratgeber({ seite }: { seite: RatgeberSeite }) {
           Start
         </a>
         <span className="px-2">/</span>
-        <a className={linkStil} href={href('ratgeber/')}>
-          Ratgeber
+        <a className={linkStil} href={href('glossar/')}>
+          Glossar
         </a>
         <span className="px-2">/</span>
         <span>{seite.kicker}</span>
@@ -124,7 +124,7 @@ export function Ratgeber({ seite }: { seite: RatgeberSeite }) {
   )
 }
 
-export function RatgeberIndex() {
+export function GlossarIndex() {
   return (
     <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
       <nav aria-label="Brotkrumen" className="text-sm text-ink-faint">
@@ -132,19 +132,19 @@ export function RatgeberIndex() {
           Start
         </a>
         <span className="px-2">/</span>
-        <span>Ratgeber</span>
+        <span>Glossar</span>
       </nav>
 
       <h1 className="mt-8 max-w-3xl text-[2.2rem] font-semibold leading-tight tracking-tight text-ink sm:text-[2.6rem]">
-        Ratgeber: Mietrecht und Mietzins in Wien
+        Glossar: Mietrecht und Mietzins in Wien
       </h1>
       <p className="mt-5 max-w-3xl text-lg leading-relaxed text-ink-soft">
-        Die wichtigsten Fragen rund um Richtwert, Lagezuschlag, Betriebskosten und Wertsicherung – kurz erklärt, mit
+        Die wichtigsten Begriffe rund um Richtwert, Lagezuschlag, Betriebskosten und Wertsicherung – kurz erklärt, mit
         Fundstellen und einem Rechner für den eigenen Fall.
       </p>
 
       <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
-        {RATGEBER.map((s) => (
+        {GLOSSAR.map((s) => (
           <a
             key={s.pfad}
             href={href(`${s.pfad}/`)}

@@ -12,7 +12,7 @@ import { Preise } from './components/Preise'
 import { Konto } from './components/Konto'
 import { Kaufdialog } from './components/Kaufdialog'
 import { ThemaSchalter } from './components/ThemaSchalter'
-import { Ratgeber, RatgeberIndex } from './components/Ratgeber'
+import { Glossar, GlossarIndex } from './components/Glossar'
 import { ApiSeite } from './components/ApiSeite'
 import { Widerruf } from './components/Widerruf'
 import { kontoOeffnen } from './lib/kontoEvent'
@@ -20,7 +20,7 @@ import { evaluateMrg } from './lib/mrgEngine'
 import { leereMerkmale } from './lib/pricingData'
 import { ladeVerlauf, speichereVerlauf, type VerlaufEintrag } from './lib/verlauf'
 import { useRoute } from './lib/router'
-import { BASIS, MARKE, RATGEBER, href } from './lib/seo'
+import { BASIS, MARKE, GLOSSAR, href } from './lib/seo'
 import { analytikStarten, ereignis, seitenaufruf } from './lib/analytics'
 import { API_SICHTBAR } from './lib/flags'
 import { anmeldungAusUrlUebernehmen, useKonto } from './lib/konto'
@@ -95,8 +95,8 @@ function Navigation({ imHero }: { imHero: boolean }) {
         <a className="hidden transition-colors hover:text-accent sm:inline" href={`${href('')}#rechner`}>
           Rechner
         </a>
-        <a className="hidden transition-colors hover:text-accent sm:inline" href={href('ratgeber/')}>
-          Ratgeber
+        <a className="hidden transition-colors hover:text-accent sm:inline" href={href('glossar/')}>
+          Glossar
         </a>
         <a className="hidden transition-colors hover:text-accent sm:inline" href={`${href('')}#profis`}>
           Für Profis
@@ -251,7 +251,7 @@ function Startseite() {
   )
 }
 
-function Fusszeile({ ohneRatgeberliste }: { ohneRatgeberliste: boolean }) {
+function Fusszeile({ ohneGlossarliste }: { ohneGlossarliste: boolean }) {
   return (
     <footer id="quellen" className="scroll-mt-4 border-t border-line bg-surface-2">
       <div className="mx-auto max-w-6xl space-y-3 px-4 py-8 text-xs leading-relaxed text-ink-soft sm:px-6">
@@ -266,12 +266,12 @@ function Fusszeile({ ohneRatgeberliste }: { ohneRatgeberliste: boolean }) {
         </div>
 
         {/* 36px Abstand zum Disclaimer (24px Padding + 12px space-y) */}
-        {/* Auf der Ratgeberübersicht stehen dieselben Verweise schon im Inhalt. */}
-        {!ohneRatgeberliste && (
+        {/* Auf der Glossarübersicht stehen dieselben Verweise schon im Inhalt. */}
+        {!ohneGlossarliste && (
           <div className="pt-6">
-            <p className="mb-1 font-semibold text-ink">Ratgeber</p>
+            <p className="mb-1 font-semibold text-ink">Glossar</p>
             <p className="flex flex-wrap gap-x-4 gap-y-1">
-              {RATGEBER.map((s) => (
+              {GLOSSAR.map((s) => (
                 <a key={s.pfad} className={quelleLink} href={href(`${s.pfad}/`)}>
                   {s.kicker}
                 </a>
@@ -344,11 +344,11 @@ function App() {
     <div className="min-h-screen bg-paper text-ink">
       {route.art !== 'start' && <Navigation imHero={false} />}
       {route.art === 'start' && <Startseite />}
-      {route.art === 'ratgeber' && <Ratgeber seite={route.seite} />}
-      {route.art === 'ratgeberIndex' && <RatgeberIndex />}
+      {route.art === 'glossar' && <Glossar seite={route.seite} />}
+      {route.art === 'glossarIndex' && <GlossarIndex />}
       {route.art === 'api' && <ApiSeite />}
       {route.art === 'widerruf' && <Widerruf />}
-      <Fusszeile ohneRatgeberliste={route.art === 'ratgeberIndex' || route.art === 'start'} />
+      <Fusszeile ohneGlossarliste={route.art === 'glossarIndex' || route.art === 'start'} />
       <Konto />
       <Kaufdialog />
     </div>

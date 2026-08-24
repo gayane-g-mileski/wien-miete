@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { href, metaAnwenden, metaFuer, routeFuer, type Route } from './seo'
 import { FAQ } from './faq'
 
-// Sehr kleiner Router für echte Pfade (nicht Hash), damit jede Ratgeberseite
+// Sehr kleiner Router für echte Pfade (nicht Hash), damit jede Glossarseite
 // eine eigene Adresse, einen eigenen Titel und eigene strukturierte Daten hat.
 // Ausgeliefert werden die Seiten als fertiges HTML (npm run prerender);
 // im Browser übernimmt danach dieselbe Anwendung.

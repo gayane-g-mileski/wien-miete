@@ -44,10 +44,12 @@ export default defineConfig(() => {
         workbox: {
           globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
           // Adressen, die es beim Build noch nicht als Datei gibt (die
-          // vorgerenderten Ratgeberseiten entstehen erst danach), fallen auf
+          // vorgerenderten Glossarseiten entstehen erst danach), fallen auf
           // die Startseite zurück – die Anwendung zeigt dann dieselbe Seite.
           navigateFallback: `${basis}index.html`,
-          navigateFallbackDenylist: [/embed\.html/, /\.(?:xml|txt)$/],
+          // Die alte Adresse des Glossars ist eine Weiterleitung und darf nicht
+          // auf die Startseite fallen – sie geht ans Netz.
+          navigateFallbackDenylist: [/embed\.html/, /\.(?:xml|txt)$/, /\/ratgeber\//],
         },
       }),
     ],
