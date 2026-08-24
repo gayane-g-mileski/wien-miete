@@ -19,6 +19,7 @@ import type { BaujahrInfo } from '../lib/geo'
 import { Checkbox, Collapsible, DateField, NumberField, Section, SelectField } from './ui'
 import { AnschriftFeld } from './AnschriftFeld'
 import { AnfrageDialog } from './AnfrageDialog'
+import { IconGebaeude, IconPost, IconWerkzeug, IconWohnung } from './Icons'
 import { Ma25Anfrage } from './Ma25Anfrage'
 import { WwafHinweis } from './WwafHinweis'
 import { RueckzahlungAnfrage } from './RueckzahlungAnfrage'
@@ -36,7 +37,7 @@ interface Props {
 // Zweitrangige Schaltfläche: leitet auf eine kostenlose Anfrage, ohne mit den
 // Eingaben zu konkurrieren.
 const zweitKnopf =
-  'w-full rounded-lg border border-accent/50 bg-surface px-4 py-2.5 text-left text-base font-medium text-accent transition-colors hover:bg-accent/10'
+  'flex w-full items-center gap-2 rounded-lg border border-accent/50 bg-surface px-4 py-2.5 text-left text-base font-medium text-accent transition-colors hover:bg-accent/10'
 
 export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Props) {
   // Die beiden kostenlosen Anfragen laufen in einem eigenen Fenster.
@@ -93,7 +94,12 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
       <div className="space-y-9">
       {/* --- Mietobjekt / Angaben --- */}
       <section>
-        <h3 className="mb-5 px-1 text-sm font-semibold text-ink-faint">Mietgegenstand</h3>
+        <h3 className="mb-5 flex items-center gap-2 px-1 text-sm font-semibold text-ink-faint">
+          <span className="text-accent">
+            <IconWohnung />
+          </span>
+          Mietgegenstand
+        </h3>
         <div className="space-y-8 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6">
         <SelectField
           label="Art des Mietgegenstands"
@@ -195,7 +201,7 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
                Kategorie, Zustand oder Merkmale überhaupt heranziehen. Sonst
                steht dort, warum gerade nichts zu tun ist. --- */}
         <div className="border-t border-line pt-6">
-          <Collapsible title="Ausstattung, Zustand & Zu-/Abschläge">
+          <Collapsible title="Ausstattung, Zustand & Zu-/Abschläge" symbol={<IconWerkzeug />}>
             {!ausstattungWirkt ? (
               <p className="pt-2 text-sm leading-relaxed text-ink-soft">
                 {baujahrOffen
@@ -312,7 +318,7 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
              beide in derselben Spalte des Rasters --- */}
       <div className="space-y-9">
       {zeigeBaujahr(value.objektart) && (
-        <Section title="Gebäude">
+        <Section title="Gebäude" symbol={<IconGebaeude />}>
           <div>
             {baujahrOffen && (
               <p className="mb-1 px-1 text-[12px] font-medium text-wert">
@@ -424,6 +430,7 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
             <div className="space-y-2">
               <p className="px-1 text-sm text-ink-soft">Baubewilligungsjahr unbekannt?</p>
               <button type="button" onClick={() => setMa25Offen(true)} className={zweitKnopf}>
+                <IconPost className="h-5 w-5 shrink-0" />
                 Kostenlos bei der MA 25 anfragen
               </button>
             </div>
@@ -489,6 +496,7 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
                         : 'Öffentliche Förderung unbekannt?'}
                     </p>
                     <button type="button" onClick={() => setRueckzahlungOffen(true)} className={zweitKnopf}>
+                      <IconPost className="h-5 w-5 shrink-0" />
                       {value.foerderungProgramm === 'wwg1948'
                         ? 'Kostenlos beim Bundeswohnbaufonds anfragen'
                         : 'Kostenlos bei der MA 50 anfragen'}

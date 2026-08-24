@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { TextField } from './ui'
+import { IconKonto } from './Icons'
 import { aufKontoOeffnen } from '../lib/kontoEvent'
 import { kontaktVorbelegen } from '../lib/kontaktEvent'
 import { abmelden, kontoAktualisieren, magicLinkAnfordern, serverVorhanden, useKonto } from '../lib/konto'
@@ -219,8 +220,9 @@ export function Konto() {
             <button
               type="button"
               onClick={zurWarteliste}
-              className="w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong"
             >
+              <IconKonto />
               Registrieren / Anmelden
             </button>
             <p className="-mt-3 text-center text-[12px] text-ink-faint">
@@ -254,8 +256,9 @@ export function Konto() {
               type="button"
               onClick={() => void anmeldelinkSchicken()}
               disabled={laeuft}
-              className="w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong disabled:opacity-60"
             >
+              <IconKonto />
               {laeuft ? 'Einen Moment …' : 'Registrieren / Anmelden'}
             </button>
             <p className="-mt-3 text-center text-[12px] text-ink-faint">

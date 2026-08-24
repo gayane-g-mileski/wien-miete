@@ -21,6 +21,7 @@ import { leereMerkmale } from './lib/pricingData'
 import { ladeVerlauf, speichereVerlauf, type VerlaufEintrag } from './lib/verlauf'
 import { useRoute } from './lib/router'
 import { BASIS, MARKE, GLOSSAR, href } from './lib/seo'
+import { IconExtern, IconGlossar, IconHinweis, IconKonto } from './components/Icons'
 import { analytikStarten, ereignis, seitenaufruf } from './lib/analytics'
 import { API_SICHTBAR } from './lib/flags'
 import { anmeldungAusUrlUebernehmen, useKonto } from './lib/konto'
@@ -112,8 +113,9 @@ function Navigation({ imHero }: { imHero: boolean }) {
         <button
           type="button"
           onClick={() => kontoOeffnen(undefined, 'anmelden')}
-          className="rounded-lg border border-accent/50 px-3 py-1.5 text-sm font-semibold text-accent transition-colors hover:bg-accent/10"
+          className="flex items-center gap-1.5 rounded-lg border border-accent/50 px-3 py-1.5 text-sm font-semibold text-accent transition-colors hover:bg-accent/10"
         >
+          <IconKonto className="h-[18px] w-[18px]" />
           {konto ? 'Konto' : 'Anmelden'}
         </button>
         <SprachSchalter />
@@ -257,6 +259,7 @@ function Fusszeile({ ohneGlossarliste }: { ohneGlossarliste: boolean }) {
       <div className="mx-auto max-w-6xl space-y-3 px-4 py-8 text-xs leading-relaxed text-ink-soft sm:px-6">
         <div className="overflow-hidden rounded-xl border border-danger/30 bg-surface">
           <div className="bg-danger/10 p-4 text-sm leading-relaxed text-ink-soft">
+            <IconHinweis className="mr-1.5 inline h-5 w-5 shrink-0 -translate-y-0.5 text-danger" />
             <strong className="text-base font-bold text-danger">Kein Rechtsrat.</strong> Dieses Informationswerkzeug
             liefert eine automatisierte Ersteinschätzung auf Basis vereinfachter Regeln und hinterlegter
             Näherungswerte für Marktmiete und Lagezuschlag je Bezirk. Es ersetzt keine rechtliche oder
@@ -269,7 +272,10 @@ function Fusszeile({ ohneGlossarliste }: { ohneGlossarliste: boolean }) {
         {/* Auf der Glossarübersicht stehen dieselben Verweise schon im Inhalt. */}
         {!ohneGlossarliste && (
           <div className="pt-6">
-            <p className="mb-1 font-semibold text-ink">Glossar</p>
+            <p className="mb-1 flex items-center gap-2 font-semibold text-ink">
+              <IconGlossar className="h-[18px] w-[18px] text-accent" />
+              Glossar
+            </p>
             <p className="flex flex-wrap gap-x-4 gap-y-1">
               {GLOSSAR.map((s) => (
                 <a key={s.pfad} className={quelleLink} href={href(`${s.pfad}/`)}>
@@ -287,7 +293,10 @@ function Fusszeile({ ohneGlossarliste }: { ohneGlossarliste: boolean }) {
 
         {/* Eigene, deckende Fläche – hebt die Quellenliste vom Fuß ab. */}
         <div className="mt-6 rounded-xl border border-line bg-surface p-4">
-          <p className="mb-1 font-semibold text-ink">Genutzte Schnittstellen (APIs) &amp; Datenquellen</p>
+          <p className="mb-1 flex items-center gap-2 font-semibold text-ink">
+            <IconExtern className="h-[18px] w-[18px] text-accent" />
+            Genutzte Schnittstellen (APIs) &amp; Datenquellen
+          </p>
           <ul className="space-y-0.5">
             {QUELLEN.map((q) => (
               <li key={q.url}>

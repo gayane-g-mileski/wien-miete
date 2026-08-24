@@ -4,6 +4,7 @@ import { Wertsicherung } from './Wertsicherung'
 import { Rendite } from './Rendite'
 import { Betriebskosten } from './Betriebskosten'
 import { ereignis } from '../lib/analytics'
+import { IconBandbreite, IconBetriebskosten, IconRendite, IconWertsicherung } from './Icons'
 import type { MietobjektInput, MrgErgebnis } from '../lib/types'
 
 // Alles, was auf dem Ergebnis aufbaut, über der Ergebniskarte: Preisbandbreite,
@@ -15,10 +16,10 @@ import type { MietobjektInput, MrgErgebnis } from '../lib/types'
 // und nicht nach der Breite des Fensters.
 
 const REITER = [
-  { id: 'preis', titel: 'Preisbandbreite', unter: '§ 16 MRG' },
-  { id: 'wertsicherung', titel: 'Wertsicherung', unter: 'MieWeG · § 16 Abs 9 MRG' },
-  { id: 'rendite', titel: 'Rendite', unter: 'Vorsorgewohnung' },
-  { id: 'betriebskosten', titel: 'Betriebskosten', unter: '§ 21 MRG' },
+  { id: 'preis', titel: 'Preisbandbreite', unter: '§ 16 MRG', Symbol: IconBandbreite },
+  { id: 'wertsicherung', titel: 'Wertsicherung', unter: 'MieWeG · § 16 Abs 9 MRG', Symbol: IconWertsicherung },
+  { id: 'rendite', titel: 'Rendite', unter: 'Vorsorgewohnung', Symbol: IconRendite },
+  { id: 'betriebskosten', titel: 'Betriebskosten', unter: '§ 21 MRG', Symbol: IconBetriebskosten },
 ] as const
 
 type ReiterId = (typeof REITER)[number]['id']
@@ -55,12 +56,13 @@ export function ErgebnisReiter({
               setAktiv(r.id)
               ereignis('rechner_gewechselt', { rechner: r.id })
             }}
-            className={`-mb-px shrink-0 whitespace-nowrap border-b-2 px-1 pb-3 text-base transition-colors ${
+            className={`-mb-px flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-1 pb-3 text-base transition-colors ${
               aktiv === r.id
                 ? 'border-accent font-semibold text-accent'
                 : 'border-transparent text-ink hover:text-accent'
             }`}
           >
+            <r.Symbol className="h-[18px] w-[18px]" />
             {r.titel}
           </button>
         ))}

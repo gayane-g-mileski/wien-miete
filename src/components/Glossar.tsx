@@ -1,5 +1,32 @@
 import { Collapsible } from './ui'
 import { GLOSSAR, href, type GlossarSeite } from '../lib/seo'
+import {
+  IconBandbreite,
+  IconBericht,
+  IconBetriebskosten,
+  IconGebaeude,
+  IconListe,
+  IconRendite,
+  IconWertsicherung,
+  IconWohnung,
+} from './Icons'
+
+// Sinnbild je Begriff; für neue Seiten bleibt das Listenzeichen als Rückfall.
+const SYMBOLE: Record<string, (p: { className?: string }) => React.JSX.Element> = {
+  'richtwert-wien': IconBandbreite,
+  'lagezuschlag-wien': IconGebaeude,
+  'angemessener-mietzins': IconWohnung,
+  'mieterhoehung-wertsicherung': IconWertsicherung,
+  'betriebskosten-pruefen': IconBetriebskosten,
+  'befristeter-mietvertrag': IconBericht,
+  'rendite-vorsorgewohnung': IconRendite,
+  'hausverwaltung-mietzinspruefung': IconListe,
+}
+
+function SeitenSymbol({ pfad, className }: { pfad: string; className?: string }) {
+  const Symbol = SYMBOLE[pfad] ?? IconListe
+  return <Symbol className={className} />
+}
 
 // Glossarseiten: eigener Pfad, eigener Titel, eigene strukturierte Daten.
 // Der Inhalt kommt aus src/inhalte/seiten.json und wird beim Pre-Rendering in
@@ -150,7 +177,10 @@ export function GlossarIndex() {
             href={href(`${s.pfad}/`)}
             className="block rounded-2xl border border-line bg-surface p-6 shadow-sm transition-colors hover:border-accent"
           >
-            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-accent">{s.kicker}</p>
+            <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
+              <SeitenSymbol pfad={s.pfad} />
+              {s.kicker}
+            </p>
             <p className="mt-3 text-lg font-semibold leading-snug text-ink">{s.h1}</p>
             <p className="mt-2 text-sm leading-relaxed text-ink-soft">{s.beschreibung}</p>
           </a>

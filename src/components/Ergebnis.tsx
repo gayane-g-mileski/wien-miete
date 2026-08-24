@@ -5,6 +5,7 @@ import { Collapsible } from './ui'
 import { RICHTWERT_WIEN } from '../lib/pricingData'
 import { ENGINE_VERSION, RECHTSGRUNDLAGE, RICHTWERT_QUELLE } from '../lib/version'
 import { pruefberichtOeffnen } from '../lib/kaufEvent'
+import { IconBericht } from './Icons'
 import type { MietobjektInput } from '../lib/types'
 
 const LAGE_STYLE: Record<LageStatus, string> = {
@@ -194,8 +195,9 @@ export function ErgebnisDetails({
           <button
             type="button"
             onClick={() => pruefberichtOeffnen(input, adresse ?? input.anschrift)}
-            className="mt-4 w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong"
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong"
           >
+            <IconBericht />
             Prüfbericht PRO als PDF – 24,00 € inkl. USt
           </button>
           <p className="mt-2 px-1 text-[12px] leading-relaxed text-ink-faint">

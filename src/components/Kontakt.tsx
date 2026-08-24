@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { TextField, TextareaField } from './ui'
 import { aufKontaktVorbelegen } from '../lib/kontaktEvent'
+import { IconPost } from './Icons'
 
 // Empfänger der Nachrichten aus dem Kontaktformular.
 const KONTAKT_EMAIL = 'gayane.mileski@gmail.com'
@@ -113,8 +114,9 @@ export function KontaktInhalt() {
             type="button"
             onClick={senden}
             disabled={status === 'sendet'}
-            className="w-full rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-on-accent hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
           >
+            <IconPost />
             {status === 'sendet' ? 'Wird gesendet …' : 'Senden'}
           </button>
 

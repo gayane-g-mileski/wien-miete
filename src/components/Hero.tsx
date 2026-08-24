@@ -2,6 +2,7 @@ import { AnschriftFeld } from './AnschriftFeld'
 import { RICHTWERT_WIEN } from '../lib/pricingData'
 import type { BaubewilligungGebaeude, Koordinaten } from '../lib/types'
 import type { BaujahrInfo } from '../lib/geo'
+import { IconSuche } from './Icons'
 
 interface Props {
   anschrift: string
@@ -48,8 +49,9 @@ export function Hero({ anschrift, onAnschrift, onGemeindebau, onBaujahr, onBauja
             </div>
             <a
               href="#rechner"
-              className="block w-full rounded-lg bg-accent px-4 py-3.5 text-center text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-3.5 text-center text-base font-semibold text-on-accent transition-colors hover:bg-accent-strong"
             >
+              <IconSuche />
               Einheit prüfen
             </a>
           </div>

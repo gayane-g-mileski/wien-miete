@@ -1,30 +1,44 @@
 import { kaufOeffnen } from '../lib/kaufEvent'
+import {
+  IconHochladen,
+  IconListe,
+  IconMarke,
+  IconSchnittstelle,
+  IconWertsicherung,
+  IconTeam,
+} from './Icons'
 import { API_SICHTBAR } from '../lib/flags'
 import { href } from '../lib/seo'
 import { Portfolio } from './Portfolio'
 
 const PUNKTE = [
   {
+    Symbol: IconListe,
     titel: '400 Einheiten in 20 Minuten prüfen',
     text: 'Bestandsliste hochladen – die Auswertung zeigt, welche Einheiten mutmaßlich über der Grenze liegen. Gleich hier ausprobieren.',
   },
   {
+    Symbol: IconHochladen,
     titel: 'CSV-Import',
     text: 'Anschrift, Fläche, Kategorie, Baujahr, Vertragsdatum und Ist-Miete genügen; das Ergebnis kommt als Tabelle und als CSV zurück.',
   },
   {
+    Symbol: IconWertsicherung,
     titel: 'Indexierung',
     text: 'Wertsicherung nachrechnen: Welche Einheit ist wann und um wie viel anpassbar, und welche Schwelle ist erreicht?',
   },
   {
+    Symbol: IconTeam,
     titel: 'Team-Zugänge',
     text: 'Mehrere Mitarbeitende, gemeinsame Objektlisten, nachvollziehbare Prüfberichte für Eigentümerinnen und Eigentümer.',
   },
   {
+    Symbol: IconSchnittstelle,
     titel: 'Schnittstelle für die eigene Software',
     text: 'Dieselbe Einschätzung als JSON: Mietzinsart, Anwendungsbereich, Bandbreite und Herleitung – mit API-Schlüssel und versionierter Rechenlogik.',
   },
   {
+    Symbol: IconMarke,
     titel: 'White-Label für die eigene Website',
     text: 'Der Rechner als iframe im eigenen Erscheinungsbild, ohne fremde Marke. Anfragen landen in Ihrem Postfach.',
   },
@@ -46,8 +60,15 @@ export function Profis() {
         <div className="mt-9 grid grid-cols-1 gap-6 sm:grid-cols-2">
           {PUNKTE.map((p) => (
             <div key={p.titel} className="rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6">
-              <p className="text-base font-semibold text-ink">{p.titel}</p>
-              <p className="mt-2 text-sm leading-relaxed text-ink-soft">{p.text}</p>
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 shrink-0 rounded-lg bg-surface-2 p-2 text-accent">
+                  <p.Symbol />
+                </span>
+                <div>
+                  <p className="text-base font-semibold text-ink">{p.titel}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-ink-soft">{p.text}</p>
+                </div>
+              </div>
             </div>
           ))}
         </div>

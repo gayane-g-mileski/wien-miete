@@ -190,17 +190,23 @@ export function Checkbox({
 /** Abschnitts-Container – Titel steht außerhalb, oberhalb des Rahmens (20px Abstand). */
 export function Section({
   title,
+  symbol,
   children,
   className = '',
 }: {
   title: string
+  /** Sinnbild vor dem Titel, etwa ein Haus für das Gebäude. */
+  symbol?: ReactNode
   children: ReactNode
   /** Zusätzliche Klassen für die Platzierung im Raster. */
   className?: string
 }) {
   return (
     <section className={className}>
-      <h3 className="mb-5 px-1 text-sm font-semibold text-ink-faint">{title}</h3>
+      <h3 className="mb-5 flex items-center gap-2 px-1 text-sm font-semibold text-ink-faint">
+        {symbol && <span className="text-accent">{symbol}</span>}
+        {title}
+      </h3>
       <div className="space-y-8 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6">{children}</div>
     </section>
   )
@@ -219,11 +225,14 @@ export function SpaltenTitel({ titel, unterzeile }: { titel: string; unterzeile:
 /** Einklappbarer Abschnitt mit Chevron rechts (standardmäßig zugeklappt). */
 export function Collapsible({
   title,
+  symbol,
   children,
   defaultOpen = false,
   immerImDom = false,
 }: {
   title: string
+  /** Sinnbild vor dem Titel. */
+  symbol?: ReactNode
   children: ReactNode
   defaultOpen?: boolean
   /**
@@ -241,7 +250,10 @@ export function Collapsible({
         aria-expanded={offen}
         className="flex w-full items-center justify-between gap-2 text-left text-sm font-semibold text-ink"
       >
-        <span>{title}</span>
+        <span className="flex items-center gap-2">
+          {symbol && <span className="text-accent">{symbol}</span>}
+          {title}
+        </span>
         <svg
           viewBox="0 0 24 24"
           className={`h-5 w-5 shrink-0 text-accent transition-transform ${offen ? 'rotate-180' : ''}`}

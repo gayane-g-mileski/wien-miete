@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BEISPIEL_CSV, portfolioAlsCsv, pruefePortfolio, type PortfolioZeile } from '../lib/csv'
 import { dateiSpeichern } from '../lib/speichern'
+import { IconHochladen } from './Icons'
 
 const zelle = 'px-3 py-2 align-top text-sm'
 
@@ -58,6 +59,7 @@ export function Portfolio() {
 
       <div className="mt-6 flex flex-wrap gap-3">
         <label className={knopf}>
+          <IconHochladen />
           CSV auswählen
           <input
             type="file"

@@ -2,6 +2,15 @@ import { kaufOeffnen } from '../lib/kaufEvent'
 import { API_SICHTBAR } from '../lib/flags'
 import { TARIFE, euro, netto, preisText } from '../lib/tarife'
 import { BASIS, href } from '../lib/seo'
+import { IconBericht, IconRechner, IconSchnittstelle, IconTeam } from './Icons'
+
+// Sinnbild je Tarif – nur Schmuck neben dem Namen.
+const SYMBOLE = { frei: IconRechner, bericht: IconBericht, profi: IconTeam, api: IconSchnittstelle } as const
+
+function TarifSymbol({ id }: { id: keyof typeof SYMBOLE }) {
+  const Symbol = SYMBOLE[id]
+  return <Symbol />
+}
 
 // Preise. Angegeben sind Endpreise inklusive Umsatzsteuer (§ 4 PrAG); der
 // Nettobetrag steht daneben. Laufzeit und Verlängerung stehen bei jedem Tarif
@@ -25,7 +34,10 @@ export function Preise() {
                 t.hervor ? 'border-accent ring-1 ring-accent/30' : 'border-line'
               }`}
             >
-              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-accent">{t.name}</p>
+              <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
+                <TarifSymbol id={t.id} />
+                {t.name}
+              </p>
               <p className="mt-3 flex items-baseline gap-2">
                 <span className="text-[1.9rem] font-bold leading-none tracking-tight text-ink">{preisText(t)}</span>
                 <span className="text-sm text-ink-faint">{t.einheit}</span>
