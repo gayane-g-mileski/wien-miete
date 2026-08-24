@@ -501,6 +501,27 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
                         ? 'Kostenlos beim Bundeswohnbaufonds anfragen'
                         : 'Kostenlos bei der MA 50 anfragen'}
                     </button>
+                    {/* Die Antwort entscheidet über die Obergrenze – hier steht,
+                        was daraus je nach Auskunft folgt. */}
+                    <p className="px-1 text-[12px] leading-relaxed text-ink-faint">
+                      {statusRelevant(value.foerderungProgramm) ? (
+                        <>
+                          <span className="font-semibold text-ink-soft">Was die Antwort für den Mietzins bedeutet:</span>{' '}
+                          Läuft das Darlehen noch, gilt die Obergrenze der Förderung (beim Wiederaufbaufonds die
+                          förderungsrechtliche, sonst die Kategorie). Planmäßig zurückgezahlt führt zum Richtwert
+                          (Wiederaufbaufonds) oder zum angemessenen Mietzins; vorzeitig zurückgezahlt bis Ende 1982 ist
+                          der Mietzins frei vereinbar, bis Ende 1988 angemessen. Der Kündigungsschutz bleibt in jedem
+                          Fall.
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-semibold text-ink-soft">Was die Antwort für den Mietzins bedeutet:</span>{' '}
+                          Ohne Förderung gilt die Obergrenze nach § 16 MRG (Richtwert oder Kategorie). Bei einer
+                          Genossenschaft rechnet das WGG nach Kosten ab; bei den Wiener Wohnbauförderungen 1954, 1989
+                          und den Wohnbauaktionen ist der Mietzins frei vereinbar – der Kündigungsschutz bleibt.
+                        </>
+                      )}
+                    </p>
                 </div>
               </div>
             </div>
