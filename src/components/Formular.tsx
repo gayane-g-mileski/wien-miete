@@ -19,7 +19,7 @@ import type { BaujahrInfo } from '../lib/geo'
 import { Checkbox, Collapsible, DateField, NumberField, Section, SelectField } from './ui'
 import { AnschriftFeld } from './AnschriftFeld'
 import { AnfrageDialog } from './AnfrageDialog'
-import { IconGebaeude, IconPost, IconWerkzeug, IconWohnung } from './Icons'
+import { IconGebaeude, IconPost, IconWohnung } from './Icons'
 import { Ma25Anfrage } from './Ma25Anfrage'
 import { WwafHinweis } from './WwafHinweis'
 import { RueckzahlungAnfrage } from './RueckzahlungAnfrage'
@@ -201,7 +201,7 @@ export function Formular({ value, onChange, mietzinsArt, adressWechsel = 0 }: Pr
                Kategorie, Zustand oder Merkmale überhaupt heranziehen. Sonst
                steht dort, warum gerade nichts zu tun ist. --- */}
         <div className="border-t border-line pt-6">
-          <Collapsible title="Ausstattung, Zustand & Zu-/Abschläge" symbol={<IconWerkzeug />}>
+          <Collapsible title="Ausstattung, Zustand & Zu-/Abschläge">
             {!ausstattungWirkt ? (
               <p className="pt-2 text-sm leading-relaxed text-ink-soft">
                 {baujahrOffen

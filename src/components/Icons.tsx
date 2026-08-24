@@ -47,15 +47,6 @@ export function IconGebaeude(p: Eigenschaften) {
   )
 }
 
-/** Ausstattung, Zu- und Abschläge. */
-export function IconWerkzeug(p: Eigenschaften) {
-  return (
-    <Grundform {...p}>
-      <path d="M14.5 6.5a3.5 3.5 0 0 0 4.6 4.4l-7.2 7.2a2 2 0 1 1-2.8-2.8l7.2-7.2a3.5 3.5 0 0 0-1.8-1.6Z" />
-      <path d="M6 4l1.2 2.8L10 8 7.2 9.2 6 12 4.8 9.2 2 8l2.8-1.2Z" />
-    </Grundform>
-  )
-}
 
 /** Preisbandbreite: Spanne zwischen zwei Werten. */
 export function IconBandbreite(p: Eigenschaften) {
@@ -218,16 +209,6 @@ export function IconExtern(p: Eigenschaften) {
   )
 }
 
-/** Buch, Glossar. */
-export function IconGlossar(p: Eigenschaften) {
-  return (
-    <Grundform {...p}>
-      <path d="M4.5 5.5A2 2 0 0 1 6.5 3.5H19v14H6.5a2 2 0 0 0-2 2Z" />
-      <path d="M4.5 19.5A2 2 0 0 1 6.5 17.5H19v3H6.5" />
-      <path d="M8 7.5h7M8 11h5" />
-    </Grundform>
-  )
-}
 
 /** Konto, angemeldete Person. */
 export function IconKonto(p: Eigenschaften) {
@@ -239,13 +220,3 @@ export function IconKonto(p: Eigenschaften) {
   )
 }
 
-/** Schloss, gesicherte Bezahlung. */
-export function IconSchloss(p: Eigenschaften) {
-  return (
-    <Grundform {...p}>
-      <rect x="5" y="10.5" width="14" height="9.5" rx="2" />
-      <path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3" />
-      <path d="M12 14.5v2" />
-    </Grundform>
-  )
-}

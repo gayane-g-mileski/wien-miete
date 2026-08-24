@@ -225,14 +225,11 @@ export function SpaltenTitel({ titel, unterzeile }: { titel: string; unterzeile:
 /** Einklappbarer Abschnitt mit Chevron rechts (standardmäßig zugeklappt). */
 export function Collapsible({
   title,
-  symbol,
   children,
   defaultOpen = false,
   immerImDom = false,
 }: {
   title: string
-  /** Sinnbild vor dem Titel. */
-  symbol?: ReactNode
   children: ReactNode
   defaultOpen?: boolean
   /**
@@ -250,10 +247,7 @@ export function Collapsible({
         aria-expanded={offen}
         className="flex w-full items-center justify-between gap-2 text-left text-sm font-semibold text-ink"
       >
-        <span className="flex items-center gap-2">
-          {symbol && <span className="text-accent">{symbol}</span>}
-          {title}
-        </span>
+        <span>{title}</span>
         <svg
           viewBox="0 0 24 24"
           className={`h-5 w-5 shrink-0 text-accent transition-transform ${offen ? 'rotate-180' : ''}`}

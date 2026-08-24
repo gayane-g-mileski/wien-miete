@@ -20,8 +20,8 @@ import { evaluateMrg } from './lib/mrgEngine'
 import { leereMerkmale } from './lib/pricingData'
 import { ladeVerlauf, speichereVerlauf, type VerlaufEintrag } from './lib/verlauf'
 import { useRoute } from './lib/router'
-import { BASIS, MARKE, GLOSSAR, href } from './lib/seo'
-import { IconExtern, IconGlossar, IconHinweis, IconKonto } from './components/Icons'
+import { BASIS, MARKE, href } from './lib/seo'
+import { IconExtern, IconHinweis, IconKonto } from './components/Icons'
 import { analytikStarten, ereignis, seitenaufruf } from './lib/analytics'
 import { API_SICHTBAR } from './lib/flags'
 import { anmeldungAusUrlUebernehmen, useKonto } from './lib/konto'
@@ -253,7 +253,7 @@ function Startseite() {
   )
 }
 
-function Fusszeile({ ohneGlossarliste }: { ohneGlossarliste: boolean }) {
+function Fusszeile() {
   return (
     <footer id="quellen" className="scroll-mt-4 border-t border-line bg-surface-2">
       <div className="mx-auto max-w-6xl space-y-3 px-4 py-8 text-xs leading-relaxed text-ink-soft sm:px-6">
@@ -267,29 +267,6 @@ function Fusszeile({ ohneGlossarliste }: { ohneGlossarliste: boolean }) {
             Sachverständige) und keine verbindliche Auskunft der Schlichtungsstelle.
           </div>
         </div>
-
-        {/* 36px Abstand zum Disclaimer (24px Padding + 12px space-y) */}
-        {/* Auf der Glossarübersicht stehen dieselben Verweise schon im Inhalt. */}
-        {!ohneGlossarliste && (
-          <div className="pt-6">
-            <p className="mb-1 flex items-center gap-2 font-semibold text-ink">
-              <IconGlossar className="h-[18px] w-[18px] text-accent" />
-              Glossar
-            </p>
-            <p className="flex flex-wrap gap-x-4 gap-y-1">
-              {GLOSSAR.map((s) => (
-                <a key={s.pfad} className={quelleLink} href={href(`${s.pfad}/`)}>
-                  {s.kicker}
-                </a>
-              ))}
-              {API_SICHTBAR && (
-                <a className={quelleLink} href={href('api/')}>
-                  Schnittstelle
-                </a>
-              )}
-            </p>
-          </div>
-        )}
 
         {/* Eigene, deckende Fläche – hebt die Quellenliste vom Fuß ab. */}
         <div className="mt-6 rounded-xl border border-line bg-surface p-4">
@@ -357,7 +334,7 @@ function App() {
       {route.art === 'glossarIndex' && <GlossarIndex />}
       {route.art === 'api' && <ApiSeite />}
       {route.art === 'widerruf' && <Widerruf />}
-      <Fusszeile ohneGlossarliste={route.art === 'glossarIndex' || route.art === 'start'} />
+      <Fusszeile />
       <Konto />
       <Kaufdialog />
     </div>
